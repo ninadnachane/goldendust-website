@@ -70,11 +70,11 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
 </script>
 
 <style>
-  .rv { padding-top: clamp(3.5rem, 8vw, 6.5rem); padding-bottom: clamp(3.5rem, 8vw, 6.5rem); }
+  .rv { padding-top: clamp(2.5rem, 5vw, 4rem); padding-bottom: clamp(2.5rem, 5vw, 4rem); }
   .rv__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  .rv__sources { display: grid; gap: 0.75rem; margin-top: 1.8rem; max-width: 20rem; }
+  .rv__sources { display: grid; gap: 0.6rem; margin-top: 1.3rem; max-width: 20rem; }
   .rv__src {
-    display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.9rem 1.1rem; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.7rem 1rem; border-radius: 14px;
     background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--ink-2); font-size: 0.9rem;
   }
   .rv__src span { font-weight: 600; color: var(--ink); font-size: 1rem; }
@@ -82,18 +82,18 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
   .rv__car { background: var(--surface); border-radius: 22px; border: 1px solid var(--line); box-shadow: 0 24px 48px -30px rgba(46, 36, 27, 0.45); overflow: hidden; }
   .rv__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
   .rv__track::-webkit-scrollbar { display: none; }
-  .rv__slide { flex: 0 0 100%; scroll-snap-align: start; margin: 0; padding: clamp(1.6rem, 4vw, 2.8rem) clamp(1.4rem, 4vw, 3rem) 1rem; display: flex; flex-direction: column; gap: 0.7rem; min-height: 17rem; }
-  .rv__stars { margin: 0; color: var(--gold); font-size: 1.35rem; letter-spacing: 0.12em; }
+  .rv__slide { flex: 0 0 100%; scroll-snap-align: start; margin: 0; padding: clamp(1.2rem, 3vw, 1.8rem) clamp(1.3rem, 3.5vw, 2.4rem) 0.4rem; display: flex; flex-direction: column; gap: 0.45rem; min-height: 11.5rem; }
+  .rv__stars { margin: 0; color: var(--gold); font-size: 1.15rem; letter-spacing: 0.12em; line-height: 1.2; }
   .rv__title { margin: 0; font-weight: 600; color: var(--rust); }
-  .rv__text { margin: 0; font-size: clamp(1.15rem, 2vw, 1.4rem); line-height: 1.5; color: var(--ink); }
-  .rv__by { margin-top: auto; display: grid; gap: 0.15rem; padding-top: 0.6rem; }
+  .rv__text { margin: 0; font-size: clamp(1.05rem, 1.7vw, 1.25rem); line-height: 1.45; color: var(--ink); }
+  .rv__by { margin-top: auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; padding-top: 0.4rem; }
   .rv__by span { color: var(--ink-2); font-size: 0.88rem; }
-  .rv__nav { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem clamp(1.4rem, 4vw, 3rem) 1.4rem; }
+  .rv__nav { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem clamp(1.3rem, 3.5vw, 2.4rem) 1rem; }
   .rv__dots { display: flex; gap: 6px; }
   .rv__dot { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width 0.25s, background 0.25s; }
   .rv__dot.is-on { width: 22px; background: var(--gold); }
   .rv__btns { display: flex; gap: 0.5rem; }
-  .rv__btns button { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--ink); }
+  .rv__btns button { width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--ink); }
   .rv__btns button:hover { background: var(--gold); border-color: var(--gold); }
   .rv__btns svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   @media (max-width: 900px) { .rv__grid { grid-template-columns: 1fr; } .rv__sources { max-width: none; grid-template-columns: 1fr 1fr; } }
