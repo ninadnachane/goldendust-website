@@ -27,7 +27,7 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
                 {r.title && <p class="rv__title">{r.title}</p>}
                 <blockquote class="rv__text">“{r.text}”</blockquote>
                 <figcaption class="rv__by">
-                  <strong>{r.name}</strong>
+                  <strong><bdi>{r.name}</bdi></strong>
                   <span>{r.source} · {r.date}{r.translated ? " · translated" : ""}</span>
                 </figcaption>
               </figure>
