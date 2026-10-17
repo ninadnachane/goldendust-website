@@ -1,0 +1,25 @@
+---
+// Round logo link to one of our profiles (Tripadvisor, Google, Instagram).
+// Logos come from the simple-icons package (official brand marks).
+import { siTripadvisor, siGoogle, siInstagram } from "simple-icons";
+const icons = { tripadvisor: siTripadvisor, google: siGoogle, instagram: siInstagram };
+interface Props { brand: keyof typeof icons; href: string; label: string; size?: "md" | "lg" }
+const { brand, href, label, size = "md" } = Astro.props;
+const icon = icons[brand];
+---
+<a class:list={["brand", `brand--${size}`]} href={href} target="_blank" rel="noopener" aria-label={label} title={label} style={`--brand: #${icon.hex}`}>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.path} /></svg>
+</a>
+
+<style>
+  .brand {
+    display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--line); color: var(--brand);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .brand--lg { width: 3.5rem; height: 3.5rem; }
+  .brand svg { width: 1.45rem; height: 1.45rem; fill: currentColor; }
+  .brand--lg svg { width: 1.7rem; height: 1.7rem; }
+  .brand:hover { border-color: var(--brand); transform: translateY(-2px); box-shadow: 0 10px 20px -14px rgba(46, 36, 27, 0.6); }
+  @media (prefers-reduced-motion: reduce) { .brand { transition: none; } .brand:hover { transform: none; } }
+</style>

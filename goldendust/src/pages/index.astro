@@ -18,8 +18,12 @@ import { orgSchema } from "../lib/schema";
     <div class="hero__frame">
       <Gallery />
       <div class="hero__panel">
-        <h1>Tanzania safaris planned by locals</h1>
-        <p class="lede">We're a TALA-registered safari company in Arusha with our own Land Cruisers. Tell us your dates, budget and the animals you dream of, and we'll plan the safari that fits, and tell you honestly where you can save.</p>
+        <h1>Meet your Tanzania safari guide before you book</h1>
+        <ul class="hero__points">
+          <li>Your guide plans the trip with you, from the first call</li>
+          <li>Transparent prices with a full cost breakdown</li>
+          <li>No cookie-cutter itineraries: we start with why you're coming</li>
+        </ul>
         <div class="hero__cta">
           <WaButton label="WhatsApp" />
           <PlannerButton variant="glass" />
@@ -93,7 +97,7 @@ import { orgSchema } from "../lib/schema";
   .hero__frame > :global(.gal .gal__track) { aspect-ratio: auto; height: clamp(480px, 76vh, 820px); }
   .hero__panel {
     position: absolute; z-index: 2; left: clamp(1rem, 3.5vw, 3rem); top: 50%; transform: translateY(-50%);
-    width: min(25rem, calc(100% - 2rem)); min-height: 74%;
+    width: min(27rem, calc(100% - 2rem)); min-height: 74%;
     display: flex; flex-direction: column; justify-content: center;
     padding: clamp(1.6rem, 3vw, 2.6rem) clamp(1.4rem, 2.4vw, 2rem);
     border-radius: 20px; color: var(--ivory);
@@ -102,8 +106,13 @@ import { orgSchema } from "../lib/schema";
     border: 1px solid rgba(244, 237, 224, 0.22);
     box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
   }
-  .hero__panel h1 { color: var(--ivory); font-size: clamp(1.7rem, 3vw, 2.4rem); letter-spacing: -0.02em; margin-bottom: 0.9rem; }
-  .hero__panel .lede { color: rgba(244, 237, 224, 0.92); font-size: 1rem; line-height: 1.65; margin: 0; }
+  .hero__panel h1 { color: var(--ivory); font-size: clamp(1.75rem, 3vw, 2.45rem); letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+  .hero__points { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  .hero__points li { position: relative; padding-left: 1.9rem; color: rgba(244, 237, 224, 0.94); font-size: 1rem; line-height: 1.5; }
+  .hero__points li::before {
+    content: ""; position: absolute; left: 0; top: 0.15rem; width: 1.2rem; height: 1.2rem; border-radius: 50%;
+    background: var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232e241b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 0.8rem no-repeat;
+  }
   .hero__cta { display: grid; gap: 0.7rem; margin-top: 1.8rem; }
   .hero__cta :global(.btn) { width: 100%; justify-content: center; }
   .cta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }

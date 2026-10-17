@@ -3,6 +3,7 @@
 // (one post per screen on phones, three on desktop). If the JSON feed can't be
 // loaded, it falls back to Behold's standard widget.
 import { site } from "../lib/site";
+import BrandLink from "./BrandLink.astro";
 const widgetId = site.instagramFeedId;
 const jsonId = site.instagramJsonFeedId || site.instagramFeedId;
 ---
@@ -10,7 +11,7 @@ const jsonId = site.instagramJsonFeedId || site.instagramFeedId;
   <div class="wrap">
     <div class="ig__head">
       <h2 id="ig-h">From our Instagram</h2>
-      <a href={site.instagram} target="_blank" rel="noopener" class="btn btn--ghost">Follow {site.instagramHandle}</a>
+      <BrandLink brand="instagram" href={site.instagram} label={`Follow ${site.instagramHandle} on Instagram`} size="lg" />
     </div>
     <p class="muted measure">Real trips, real guides and real vehicles, straight from the bush.</p>
     {widgetId ? (
@@ -115,7 +116,7 @@ const jsonId = site.instagramJsonFeedId || site.instagramFeedId;
 </script>
 
 <style>
-  .ig__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+  .ig__head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
   .ig__head h2 { margin: 0; }
   .ig { margin-top: 1.5rem; }
   .ig__track { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
