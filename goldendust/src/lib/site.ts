@@ -13,7 +13,7 @@ export const site = {
   instagramFeedId: "",
 
   // Reviews. Paste your profile links to show the review buttons.
-  tripadvisorUrl: "",
+  tripadvisorUrl: "https://www.tripadvisor.com/Attraction_Review-g297913-d34516684-Reviews-GOLDEN_DUST_SAFARIS-Arusha_Arusha_Region.html",
   googleReviewsUrl: "",
   // Optional: a reviews widget (e.g. Trustindex or Elfsight) that shows Google and TripAdvisor reviews.
   // Paste the widget's script URL here; leave empty to show only the buttons above.

@@ -13,7 +13,7 @@ export const orgSchema = {
   telephone: "+" + site.whatsapp,
   address: { "@type": "PostalAddress", addressLocality: "Arusha", addressCountry: "TZ" },
   areaServed: "Tanzania",
-  sameAs: [site.instagram],
+  sameAs: [site.instagram, site.tripadvisorUrl].filter(Boolean),
 };
 
 export const breadcrumbs = (items: [string, string][]) => ({

@@ -2,12 +2,16 @@
 import Base from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import { img } from "../lib/site";
+import Faq from "../components/Faq.astro";
+import { faqs } from "../data/faqs";
+import { faqSchema } from "../lib/schema";
 const posts = (await getCollection("blog")).sort((a, b) => +b.data.pubDate - +a.data.pubDate);
 const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 ---
 <Base
   title="Tanzania Safari Guides: Costs, Seasons & Parks | Golden Dust Safaris"
   description="Honest Tanzania safari planning guides from a local Arusha operator: what a safari costs, the best time to go, and how to choose between parks and safari styles."
+  schema={[faqSchema(faqs)]}
 >
   <section class="section">
     <div class="wrap">
@@ -26,6 +30,9 @@ const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: 
         ))}
       </div>
     </div>
+  </section>
+  <section class="section section--white">
+    <div class="wrap"><Faq items={faqs} /></div>
   </section>
 </Base>
 

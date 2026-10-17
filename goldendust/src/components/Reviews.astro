@@ -7,14 +7,27 @@ const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript;
   <section class="section section--white" aria-labelledby="rv-h">
     <div class="wrap">
       <h2 id="rv-h">What our guests say</h2>
+      <p class="muted measure">Read honest reviews from travelers who've been on safari with our guides, and leave your own after your trip.</p>
       {reviewsWidgetScript && (
         <div class="rv__widget">
           <script src={reviewsWidgetScript} defer is:inline></script>
         </div>
       )}
-      <div class="rv__links">
-        {tripadvisorUrl && <a class="btn btn--ghost" href={tripadvisorUrl} target="_blank" rel="noopener">Read our reviews on Tripadvisor</a>}
-        {googleReviewsUrl && <a class="btn btn--ghost" href={googleReviewsUrl} target="_blank" rel="noopener">Read our Google reviews</a>}
+      <div class="rv__cards">
+        {tripadvisorUrl && (
+          <a class="rv__card" href={tripadvisorUrl} target="_blank" rel="noopener">
+            <span class="rv__name">Tripadvisor</span>
+            <span class="rv__text">Golden Dust Safaris reviews on Tripadvisor</span>
+            <span class="rv__go">Read our reviews</span>
+          </a>
+        )}
+        {googleReviewsUrl && (
+          <a class="rv__card" href={googleReviewsUrl} target="_blank" rel="noopener">
+            <span class="rv__name">Google</span>
+            <span class="rv__text">Golden Dust Safaris reviews on Google</span>
+            <span class="rv__go">Read our reviews</span>
+          </a>
+        )}
       </div>
     </div>
   </section>
@@ -22,5 +35,13 @@ const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript;
 
 <style>
   .rv__widget { margin: 1.5rem 0; }
-  .rv__links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.5rem; }
+  .rv__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 22rem)); gap: 1rem; margin-top: 1.8rem; }
+  .rv__card {
+    display: grid; gap: 0.35rem; padding: 1.4rem 1.5rem; border-radius: 16px; text-decoration: none;
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  }
+  .rv__card:hover { border-color: var(--gold); box-shadow: 0 12px 28px -18px rgba(46, 36, 27, 0.5); color: var(--ink); }
+  .rv__name { font-weight: 600; font-size: 1.25rem; }
+  .rv__text { color: var(--ink-2); font-size: 0.95rem; }
+  .rv__go { margin-top: 0.6rem; justify-self: start; font-weight: 600; font-size: 0.92rem; padding: 0.5rem 1rem; border-radius: 99px; background: var(--btn); color: var(--btn-text); }
 </style>

@@ -4,41 +4,18 @@ import Gallery from "../components/Gallery.astro";
 import InstagramFeed from "../components/InstagramFeed.astro";
 import Reviews from "../components/Reviews.astro";
 import WaButton from "../components/WaButton.astro";
-import Faq from "../components/Faq.astro";
 import { img } from "../lib/site";
-import { orgSchema, faqSchema } from "../lib/schema";
-import { getCollection } from "astro:content";
+import { orgSchema } from "../lib/schema";
 
-const posts = (await getCollection("blog")).sort((a, b) => +b.data.pubDate - +a.data.pubDate).slice(0, 3);
-
-const faqs = [
-  {
-    q: "How much does a Tanzania safari with Golden Dust Safaris cost?",
-    a: "Our private safaris start at $800 per person for a 4-day Serengeti and Ngorongoro camping safari (group of 6). A 5-day Tarangire, Serengeti and Ngorongoro safari starts at $1,050 per person on a budget and $1,620 mid-range. The price per person drops as your group gets bigger, because you share the vehicle and the crater fee.",
-  },
-  {
-    q: "Can you build a custom safari instead of a package?",
-    a: "Yes. Most of our guests end up with a custom plan. Tell us your dates, budget and what you want to see on WhatsApp, and we'll suggest parks and an itinerary, including less-visited parks like Ruaha and Katavi.",
-  },
-  {
-    q: "Will you review a quote from another safari company?",
-    a: "Yes, for free. Send it to us and we'll tell you honestly whether it's good value, even if you end up booking with them.",
-  },
-  {
-    q: "What happens when I land in Tanzania?",
-    a: "We pick you up at Kilimanjaro or Arusha airport, take you to your hotel (the night before your safari is on us), and your guide briefs you on the days ahead. After the safari we drop you at the airport or your hotel.",
-  },
-];
 ---
 <Base
   title="Tanzania Safari Packages & Tours | Golden Dust Safaris"
   description="Private Tanzania safaris from Arusha with local experts. Serengeti, Ngorongoro and Tarangire packages from $800 per person, honest pricing and direct WhatsApp planning."
-  schema={[orgSchema, faqSchema(faqs)]}
+  schema={[orgSchema]}
 >
   <section class="hero">
     <div class="wrap hero__grid">
       <div class="hero__text">
-        <p class="hero__tag">Private safaris from Arusha, Tanzania</p>
         <h1>Tanzania safaris planned by locals who drive these parks every week</h1>
         <p class="lede">We're a TALA-registered safari company in Arusha with our own Land Cruisers. Tell us your dates, budget and the animals you dream of, and we'll plan the safari that fits, and tell you honestly where you can save.</p>
         <div class="hero__cta">
@@ -91,28 +68,6 @@ const faqs = [
 
   <InstagramFeed />
 
-  <section class="section section--white">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>Safari planning guides</h2>
-        <a href="/blog">All blogs</a>
-      </div>
-      <div class="posts">
-        {posts.map((p) => (
-          <a class="post" href={`/post/${p.id}`}>
-            <img src={img(p.data.image, 600)} alt={p.data.imageAlt} loading="lazy" width="600" height="320" />
-            <h3>{p.data.title}</h3>
-            <p class="muted">{p.data.minutes} min read</p>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap"><Faq items={faqs} /></div>
-  </section>
-
   <section class="section section--green">
     <div class="wrap cta">
       <h2>Ready to plan your safari?</h2>
@@ -123,10 +78,12 @@ const faqs = [
 </Base>
 
 <style>
-  .hero { padding: clamp(2.5rem, 6vw, 5rem) 0; background: radial-gradient(ellipse at 85% 20%, rgba(200, 154, 75, 0.14), transparent 60%); }
-  .hero__grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  .hero__tag { display: inline-block; font-weight: 600; font-size: 0.85rem; color: var(--olive); background: rgba(91, 107, 61, 0.1); padding: 0.35rem 0.85rem; border-radius: 99px; margin-bottom: 1.2rem; }
-  .hero h1 { font-size: clamp(2.1rem, 4.4vw, 3.4rem); letter-spacing: -0.02em; }
+  .hero { padding: clamp(2rem, 4vw, 3.5rem) 0; overflow-x: clip; background: radial-gradient(ellipse at 85% 20%, rgba(200, 154, 75, 0.14), transparent 60%); }
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr); gap: clamp(2rem, 4vw, 3.5rem); align-items: center; }
+  /* the photos are the hero: they bleed to the right edge of the screen on desktop */
+  .hero__grid > :global(.gal) { margin-right: calc((100vw - min(100vw, var(--wrap))) / -2 - var(--gutter)); border-radius: 22px 0 0 22px; }
+  .hero__grid > :global(.gal .gal__track) { aspect-ratio: 5 / 4; }
+  .hero h1 { font-size: clamp(1.8rem, 3.75vw, 2.9rem); letter-spacing: -0.02em; }
   .hero__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.8rem; }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
@@ -143,16 +100,12 @@ const faqs = [
   }
   .steps li:not(:last-child)::after { content: ""; position: absolute; left: 1.03rem; top: 2.2rem; bottom: 0.2rem; border-left: 2px dashed var(--gold); }
   .steps strong { color: var(--rust); font-family: var(--display); font-weight: 600; }
-  .posts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-  .post { text-decoration: none; color: var(--ink); }
-  .post img { border-radius: 8px; aspect-ratio: 15 / 8; object-fit: cover; width: 100%; margin-bottom: 0.9rem; background: var(--line); }
-  .post h3 { font-size: 1.08rem; margin-bottom: 0.3rem; }
-  .post:hover h3 { color: var(--green); text-decoration: underline; }
-  .post p { margin: 0; font-size: 0.9rem; }
   .cta { text-align: left; }
   .cta h2 { color: var(--gold); }
   @media (max-width: 900px) {
     .hero__grid, .steps-wrap { grid-template-columns: 1fr; }
-    .why, .posts { grid-template-columns: 1fr; }
+    .hero__grid > :global(.gal) { margin-right: 0; border-radius: 18px; order: -1; }
+    .hero__grid > :global(.gal .gal__track) { aspect-ratio: 4 / 3; }
+    .why { grid-template-columns: 1fr; }
   }
 </style>
