@@ -11,6 +11,9 @@ export const site = {
 
   // Instagram live feed via Behold (behold.so, free plan). Paste your feed ID here to switch it on.
   instagramFeedId: "65XiVaGYDVCTRo2zOnY5",
+  // Optional: ID of a Behold feed created with "JSON" output (used for our own swipeable row).
+  // If empty, the widget feed ID above is tried; if that fails, the standard Behold widget is shown.
+  instagramJsonFeedId: "",
 
   // Reviews. Paste your profile links to show the review buttons.
   tripadvisorUrl: "https://www.tripadvisor.com/Attraction_Review-g297913-d34516684-Reviews-GOLDEN_DUST_SAFARIS-Arusha_Arusha_Region.html",
