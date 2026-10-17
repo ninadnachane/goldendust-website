@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.goldendustsafaris.com/sitemap-index.xml

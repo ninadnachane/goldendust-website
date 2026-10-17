@@ -1,0 +1,9 @@
+---
+import WaIcon from "./WaIcon.astro";
+import { waLink } from "../lib/site";
+interface Props { label?: string; text?: string; variant?: "" | "light" | "ghost" }
+const { label = "Message us on WhatsApp", text, variant = "" } = Astro.props;
+---
+<a class:list={["btn", variant && `btn--${variant}`]} href={waLink(text)} target="_blank" rel="noopener">
+  <WaIcon />{label}
+</a>

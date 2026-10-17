@@ -1,0 +1,67 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import WaButton from "../components/WaButton.astro";
+import { tours, fromPrice, usd, tourUrl } from "../data/tours";
+import { site } from "../lib/site";
+import { breadcrumbs } from "../lib/schema";
+
+const list = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Tanzania safari packages",
+  itemListElement: tours.map((t, i) => ({ "@type": "ListItem", position: i + 1, url: site.url + tourUrl(t), name: t.seoTitle })),
+};
+---
+<Base
+  title="Tanzania Safari Packages from $800 | Golden Dust Safaris"
+  description="Private Tanzania safari packages from Arusha: Serengeti, Ngorongoro and Tarangire in 3, 4 and 5 days, budget and mid-range. Transparent prices per person by group size."
+  schema={[list, breadcrumbs([["Home", "/"], ["Safari packages", "/tanzania-safari-packages"]])]}
+>
+  <section class="section">
+    <div class="wrap">
+      <h1 class="measure">Tanzania safari packages</h1>
+      <p class="lede measure">Private safaris from Arusha to the Serengeti, Ngorongoro Crater and Tarangire. Every package includes your own vehicle and guide, and every one can be changed to suit you.</p>
+
+      <div class="compare" role="region" aria-label="Package comparison" tabindex="0">
+        <table>
+          <thead>
+            <tr><th scope="col">Safari</th><th scope="col">Days</th><th scope="col">Style</th><th scope="col">Parks</th><th scope="col">From, per person</th></tr>
+          </thead>
+          <tbody>
+            {tours.map((t) => (
+              <tr>
+                <td><a href={tourUrl(t)}>{t.shortName}</a></td>
+                <td>{t.nights + 1}</td>
+                <td>{t.tier}</td>
+                <td>{t.route.slice(1, -1).join(", ")}</td>
+                <td><strong>{usd(fromPrice(t))}</strong></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tours">{tours.map((t) => <TourRow tour={t} />)}</div>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap measure">
+      <h2>Want something different?</h2>
+      <p>Tanzania has 22 national parks. If you'd like to add Lake Manyara, go further to Ruaha or Katavi, or need a family-friendly pace, we'll build a custom plan around your dates and budget.</p>
+      <WaButton label="Ask for a custom safari" text="Hi Golden Dust Safaris, I'd like a custom Tanzania safari." />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .compare { overflow-x: auto; margin: 2rem 0 2.5rem; background: var(--surface); border-radius: 10px; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; min-width: 36rem; font-size: 0.97rem; }
+  th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--display); font-size: 0.85rem; color: var(--ink-2); }
+  tr:last-child td { border-bottom: 0; }
+  td a { font-family: var(--display); font-weight: 600; }
+  .tours { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 900px) { .tours { grid-template-columns: 1fr; } }
+</style>

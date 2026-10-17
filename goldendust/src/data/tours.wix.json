@@ -1,0 +1,171 @@
+[
+  {
+    "slug": "tarangire-serengeti-ngorongoro-safari-5d4n-budget",
+    "oldSlug": null,
+    "name": "Tarangire, Serengeti & Ngorongoro Safari (5D/4N) | Budget",
+    "tier": "Budget",
+    "intro": "",
+    "days": [
+      {
+        "title": "Arrival – Arusha",
+        "text": "Airport pick-up from Kilimanjaro or Arusha. Transfer to your hotel for safari briefing and rest.",
+        "overnight": ""
+      },
+      {
+        "title": "Day 1 – Tarangire National Park",
+        "text": "Full-day game drive in Tarangire, famous for massive elephant herds, ancient baobab trees and seasonal wildlife gatherings.",
+        "overnight": "Mid-range lodge / tented camp"
+      },
+      {
+        "title": "Day 2 – Serengeti National Park",
+        "text": "Scenic drive through the Ngorongoro Highlands into the iconic Serengeti. Afternoon game drive in big cat territory.",
+        "overnight": "Tented camp in Serengeti"
+      },
+      {
+        "title": "Day 3 – Full Day Serengeti",
+        "text": "Explore endless plains on full-day game drives. Exceptional chances to spot lions, cheetahs, leopards and large wildebeest herds.",
+        "overnight": "Serengeti camp"
+      },
+      {
+        "title": "Day 4 – Serengeti to Ngorongoro",
+        "text": "Morning game drive before heading to the Ngorongoro Conservation Area. Enjoy crater highland views and Maasai landscapes.",
+        "overnight": "Lodge on crater rim or Karatu"
+      },
+      {
+        "title": "Day 5 – Ngorongoro Crater → Arusha",
+        "text": "Descend into the Ngorongoro Crater, one of Africa’s most wildlife-dense ecosystems. Spot rhino, lions, buffalo, elephants and flamingos before returning to Arusha.",
+        "overnight": ""
+      }
+    ],
+    "prices": {
+      "2": 1650,
+      "4": 1200,
+      "6": 1050
+    },
+    "image": "7df076_31b4e0f4d7b94365afdebb5b89e76d11~mv2.png",
+    "imageAlt": "Tarangire, Serengeti & Ngorongoro Safari Map - Golden Dust Safaris"
+  },
+  {
+    "slug": "tarangire-serengeti-ngorongoro-safari-5d4n-mid-range",
+    "oldSlug": null,
+    "name": "Tarangire, Serengeti & Ngorongoro Safari (5D/4N) | Mid Range",
+    "tier": "Mid Range",
+    "intro": "",
+    "days": [
+      {
+        "title": "Arrival – Arusha",
+        "text": "Airport pick-up from Kilimanjaro or Arusha. Transfer to your hotel for safari briefing and rest.",
+        "overnight": ""
+      },
+      {
+        "title": "Day 1 – Tarangire National Park",
+        "text": "Full-day game drive in Tarangire, famous for massive elephant herds, ancient baobab trees and seasonal wildlife gatherings.",
+        "overnight": "Mid-range lodge / tented camp"
+      },
+      {
+        "title": "Day 2 – Serengeti National Park",
+        "text": "Scenic drive through the Ngorongoro Highlands into the iconic Serengeti. Afternoon game drive in big cat territory.",
+        "overnight": "Tented camp in Serengeti"
+      },
+      {
+        "title": "Day 3 – Full Day Serengeti",
+        "text": "Explore endless plains on full-day game drives. Exceptional chances to spot lions, cheetahs, leopards and large wildebeest herds.",
+        "overnight": "Serengeti camp"
+      },
+      {
+        "title": "Day 4 – Serengeti to Ngorongoro",
+        "text": "Morning game drive before heading to the Ngorongoro Conservation Area. Enjoy crater highland views and Maasai landscapes.",
+        "overnight": "Lodge on crater rim or Karatu"
+      },
+      {
+        "title": "Day 5 – Ngorongoro Crater → Arusha",
+        "text": "Descend into the Ngorongoro Crater, one of Africa’s most wildlife-dense ecosystems. Spot rhino, lions, buffalo, elephants and flamingos before returning to Arusha.",
+        "overnight": ""
+      }
+    ],
+    "prices": {
+      "2": 2100,
+      "4": 1780,
+      "6": 1620
+    },
+    "image": "7df076_31b4e0f4d7b94365afdebb5b89e76d11~mv2.png",
+    "imageAlt": "Tarangire, Serengeti & Ngorongoro Safari Map | Mid Range- Golden Dust Safaris"
+  },
+  {
+    "slug": "serengeti-ngorongoro-safari-4d-3n-budget",
+    "oldSlug": null,
+    "name": "Serengeti & Ngorongoro Safari (4D/3N) | Budget",
+    "tier": "Budget",
+    "intro": "Start/End: Arusha. This is a private safari and you will be accomodate at public campsite. A chef and guide will be travelling with the group.",
+    "days": [
+      {
+        "title": "Arrival – Arusha",
+        "text": "Airport pick-up from Kilimanjaro or Arusha. Transfer to your hotel, safari briefing, and rest before the adventure begins.",
+        "overnight": ""
+      },
+      {
+        "title": "Day 1 – Serengeti National Park",
+        "text": "Early departure and heading to Serengeti via Northern gate. Afternoon game drive in the iconic Serengeti. Expect lions, elephants, giraffes, cheetahs, wildebeest and more.",
+        "overnight": "Public Campsite (North or Central Serengeti)"
+      },
+      {
+        "title": "Day 2 – Serengeti National Park",
+        "text": "You can choose for optional activities in the morning like Ballon Safari, followed by entire day of game drive. You will also get to enjoy picnic lunch during the game drive.",
+        "overnight": "Public Campsite (Central Serengeti)"
+      },
+      {
+        "title": "Day 3 – Serengeti - Ngorongoro",
+        "text": "Morning game drive in Serengeti followed by transfer to the Ngorongoro Conservation Area. You will arrive at the camp situated on rim of Ngorongoro Crater just before the sunset and spend the evening relaxing and enjoying amazing sunset.",
+        "overnight": ""
+      },
+      {
+        "title": "Day 4 – Ngorongoro Crater - Arusha",
+        "text": "Descend into the Ngorongoro Crater, one of Africa’s most wildlife-dense regions. The advantage of staying close to the crater is we will descend early in the morning avoiding the crowd. Spot rhino, lions, buffalo, hippos and flamingos before returning to Arusha. Drop-off at hotel or airport.",
+        "overnight": ""
+      }
+    ],
+    "prices": {
+      "2": 1250,
+      "4": 900,
+      "6": 800
+    },
+    "image": "7df076_ad8aded75f6b4874a29bf8b75a72ca88~mv2.jpg",
+    "imageAlt": "Serengeti & Ngorongoro Safari Map - Golden Dust Safaris"
+  },
+  {
+    "slug": "serengeti-ngorongoro-safari-3d2n-mid-range",
+    "oldSlug": "luxury-serengeti-ngorongoro-safari-3d2n",
+    "name": "Serengeti & Ngorongoro Safari (3D/2N) | Mid Range",
+    "tier": "Mid Range",
+    "intro": "Start/End: Arusha",
+    "days": [
+      {
+        "title": "Arrival – Arusha",
+        "text": "Airport pick-up from Kilimanjaro or Arusha. Transfer to your hotel, safari briefing, and rest before the adventure begins.",
+        "overnight": ""
+      },
+      {
+        "title": "Day 1 – Serengeti National Park",
+        "text": "Early departure through the scenic Ngorongoro Highlands. Afternoon game drive in the iconic Serengeti. Expect lions, elephants, giraffes, cheetahs, wildebeest and more.",
+        "overnight": "Enkiterata Camp (Central Serengeti)"
+      },
+      {
+        "title": "Day 2 – Serengeti to Ngorongoro",
+        "text": "Morning game drive in Serengeti followed by transfer to the Ngorongoro Conservation Area.",
+        "overnight": "Ngorongoro Wild Camp"
+      },
+      {
+        "title": "Day 3 – Ngorongoro Crater → Arusha",
+        "text": "Descend into the Ngorongoro Crater, one of Africa’s most wildlife-dense regions. Spot rhino, lions, buffalo, hippos and flamingos before returning to Arusha.Drop-off at hotel or airport.",
+        "overnight": ""
+      }
+    ],
+    "prices": {
+      "2": 1400,
+      "4": 1100,
+      "6": 1000
+    },
+    "image": "7df076_1187e744d161447f83fac7bd232e532d~mv2.jpg",
+    "imageAlt": "Serengeti & Ngorongoro Safari Map| Mid Range- Golden Dust Safaris"
+  }
+]

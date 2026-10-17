@@ -1,0 +1,33 @@
+---
+// A road-style line through the parks a safari visits.
+interface Props { stops: string[]; size?: "sm" | "lg" }
+const { stops, size = "sm" } = Astro.props;
+---
+<ol class:list={["route", `route--${size}`]} aria-label={`Route: ${stops.join(" to ")}`}>
+  {stops.map((s) => <li><span>{s}</span></li>)}
+</ol>
+
+<style>
+  .route { list-style: none; display: flex; margin: 0; padding: 0; position: relative; }
+  .route::before {
+    content: ""; position: absolute; left: 0.45rem; right: 0.45rem; top: 0.45rem;
+    border-top: 3px dashed var(--gold);
+  }
+  li { flex: 1; position: relative; padding-top: 1.35rem; min-width: 0; }
+  li:last-child { flex: 0 0 auto; text-align: right; }
+  li::before {
+    content: ""; position: absolute; top: 0; left: 0; width: 0.9rem; height: 0.9rem; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--green);
+  }
+  li:last-child::before { left: auto; right: 0; }
+  span { font-family: var(--display); font-weight: 600; font-size: 0.82rem; color: var(--ink-2); display: block; white-space: nowrap; }
+  .route--lg span { font-size: 1rem; color: var(--ink); }
+  .route--lg li::before { width: 1.1rem; height: 1.1rem; }
+  .route--lg::before { top: 0.55rem; }
+  @media (max-width: 560px) {
+    .route { margin-top: 1.3rem; }
+    span, .route--lg span { font-size: 0.74rem; }
+    /* alternate labels above and below the line so long park names don't collide */
+    li:nth-child(even) span { position: absolute; top: -1.35rem; left: 0; }
+  }
+</style>

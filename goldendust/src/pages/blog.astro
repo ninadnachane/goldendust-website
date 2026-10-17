@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { img } from "../lib/site";
+const posts = (await getCollection("blog")).sort((a, b) => +b.data.pubDate - +a.data.pubDate);
+const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+---
+<Base
+  title="Tanzania Safari Guides: Costs, Seasons & Parks | Golden Dust Safaris"
+  description="Honest Tanzania safari planning guides from a local Arusha operator: what a safari costs, the best time to go, and how to choose between parks and safari styles."
+>
+  <section class="section">
+    <div class="wrap">
+      <h1>Safari planning guides</h1>
+      <p class="lede measure">Straight answers to the questions we get every day from travelers planning a Tanzania safari.</p>
+      <div class="list">
+        {posts.map((p) => (
+          <article class="item">
+            <a href={`/post/${p.id}`} class="thumb"><img src={img(p.data.image, 600)} alt={p.data.imageAlt} loading="lazy" width="600" height="320" /></a>
+            <div>
+              <h2><a href={`/post/${p.id}`}>{p.data.title}</a></h2>
+              <p class="muted">{p.data.description}</p>
+              <p class="meta">{fmt(p.data.updatedDate)} · {p.data.minutes} min read</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .list { display: grid; gap: 2rem; margin-top: 2.5rem; max-width: 56rem; }
+  .item { display: grid; grid-template-columns: 16rem 1fr; gap: 1.6rem; align-items: start; }
+  .thumb img { border-radius: 8px; aspect-ratio: 15 / 8; object-fit: cover; width: 100%; background: var(--line); }
+  h2 { font-size: var(--step-1); margin-bottom: 0.4rem; }
+  h2 a { color: var(--ink); text-decoration: none; }
+  h2 a:hover { color: var(--green); text-decoration: underline; }
+  .item p { margin: 0 0 0.4rem; }
+  .meta { font-size: 0.85rem; color: var(--ink-2); }
+  @media (max-width: 640px) { .item { grid-template-columns: 1fr; gap: 0.8rem; } }
+</style>

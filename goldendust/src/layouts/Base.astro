@@ -1,0 +1,53 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site, img } from "../lib/site";
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;       // Wix media id
+  type?: "website" | "article" | "product";
+  schema?: object[];
+  noindex?: boolean;
+}
+const { title, description, image, type = "website", schema = [], noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname.replace(/\/$/, "") || "/", site.url).href;
+const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcfbca9bc0~mv2.png", 1200);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:type" content={type === "article" ? "article" : "website"} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="google-site-verification" content="RbwLDpIUhERXuoYX594CVtZotjeJB-b9KwS63VKWaO0" />
+    <meta name="msvalidate.01" content="2844E613C724FEE306C7ED8C277B1FCB" />
+    <link rel="icon" href={img(site.logo, 64)} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://static.wixstatic.com" />
+    {schema.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main"><slot /></main>
+    <Footer />
+  </body>
+</html>

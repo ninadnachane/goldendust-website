@@ -1,0 +1,169 @@
+---
+import Base from "../../layouts/Base.astro";
+import Route from "../../components/Route.astro";
+import WaButton from "../../components/WaButton.astro";
+import TourRow from "../../components/TourRow.astro";
+import { tours, type Tour, fromPrice, usd, tourUrl } from "../../data/tours";
+import { img, site } from "../../lib/site";
+import { breadcrumbs } from "../../lib/schema";
+
+export function getStaticPaths() {
+  return tours.map((t) => ({ params: { slug: t.slug }, props: { tour: t } }));
+}
+const { tour: t } = Astro.props as { tour: Tour };
+const days = t.nights + 1;
+const others = tours.filter((o) => o.slug !== t.slug);
+const groupSizes = Object.entries(t.prices);
+
+const productSchema = {
+  "@context": "https://schema.org",
+  "@type": ["Product", "TouristTrip"],
+  name: `${days}-Day ${t.shortName} Safari (${t.tier})`,
+  description: t.description,
+  image: img(t.image, 1200),
+  brand: { "@type": "Brand", name: site.name },
+  touristType: t.tier === "Budget" ? "Budget travelers" : "Mid-range travelers",
+  itinerary: {
+    "@type": "ItemList",
+    itemListElement: t.days.map((d, i) => ({ "@type": "ListItem", position: i + 1, name: d.title, description: d.text })),
+  },
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "USD",
+    lowPrice: fromPrice(t),
+    highPrice: Math.max(...Object.values(t.prices)),
+    offerCount: groupSizes.length,
+    availability: "https://schema.org/InStock",
+    url: site.url + tourUrl(t),
+  },
+};
+const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.shortName} safari (${t.tier}). Can you help me plan it?`;
+---
+<Base
+  title={`${t.seoTitle} | Golden Dust Safaris`}
+  description={t.description}
+  image={t.image}
+  type="product"
+  schema={[productSchema, breadcrumbs([["Home", "/"], ["Safari packages", "/tanzania-safari-packages"], [t.shortName, tourUrl(t)]])]}
+>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/">Home</a> / <a href="/tanzania-safari-packages">Safari packages</a> / <span>{days} days, {t.tier}</span>
+    </nav>
+  </div>
+
+  <section class="top">
+    <div class="wrap top__grid">
+      <div>
+        <p class="tier">{t.tier} · private safari</p>
+        <h1>{days}-day {t.shortName} safari</h1>
+        <p class="lede">{t.summary}</p>
+        <div class="route-box"><Route stops={t.route} size="lg" /></div>
+        <dl class="facts">
+          <div><dt>Length</dt><dd>{days} days, {t.nights} nights on safari</dd></div>
+          <div><dt>Start and end</dt><dd>Arusha</dd></div>
+          <div><dt>Accommodation</dt><dd>{t.stay}</dd></div>
+          <div><dt>Vehicle</dt><dd>Private 4x4 with your own guide</dd></div>
+        </dl>
+      </div>
+      <aside class="price" aria-labelledby="price-h">
+        <h2 id="price-h">Price per person</h2>
+        <table>
+          <thead><tr><th scope="col">Group size</th><th scope="col">Per person</th></tr></thead>
+          <tbody>
+            {groupSizes.map(([n, p]) => <tr><td>{n} travelers</td><td>{usd(p)}</td></tr>)}
+          </tbody>
+        </table>
+        <p class="muted small">Bigger groups pay less each because the vehicle, guide and crater fee are shared. Other group sizes and dates on request.</p>
+        <WaButton label="Ask about this safari" text={waText} />
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap itin-grid">
+      <div>
+        <h2>Day-by-day itinerary</h2>
+        {t.intro && <p class="muted">{t.intro}</p>}
+        <ol class="itin">
+          {t.days.map((d) => (
+            <li>
+              <h3>{d.title}</h3>
+              <p>{d.text}</p>
+              {d.overnight && <p class="overnight"><strong>Overnight:</strong> {d.overnight}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <figure class="map">
+        <img src={img(t.image, 900)} alt={t.imageAlt} loading="lazy" width="700" height="600" />
+        <figcaption class="muted">Route map</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Good to know</h2>
+      <ul class="know">
+        <li>We pick you up at Kilimanjaro or Arusha airport, and your night in Arusha before the safari is on us.</li>
+        <li>Your guide briefs you before you set off and picks you up from your hotel on the first morning.</li>
+        <li>After the safari we drop you at the airport or your hotel.</li>
+        <li>Every day can be changed: add a park, swap a camp or extend your trip.</li>
+      </ul>
+      <p>Not sure which safari fits? Read our <a href="/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown">Tanzania safari cost breakdown</a> or <a href="/post/luxury-vs-mid-range-vs-budget-tanzania-safari-which-should-you-choose">budget vs mid-range vs luxury guide</a>.</p>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>Other safaris</h2>
+      <div class="others">{others.map((o) => <TourRow tour={o} />)}</div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .crumbs { font-size: 0.88rem; padding: 1.2rem 0 0; color: var(--ink-2); }
+  .crumbs a { color: var(--ink-2); }
+  .top { padding: 1.5rem 0 3.5rem; }
+  .top__grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: start; }
+  .tier { font-family: var(--display); font-weight: 700; color: var(--gold); margin-bottom: 0.4rem; }
+  h1 { font-size: clamp(2rem, 4.4vw, 3rem); }
+  .route-box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.4rem 1.5rem 1.2rem; margin: 1.8rem 0; }
+  .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 2rem; margin: 0; }
+  .facts dt { font-family: var(--display); font-weight: 700; font-size: 0.85rem; color: var(--ink-2); }
+  .facts dd { margin: 0; }
+  .price { background: var(--surface); border-radius: 10px; padding: 1.6rem; border: 2px solid var(--green); position: sticky; top: 1rem; }
+  .price h2 { font-size: var(--step-1); }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+  th { text-align: left; font-family: var(--display); font-size: 0.85rem; color: var(--ink-2); padding-bottom: 0.4rem; border-bottom: 1px solid var(--line); }
+  td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
+  td:last-child, th:last-child { text-align: right; }
+  td:last-child { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
+  .small { font-size: 0.88rem; }
+  .itin-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 3rem; align-items: start; }
+  .itin { list-style: none; margin: 1.5rem 0 0; padding: 0; }
+  .itin li { position: relative; padding: 0 0 1.8rem 2.2rem; border-left: 3px dashed var(--gold); margin-left: 0.5rem; }
+  .itin li:last-child { border-left-color: transparent; }
+  .itin li::before {
+    content: ""; position: absolute; left: -0.7rem; top: 0.1rem; width: 1.1rem; height: 1.1rem; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--green);
+  }
+  .itin h3 { margin-bottom: 0.35rem; }
+  .itin p { margin: 0 0 0.4rem; color: var(--ink-2); }
+  .overnight { font-size: 0.95rem; }
+  .overnight strong { color: var(--ink); font-family: var(--display); }
+  .map { margin: 0; position: sticky; top: 1rem; }
+  .map img { border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+  .map figcaption { font-size: 0.85rem; margin-top: 0.4rem; }
+  .know { padding-left: 1.2rem; max-width: 44rem; }
+  .know li { margin-bottom: 0.5rem; }
+  .others { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  @media (max-width: 900px) {
+    .top__grid, .itin-grid { grid-template-columns: 1fr; }
+    .others { grid-template-columns: 1fr; }
+    .price, .map { position: static; }
+  }
+  @media (max-width: 520px) { .facts { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,78 @@
+---
+import Base from "../../layouts/Base.astro";
+import WaButton from "../../components/WaButton.astro";
+import TourRow from "../../components/TourRow.astro";
+import { getCollection, render } from "astro:content";
+import { img, site } from "../../lib/site";
+import { orgSchema, breadcrumbs, faqSchema } from "../../lib/schema";
+import { tours } from "../../data/tours";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((p) => ({ params: { slug: p.id }, props: { post: p } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const url = `/post/${post.id}`;
+const fmt = (x: Date) => x.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+const article = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: d.title,
+  description: d.description,
+  image: img(d.image, 1200),
+  datePublished: d.pubDate.toISOString(),
+  dateModified: d.updatedDate.toISOString(),
+  author: { "@type": "Organization", name: site.name, url: site.url },
+  publisher: { "@id": orgSchema["@id"], "@type": "TravelAgency", name: site.name, logo: { "@type": "ImageObject", url: orgSchema.logo } },
+  mainEntityOfPage: site.url + url,
+};
+const schema: object[] = [article, breadcrumbs([["Home", "/"], ["Guides", "/blog"], [d.title, url]])];
+if (d.faqs.length) schema.push(faqSchema(d.faqs));
+const related = tours.slice(0, 2);
+---
+<Base title={`${d.seoTitle} | Golden Dust Safaris`} description={d.description} image={d.image} type="article" schema={schema}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/blog">Guides</a></nav>
+      <header class="head">
+        <h1>{d.title}</h1>
+        <p class="meta">By the Golden Dust Safaris team in Arusha · Updated {fmt(d.updatedDate)} · {d.minutes} min read</p>
+      </header>
+      <img class="hero" src={img(d.image, 1200)} alt={d.imageAlt} width="1200" height="600" />
+      <div class="body">
+        <div class="prose"><Content /></div>
+        <aside class="side">
+          <div class="side__box">
+            <p class="side__h">Planning a Tanzania safari?</p>
+            <p>Message our team in Arusha. We'll give you an honest opinion and a full cost breakdown, free.</p>
+            <WaButton label="Ask us on WhatsApp" />
+          </div>
+        </aside>
+      </div>
+    </div>
+  </article>
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>Safaris to consider</h2>
+      <div class="rel">{related.map((t) => <TourRow tour={t} />)}</div>
+      <p style="margin-top:1.5rem"><a href="/tanzania-safari-packages">See all safari packages</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .crumbs { font-size: 0.88rem; color: var(--ink-2); margin-bottom: 1rem; }
+  .crumbs a { color: var(--ink-2); }
+  .head { max-width: 48rem; }
+  h1 { font-size: clamp(2rem, 4.4vw, 3rem); }
+  .meta { color: var(--ink-2); font-size: 0.92rem; }
+  .hero { width: 100%; max-width: 64rem; border-radius: 10px; margin: 1.5rem 0 2.5rem; aspect-ratio: 2 / 1; object-fit: cover; background: var(--line); }
+  .body { display: grid; grid-template-columns: minmax(0, 40rem) 1fr; gap: 3.5rem; }
+  .side__box { position: sticky; top: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.4rem; font-size: 0.95rem; }
+  .side__h { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+  .rel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 900px) { .body, .rel { grid-template-columns: 1fr; } .side__box { position: static; } }
+</style>

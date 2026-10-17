@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import { orgSchema, breadcrumbs } from "../lib/schema";
+import { site } from "../lib/site";
+---
+<Base
+  title="About Golden Dust Safaris | Local Safari Company in Arusha, Tanzania"
+  description="Golden Dust Safaris is a TALA-registered safari operator in Arusha with its own 4x4 fleet and local guides. Honest advice, transparent prices, no middlemen."
+  schema={[orgSchema, breadcrumbs([["Home", "/"], ["About us", "/about"]])]}
+>
+  <section class="section">
+    <div class="wrap measure">
+      <h1>About Golden Dust Safaris</h1>
+      <p class="lede">We're a local safari company in Arusha, run by people who proudly call Tanzania home.</p>
+      <p>Golden Dust Safaris is a TALA-registered ground operator. We run our own fleet of safari-spec 4x4 Land Cruisers and our guides drive the Northern Circuit parks every week. When you book with us, you're paying for the safari itself, not a chain of agents who each add a markup.</p>
+      <h2>What we believe</h2>
+      <p>Most travelers hear the same three parks recommended again and again. Tanzania has 22 national parks, and the right one for you depends on your budget, the wildlife you care about, your photography goals, who you're traveling with and when you can go. We'll help you choose honestly, even when the right answer earns us less.</p>
+      <ul>
+        <li>Transparent pricing with a complete cost breakdown</li>
+        <li>Honest advice on which parks to visit, and which to skip</li>
+        <li>Real photos of our vehicles, not stock images</li>
+        <li>Direct WhatsApp access to your safari specialist</li>
+        <li>References from recent travelers on request</li>
+        <li>A free review of other companies' quotes</li>
+      </ul>
+      <p>Follow our latest trips on <a href={site.instagram} target="_blank" rel="noopener">Instagram ({site.instagramHandle})</a>.</p>
+      <WaButton label="Talk to our team" />
+    </div>
+  </section>
+</Base>
