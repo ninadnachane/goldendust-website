@@ -1,0 +1,33 @@
+---
+import { site } from "../lib/site";
+const id = site.instagramFeedId;
+---
+<section class="section" aria-labelledby="ig-h">
+  <div class="wrap">
+    <div class="ig__head">
+      <h2 id="ig-h">From our Instagram</h2>
+      <a href={site.instagram} target="_blank" rel="noopener" class="btn btn--ghost">Follow {site.instagramHandle}</a>
+    </div>
+    <p class="muted measure">Real trips, real guides and real vehicles, straight from the bush.</p>
+    {id ? (
+      <>
+        <script type="module" src="https://w.behold.so/widget.js" is:inline></script>
+        <behold-widget feed-id={id}></behold-widget>
+      </>
+    ) : (
+      <a class="ig__empty" href={site.instagram} target="_blank" rel="noopener">
+        See our latest safari photos and reels on Instagram
+      </a>
+    )}
+  </div>
+</section>
+
+<style>
+  .ig__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+  .ig__head h2 { margin: 0; }
+  .ig__empty {
+    display: block; margin-top: 1.5rem; padding: 2.5rem 1.5rem; text-align: center; border: 2px dashed var(--gold);
+    border-radius: 10px; font-weight: 600; color: var(--rust); text-decoration: none; background: var(--surface);
+  }
+  .ig__empty:hover { background: var(--ivory); }
+</style>

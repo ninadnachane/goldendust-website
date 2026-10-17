@@ -1,16 +1,27 @@
 :root {
-  --bg: #eef0e6;        /* sage dust */
-  --surface: #ffffff;
-  --ink: #1e2318;       /* acacia ink */
-  --ink-2: #4a5240;
-  --green: #2f4a2c;     /* ranger green */
-  --green-2: #3d5f39;
-  --gold: #b8862a;      /* savanna gold */
-  --gold-soft: #f3e7c9;
-  --line: #d4d8c6;
+  /* Brand: Golden Dust, Savannah Rust, Sun-Bleached Ivory, Ngorongoro Olive */
+  --gold: #c89a4b;      /* titles on dark, highlights, dividers */
+  --rust: #8a4b2e;      /* secondary titles, CTAs, dividers */
+  --rust-2: #733d25;
+  --ivory: #f4ede0;     /* text on dark/photo, light tints */
+  --olive: #5b6b3d;     /* small accents, tags */
 
-  --display: "Archivo", system-ui, sans-serif;
-  --body: "Literata", Georgia, serif;
+  --bg: #fdfbf7;        /* page */
+  --surface: #ffffff;
+  --tint: #f8f3ea;      /* alternate sections */
+  --dark: #2e241b;      /* dark sections */
+  --ink: #2b2118;       /* body text */
+  --ink-2: #5e5246;
+  --line: #e7dccb;
+
+  /* legacy names used by components */
+  --green: var(--rust);
+  --green-2: var(--rust-2);
+  --gold-soft: var(--ivory);
+
+  --display: "Montserrat", system-ui, sans-serif;   /* UI labels, buttons, nav */
+  --body: "Montserrat", system-ui, sans-serif;      /* body and captions (SemiBold) */
+  --serif: "Playfair Display", Georgia, serif;      /* headings */
 
   --step--1: 0.875rem;
   --step-0: 1.0625rem;
@@ -31,22 +42,23 @@ body {
   color: var(--ink);
   font-family: var(--body);
   font-size: var(--step-0);
-  line-height: 1.65;
+  font-weight: 600;
+  line-height: 1.7;
 }
 img { max-width: 100%; height: auto; display: block; background: var(--line); }
 a { color: var(--green); text-underline-offset: 0.18em; }
-a:hover { color: var(--gold); }
+a:hover { color: var(--rust-2); }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 2px; }
 
 h1, h2, h3, h4 {
-  font-family: var(--display);
-  font-stretch: 112%;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
+  font-family: var(--serif);
+  line-height: 1.15;
   margin: 0 0 0.5em;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--ink);
 }
-h1 { font-size: var(--step-4); font-stretch: 118%; font-weight: 800; }
+h1 { font-size: var(--step-4); font-weight: 700; }
+h3 { color: var(--rust); }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); }
 p { margin: 0 0 1em; }
@@ -56,19 +68,20 @@ p { margin: 0 0 1em; }
 .lede { font-size: var(--step-1); color: var(--ink-2); line-height: 1.55; }
 .muted { color: var(--ink-2); }
 .section { padding: clamp(3rem, 7vw, 5.5rem) 0; }
-.section--white { background: var(--surface); }
-.section--green { background: var(--green); color: #f2f4ea; }
-.section--green a:not(.btn) { color: #f2f4ea; }
+.section--white { background: var(--tint); }
+.section--green { background: var(--dark); color: var(--ivory); }
+.section--green h2 { color: var(--gold); }
+.section--green a:not(.btn) { color: var(--ivory); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 0.55em;
-  font-family: var(--display); font-weight: 700; font-size: 1rem; font-stretch: 105%;
+  font-family: var(--display); font-weight: 700; font-size: 0.98rem;
   padding: 0.85em 1.35em; border-radius: 999px; text-decoration: none;
   background: var(--green); color: #fff; border: 2px solid var(--green);
 }
 .btn:hover { background: var(--green-2); border-color: var(--green-2); color: #fff; }
-.btn--light { background: #fff; color: var(--green); border-color: #fff; }
-.btn--light:hover { background: var(--gold-soft); border-color: var(--gold-soft); color: var(--green); }
+.btn--light { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+.btn--light:hover { background: var(--ivory); border-color: var(--ivory); color: var(--dark); }
 .btn--ghost { background: transparent; color: var(--green); }
 .btn--ghost:hover { background: var(--green); color: #fff; }
 .btn svg { width: 1.2em; height: 1.2em; flex: none; }

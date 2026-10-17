@@ -1,23 +1,26 @@
 ---
-import { site, img, waLink } from "../lib/site";
+import { site, waLink } from "../lib/site";
 import WaIcon from "./WaIcon.astro";
-const path = Astro.url.pathname;
+const path = Astro.url.pathname.replace(/\.html$/, "");
 const links = [
-  { href: "/tanzania-safari-packages", label: "Safaris" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/blog", label: "Guides" },
+  { href: "/", label: "Home" },
   { href: "/about", label: "About us" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/planner", label: "Planner" },
+  { href: "/blog", label: "Blogs", match: ["/blog", "/post"] },
 ];
+const isActive = (l: { href: string; match?: string[] }) =>
+  l.href === "/" ? path === "/" || path === "/index" : (l.match ?? [l.href]).some((m) => path.startsWith(m));
 ---
 <header class="hdr">
   <div class="wrap hdr__in">
     <a href="/" class="hdr__logo" aria-label={`${site.name} home`}>
-      <img src={img(site.logo, 260)} alt={site.name} width="130" height="60" />
+      <img src="/images/logo-header.webp" alt={site.name} width="400" height="177" />
     </a>
     <nav aria-label="Main">
       <ul>
         {links.map((l) => (
-          <li><a href={l.href} aria-current={path.startsWith(l.href) ? "page" : undefined}>{l.label}</a></li>
+          <li><a href={l.href} aria-current={isActive(l) ? "page" : undefined}>{l.label}</a></li>
         ))}
       </ul>
     </nav>
@@ -27,24 +30,25 @@ const links = [
 
 <style>
   .hdr { background: var(--surface); border-bottom: 1px solid var(--line); }
-  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 4.5rem; }
-  .hdr__logo img { width: 112px; height: auto; }
+  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 5.25rem; }
+  .hdr__logo img { width: 200px; height: auto; background: transparent; }
   nav { margin-left: auto; }
   ul { list-style: none; display: flex; gap: 1.6rem; margin: 0; padding: 0; }
-  nav a { font-family: var(--display); font-weight: 600; font-size: 0.98rem; color: var(--ink); text-decoration: none; }
-  nav a:hover, nav a[aria-current] { color: var(--gold); }
+  nav a { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: var(--ink); text-decoration: none; padding: 0.3rem 0; border-bottom: 2px solid transparent; }
+  nav a:hover { color: var(--rust); }
+  nav a[aria-current] { color: var(--rust); border-bottom-color: var(--gold); }
   .hdr__wa {
-    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 999px;
-    background: var(--green); color: #fff; font-family: var(--display); font-weight: 700; font-size: 0.95rem; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.05rem; border-radius: 999px;
+    background: var(--rust); color: #fff; font-family: var(--display); font-weight: 700; font-size: 0.92rem; text-decoration: none;
   }
-  .hdr__wa:hover { background: var(--green-2); color: #fff; }
+  .hdr__wa:hover { background: var(--rust-2); color: #fff; }
   .hdr__wa :global(svg) { width: 1.15rem; height: 1.15rem; }
-  @media (max-width: 760px) {
-    .hdr__in { flex-wrap: wrap; gap: 0.5rem 1rem; padding-top: 0.6rem; padding-bottom: 0.6rem; }
-    .hdr__logo img { width: 92px; }
+  @media (max-width: 860px) {
+    .hdr__in { flex-wrap: wrap; gap: 0.4rem 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .hdr__logo img { width: 150px; }
     .hdr__wa { margin-left: auto; }
     nav { order: 3; width: 100%; margin: 0; overflow-x: auto; }
-    ul { gap: 1.2rem; padding-bottom: 0.2rem; }
-    nav a { font-size: 0.92rem; white-space: nowrap; }
+    ul { gap: 1rem; padding-bottom: 0.2rem; justify-content: space-between; }
+    nav a { font-size: 0.84rem; white-space: nowrap; }
   }
 </style>

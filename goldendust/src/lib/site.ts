@@ -8,6 +8,16 @@ export const site = {
   city: "Arusha",
   country: "TZ",
   logo: "7df076_23c9d5d8eb404c038205431f3e1857f3~mv2.png",
+
+  // Instagram live feed via Behold (behold.so, free plan). Paste your feed ID here to switch it on.
+  instagramFeedId: "",
+
+  // Reviews. Paste your profile links to show the review buttons.
+  tripadvisorUrl: "",
+  googleReviewsUrl: "",
+  // Optional: a reviews widget (e.g. Trustindex or Elfsight) that shows Google and TripAdvisor reviews.
+  // Paste the widget's script URL here; leave empty to show only the buttons above.
+  reviewsWidgetScript: "",
 };
 
 export const waLink = (text = "Hi Golden Dust Safaris, I'd like help planning a Tanzania safari.") =>
