@@ -5,27 +5,49 @@ import { orgSchema, breadcrumbs } from "../lib/schema";
 import { site } from "../lib/site";
 ---
 <Base
-  title="About Golden Dust Safaris | Local Safari Company in Arusha, Tanzania"
-  description="Golden Dust Safaris is a TALA-registered safari operator in Arusha with its own 4x4 fleet and local guides. Honest advice, transparent prices, no middlemen."
+  title="About Us | Local Tanzania Safari Company in Arusha | Golden Dust Safaris"
+  description="We're a local Tanzania safari company in Arusha. Serengeti safari tours, family safaris and Tanzania safari holidays across all 22 national parks, including Ruaha and Katavi."
   schema={[orgSchema, breadcrumbs([["Home", "/"], ["About us", "/about"]])]}
 >
   <section class="section">
-    <div class="wrap measure">
+    <div class="wrap measure about">
       <h1>About Golden Dust Safaris</h1>
-      <p class="lede">We're a local safari company in Arusha, run by people who proudly call Tanzania home.</p>
-      <p>Golden Dust Safaris is a TALA-registered ground operator. We run our own fleet of safari-spec 4x4 Land Cruisers and our guides drive the Northern Circuit parks every week. When you book with us, you're paying for the safari itself, not a chain of agents who each add a markup.</p>
-      <h2>What we believe</h2>
-      <p>Most travelers hear the same three parks recommended again and again. Tanzania has 22 national parks, and the right one for you depends on your budget, the wildlife you care about, your photography goals, who you're traveling with and when you can go. We'll help you choose honestly, even when the right answer earns us less.</p>
+      <p class="lede">We're a small, local Tanzania safari company based in Arusha. Tanzania is home for us, and showing it to people properly is what we love doing.</p>
+
+      <p>We're a TALA-registered operator with our own Land Cruisers and our own guides. There's no agency in the middle, so when you book with us, your money goes into your safari, not into a chain of commissions.</p>
+
+      <h2>You'll know your guide before you land</h2>
+      <p>This is the part we're proudest of. The guides you see on our Instagram are the people who actually drive you, and you get to talk to yours while we're still planning your trip. Guides like Joshua shape the whole experience: where you go, when you leave camp, how long you stay with a pride of lions. So it makes sense to meet them first. Most companies don't work this way. You'd normally meet your guide for the first time on the morning of day one.</p>
+
+      <h2>More than the famous three parks</h2>
+      <p>Almost everyone hears the same three names: the Serengeti, Ngorongoro Crater and Tarangire. They're famous for good reason, and our Serengeti safari tours are still the trips we run most. But Tanzania has 22 national parks, and some of the most memorable ones are the quiet ones. Ruaha is wild and vast with far fewer vehicles. Katavi is one of the most remote places you can go on safari in Africa. If one of them suits you better, we'll tell you.</p>
+
+      <h2>Safaris for families, couples and first-timers</h2>
+      <p>A family safari in Tanzania needs a different pace from a photography trip or a honeymoon. Shorter drives, the right lodges, a guide who's great with kids. We plan around who's coming, not around a fixed package. Whether it's a short Serengeti and Ngorongoro trip or a longer Tanzania safari holiday across several parks, every itinerary starts from a conversation.</p>
+
+      <h2>How we like to work</h2>
       <ul>
-        <li>Transparent pricing with a complete cost breakdown</li>
-        <li>Honest advice on which parks to visit, and which to skip</li>
-        <li>Real photos of our vehicles, not stock images</li>
-        <li>Direct WhatsApp access to your safari specialist</li>
-        <li>References from recent travelers on request</li>
-        <li>A free review of other companies' quotes</li>
+        <li>We usually start with a call to understand what you want and why Tanzania is calling you.</li>
+        <li>We tell you honestly which parks are worth it for you, and which ones you can skip.</li>
+        <li>You get a full cost breakdown, so you know exactly what you're paying for.</li>
+        <li>Real photos of our vehicles, not stock images.</li>
+        <li>Direct WhatsApp contact with the people planning your trip.</li>
+        <li>Got a quote from another company? Send it over and we'll give you our honest opinion, even if you end up booking with them.</li>
       </ul>
-      <p>Follow our latest trips on <a href={site.instagram} target="_blank" rel="noopener">Instagram ({site.instagramHandle})</a>.</p>
-      <WaButton label="Talk to our team" />
+
+      <p>Want to see what our trips really look like? Follow us on <a href={site.instagram} target="_blank" rel="noopener">Instagram ({site.instagramHandle})</a>, or read what <a href="/#rv-h">our guests say</a>.</p>
+
+      <div class="about__cta">
+        <WaButton label="Say hello on WhatsApp" />
+        <a href="/tanzania-safari-packages" class="btn btn--ghost">See example safaris</a>
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  .about h2 { margin-top: 2.2rem; font-size: var(--step-2); }
+  .about ul { padding-left: 1.2rem; }
+  .about li { margin-bottom: 0.45rem; }
+  .about__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+</style>
