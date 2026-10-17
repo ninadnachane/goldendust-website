@@ -90,15 +90,15 @@ import { orgSchema } from "../lib/schema";
 
 <style>
   /* Full-width photo gallery with the headline on a frosted panel */
-  .hero { padding: 0; background: var(--tint); }
+  .hero { padding: 0; background: linear-gradient(to bottom, var(--bg), var(--tint)); }
   .hero__frame { position: relative; }
-  /* photos run edge to edge and melt into the next section's background at the bottom */
+  /* photos run edge to edge; the top and bottom 5% soften into the header and next section */
   .hero__frame > :global(.gal) {
     border-radius: 0; box-shadow: none; background: transparent;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 5%, #000 95%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 5%, #000 95%, transparent 100%);
   }
-  .hero__frame > :global(.gal .gal__bar) { bottom: clamp(3.5rem, 11vh, 6rem); background: none; padding-top: 0; justify-content: flex-end; gap: 1rem; }
+  .hero__frame > :global(.gal .gal__bar) { bottom: clamp(2rem, 6vh, 3.5rem); background: none; padding-top: 0; justify-content: flex-end; gap: 1rem; }
   .hero__frame > :global(.gal .gal__btns button) { box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5); }
   .hero__frame > :global(.gal .gal__dots) { background: rgba(46, 36, 27, 0.5); padding: 7px 10px; border-radius: 99px; }
   .hero__frame > :global(.gal .gal__track) { aspect-ratio: auto; height: clamp(480px, 76vh, 820px); }
@@ -123,7 +123,7 @@ import { orgSchema } from "../lib/schema";
   .hero__cta { display: grid; gap: 0.7rem; margin-top: 1.8rem; }
   .hero__cta :global(.btn) { width: 100%; justify-content: center; }
   .cta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-  .why-sec { padding-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .why-sec { padding-top: clamp(2rem, 4vw, 3.5rem); }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
   .why p { color: var(--ink-2); }
