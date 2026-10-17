@@ -4,6 +4,7 @@ import Gallery from "../components/Gallery.astro";
 import InstagramFeed from "../components/InstagramFeed.astro";
 import Reviews from "../components/Reviews.astro";
 import WaButton from "../components/WaButton.astro";
+import PlannerButton from "../components/PlannerButton.astro";
 import { img } from "../lib/site";
 import { orgSchema } from "../lib/schema";
 
@@ -21,7 +22,7 @@ import { orgSchema } from "../lib/schema";
         <p class="lede">We're a TALA-registered safari company in Arusha with our own Land Cruisers. Tell us your dates, budget and the animals you dream of, and we'll plan the safari that fits, and tell you honestly where you can save.</p>
         <div class="hero__cta">
           <WaButton label="WhatsApp" />
-          <a href="/planner" class="btn btn--glass">Itinerary planner</a>
+          <PlannerButton variant="glass" />
         </div>
       </div>
     </div>
@@ -74,7 +75,10 @@ import { orgSchema } from "../lib/schema";
     <div class="wrap cta">
       <h2>Ready to plan your safari?</h2>
       <p class="measure">Message us on WhatsApp and talk directly to a local safari expert in Arusha.</p>
-      <WaButton variant="light" label="Start planning on WhatsApp" />
+      <div class="cta__btns">
+        <WaButton variant="light" label="Start planning on WhatsApp" />
+        <PlannerButton variant="light-outline" />
+      </div>
     </div>
   </section>
 </Base>
@@ -99,9 +103,9 @@ import { orgSchema } from "../lib/schema";
   }
   .hero__panel h1 { color: var(--ivory); font-size: clamp(1.7rem, 3vw, 2.4rem); letter-spacing: -0.02em; margin-bottom: 0.9rem; }
   .hero__panel .lede { color: rgba(244, 237, 224, 0.92); font-size: 1rem; line-height: 1.65; margin: 0; }
-  .hero__cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.8rem; }
-  .hero__cta :global(.btn--glass) { background: rgba(244, 237, 224, 0.12); color: var(--ivory); border-color: rgba(244, 237, 224, 0.6); }
-  .hero__cta :global(.btn--glass:hover) { background: var(--ivory); color: var(--dark); border-color: var(--ivory); }
+  .hero__cta { display: grid; gap: 0.7rem; margin-top: 1.8rem; }
+  .hero__cta :global(.btn) { width: 100%; justify-content: center; }
+  .cta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
   .why p { color: var(--ink-2); }

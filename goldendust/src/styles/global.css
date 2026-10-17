@@ -91,6 +91,10 @@ p { margin: 0 0 1em; }
 .btn--ghost { background: transparent; color: var(--ink); }
 .btn--ghost:hover { background: var(--btn); color: var(--btn-text); }
 .btn svg { width: 1.2em; height: 1.2em; flex: none; }
+.btn--glass { background: rgba(244, 237, 224, 0.12); color: var(--ivory); border-color: rgba(244, 237, 224, 0.6); }
+.btn--glass:hover { background: var(--ivory); color: var(--dark); border-color: var(--ivory); }
+.btn--light-outline { background: transparent; color: var(--ivory); border-color: rgba(244, 237, 224, 0.7); }
+.btn--light-outline:hover { background: var(--ivory); color: var(--dark); border-color: var(--ivory); }
 
 .skip { position: absolute; left: -999px; }
 .skip:focus { left: 1rem; top: 1rem; background: #fff; padding: 0.5rem 1rem; z-index: 10; }

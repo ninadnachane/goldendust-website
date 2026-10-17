@@ -1,0 +1,7 @@
+---
+// "Itinerary planner" button used in the hero, the navigation bar and the closing section.
+import MapIcon from "./MapIcon.astro";
+interface Props { label?: string; variant?: "ghost" | "glass" | "light-outline"; class?: string }
+const { label = "Itinerary planner", variant = "ghost", class: cls } = Astro.props;
+---
+<a class:list={["btn", `btn--${variant}`, cls]} href="/planner"><MapIcon />{label}</a>
