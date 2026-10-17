@@ -11,13 +11,13 @@ const { stops, size = "sm" } = Astro.props;
   .route { list-style: none; display: flex; margin: 0; padding: 0; position: relative; }
   .route::before {
     content: ""; position: absolute; left: 0.45rem; right: 0.45rem; top: 0.45rem;
-    border-top: 3px dashed var(--gold);
+    border-top: 3px dashed var(--line);
   }
   li { flex: 1; position: relative; padding-top: 1.35rem; min-width: 0; }
   li:last-child { flex: 0 0 auto; text-align: right; }
   li::before {
     content: ""; position: absolute; top: 0; left: 0; width: 0.9rem; height: 0.9rem; border-radius: 50%;
-    background: var(--surface); border: 3px solid var(--green);
+    background: var(--surface); border: 3px solid var(--gold);
   }
   li:last-child::before { left: auto; right: 0; }
   span { font-family: var(--display); font-weight: 600; font-size: 0.82rem; color: var(--ink-2); display: block; white-space: nowrap; }

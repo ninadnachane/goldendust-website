@@ -14,14 +14,18 @@
   --ink-2: #5e5246;
   --line: #e7dccb;
 
+  --btn: var(--gold);   /* all buttons and highlights */
+  --btn-hover: #b5873a;
+  --btn-text: var(--dark);
+
   /* legacy names used by components */
   --green: var(--rust);
   --green-2: var(--rust-2);
   --gold-soft: var(--ivory);
 
   --display: "Montserrat", system-ui, sans-serif;   /* UI labels, buttons, nav */
-  --body: "Montserrat", system-ui, sans-serif;      /* body and captions (SemiBold) */
-  --serif: "Playfair Display", Georgia, serif;      /* headings */
+  --body: "Montserrat", system-ui, sans-serif;      /* body text (Regular) */
+  --serif: "Montserrat", system-ui, sans-serif;     /* headings (SemiBold) */
 
   --step--1: 0.875rem;
   --step-0: 1.0625rem;
@@ -42,7 +46,7 @@ body {
   color: var(--ink);
   font-family: var(--body);
   font-size: var(--step-0);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.7;
 }
 img { max-width: 100%; height: auto; display: block; background: var(--line); }
@@ -52,12 +56,14 @@ a:hover { color: var(--rust-2); }
 
 h1, h2, h3, h4 {
   font-family: var(--serif);
-  line-height: 1.15;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
   margin: 0 0 0.5em;
   font-weight: 600;
   color: var(--ink);
 }
-h1 { font-size: var(--step-4); font-weight: 700; }
+h1 { font-size: var(--step-4); }
+strong, b { font-weight: 600; }
 h3 { color: var(--rust); }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); }
@@ -75,15 +81,15 @@ p { margin: 0 0 1em; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 0.55em;
-  font-family: var(--display); font-weight: 700; font-size: 0.98rem;
+  font-family: var(--display); font-weight: 600; font-size: 0.98rem;
   padding: 0.85em 1.35em; border-radius: 999px; text-decoration: none;
-  background: var(--green); color: #fff; border: 2px solid var(--green);
+  background: var(--btn); color: var(--btn-text); border: 2px solid var(--btn);
 }
-.btn:hover { background: var(--green-2); border-color: var(--green-2); color: #fff; }
-.btn--light { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+.btn:hover { background: var(--btn-hover); border-color: var(--btn-hover); color: var(--btn-text); }
+.btn--light { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
 .btn--light:hover { background: var(--ivory); border-color: var(--ivory); color: var(--dark); }
-.btn--ghost { background: transparent; color: var(--green); }
-.btn--ghost:hover { background: var(--green); color: #fff; }
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn--ghost:hover { background: var(--btn); color: var(--btn-text); }
 .btn svg { width: 1.2em; height: 1.2em; flex: none; }
 
 .skip { position: absolute; left: -999px; }

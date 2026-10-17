@@ -1,58 +1,79 @@
 ---
+// Swipeable photo gallery shown next to the homepage headline.
+// Add photos in src/data/gallery.ts.
 import { gallery } from "../data/gallery";
 import { img } from "../lib/site";
-const src = (s: string) => (s.startsWith("/") ? s : img(s, 1600));
+const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
 ---
-<section class="gal" aria-roledescription="carousel" aria-label="Safari photos">
+<div class="gal" aria-roledescription="carousel" aria-label="Safari photos">
   <div class="gal__track" tabindex="0" data-track>
     {gallery.map((p, i) => (
       <figure class="gal__slide" aria-label={`Photo ${i + 1} of ${gallery.length}`}>
-        <img src={src(p.src)} alt={p.alt} width="1600" height="900" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
+        <img src={src(p.src)} alt={p.alt} width="1400" height="1050" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
       </figure>
     ))}
   </div>
   {gallery.length > 1 && (
-    <div class="gal__ctrl">
-      <button type="button" data-dir="-1" aria-label="Previous photo">‹</button>
-      <button type="button" data-dir="1" aria-label="Next photo">›</button>
+    <div class="gal__bar">
+      <div class="gal__dots" aria-hidden="true">
+        {gallery.map((_, i) => <span class:list={["gal__dot", i === 0 && "is-on"]}></span>)}
+      </div>
+      <div class="gal__btns">
+        <button type="button" data-dir="-1" aria-label="Previous photo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <button type="button" data-dir="1" aria-label="Next photo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </div>
     </div>
   )}
-</section>
+</div>
 
 <script>
   document.querySelectorAll<HTMLElement>(".gal").forEach((gal) => {
     const track = gal.querySelector<HTMLElement>("[data-track]")!;
+    const dots = [...gal.querySelectorAll<HTMLElement>(".gal__dot")];
+    const count = dots.length;
+    const index = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = (i: number) => track.scrollTo({ left: ((i + count) % count) * track.clientWidth, behavior: "smooth" });
     gal.querySelectorAll<HTMLButtonElement>("[data-dir]").forEach((b) =>
-      b.addEventListener("click", () => {
-        const dir = Number(b.dataset.dir);
-        const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
-        const atStart = track.scrollLeft <= 4;
-        if (dir > 0 && atEnd) track.scrollTo({ left: 0, behavior: "smooth" });
-        else if (dir < 0 && atStart) track.scrollTo({ left: track.scrollWidth, behavior: "smooth" });
-        else track.scrollBy({ left: dir * track.clientWidth * 0.85, behavior: "smooth" });
-      })
+      b.addEventListener("click", () => go(index() + Number(b.dataset.dir)))
     );
+    track.addEventListener("scroll", () => {
+      const i = index();
+      dots.forEach((d, j) => d.classList.toggle("is-on", i === j));
+    }, { passive: true });
+    track.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); go(index() + 1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(index() - 1); }
+    });
   });
 </script>
 
 <style>
-  .gal { position: relative; background: var(--dark); }
+  .gal { position: relative; border-radius: 22px; overflow: hidden; background: var(--line); box-shadow: 0 24px 48px -24px rgba(46, 36, 27, 0.45); }
   .gal__track {
-    display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
-    height: clamp(260px, 52vh, 560px);
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    aspect-ratio: 4 / 3;
   }
   .gal__track::-webkit-scrollbar { display: none; }
-  .gal__slide { margin: 0; flex: 0 0 auto; height: 100%; scroll-snap-align: start; }
-  .gal__slide img { height: 100%; width: auto; max-width: none; object-fit: cover; background: #3a2f25; }
-  .gal__ctrl { position: absolute; right: var(--gutter); bottom: 1rem; display: flex; gap: 0.5rem; }
-  .gal__ctrl button {
-    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 0; cursor: pointer;
-    background: rgba(46, 36, 27, 0.72); color: var(--ivory); font-size: 1.6rem; line-height: 1;
+  .gal__slide { margin: 0; flex: 0 0 100%; scroll-snap-align: start; }
+  .gal__slide img { width: 100%; height: 100%; object-fit: cover; }
+  .gal__bar {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 2.5rem 1rem 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to top, rgba(46, 36, 27, 0.55), transparent);
+    pointer-events: none;
   }
-  .gal__ctrl button:hover { background: var(--rust); }
-  @media (max-width: 640px) {
-    .gal__track { height: 300px; }
-    .gal__slide { width: 88vw; }
-    .gal__slide img { width: 100%; }
+  .gal__dots { display: flex; gap: 6px; }
+  .gal__dot { width: 7px; height: 7px; border-radius: 99px; background: rgba(244, 237, 224, 0.55); transition: width 0.25s, background 0.25s; }
+  .gal__dot.is-on { width: 22px; background: var(--gold); }
+  .gal__btns { display: flex; gap: 0.5rem; pointer-events: auto; }
+  .gal__btns button {
+    width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
+    background: rgba(244, 237, 224, 0.92); color: var(--dark);
   }
+  .gal__btns button:hover { background: var(--gold); }
+  .gal__btns svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 </style>

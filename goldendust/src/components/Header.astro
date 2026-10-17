@@ -30,18 +30,18 @@ const isActive = (l: { href: string; match?: string[] }) =>
 
 <style>
   .hdr { background: var(--surface); border-bottom: 1px solid var(--line); }
-  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 5.25rem; }
+  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 6.25rem; padding-top: 0.4rem; padding-bottom: 0.4rem; }
   .hdr__logo img { width: 200px; height: auto; background: transparent; }
   nav { margin-left: auto; }
   ul { list-style: none; display: flex; gap: 1.6rem; margin: 0; padding: 0; }
   nav a { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: var(--ink); text-decoration: none; padding: 0.3rem 0; border-bottom: 2px solid transparent; }
-  nav a:hover { color: var(--rust); }
-  nav a[aria-current] { color: var(--rust); border-bottom-color: var(--gold); }
+  nav a:hover { color: var(--gold); }
+  nav a[aria-current] { color: var(--ink); border-bottom-color: var(--gold); }
   .hdr__wa {
     display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.05rem; border-radius: 999px;
-    background: var(--rust); color: #fff; font-family: var(--display); font-weight: 700; font-size: 0.92rem; text-decoration: none;
+    background: var(--btn); color: var(--btn-text); font-family: var(--display); font-weight: 600; font-size: 0.92rem; text-decoration: none;
   }
-  .hdr__wa:hover { background: var(--rust-2); color: #fff; }
+  .hdr__wa:hover { background: var(--btn-hover); color: var(--btn-text); }
   .hdr__wa :global(svg) { width: 1.15rem; height: 1.15rem; }
   @media (max-width: 860px) {
     .hdr__in { flex-wrap: wrap; gap: 0.4rem 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
