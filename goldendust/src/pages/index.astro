@@ -90,15 +90,13 @@ import { orgSchema } from "../lib/schema";
 
 <style>
   /* Full-width photo gallery with the headline on a frosted panel */
-  .hero { padding: 0; background: linear-gradient(to bottom, var(--bg), var(--tint)); }
+  .hero { padding: 0; }
   .hero__frame { position: relative; }
-  /* photos run edge to edge; the top and bottom quarter soften into the header and next section */
+  /* photos run edge to edge, no rounded corners */
   .hero__frame > :global(.gal) {
     border-radius: 0; box-shadow: none; background: transparent;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.55) 12%, #000 26%, #000 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.55) 12%, #000 26%, #000 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
   }
-  .hero__frame > :global(.gal .gal__bar) { bottom: clamp(3.5rem, 11vh, 6rem); background: none; padding-top: 0; justify-content: flex-end; gap: 1rem; }
+  .hero__frame > :global(.gal .gal__bar) { bottom: 1.25rem; background: none; padding-top: 0; justify-content: flex-end; gap: 1rem; }
   .hero__frame > :global(.gal .gal__btns button) { box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5); }
   .hero__frame > :global(.gal .gal__dots) { background: rgba(46, 36, 27, 0.5); padding: 7px 10px; border-radius: 99px; }
   .hero__frame > :global(.gal .gal__track) { aspect-ratio: auto; height: clamp(480px, 76vh, 820px); }
@@ -123,7 +121,6 @@ import { orgSchema } from "../lib/schema";
   .hero__cta { display: grid; gap: 0.7rem; margin-top: 1.8rem; }
   .hero__cta :global(.btn) { width: 100%; justify-content: center; }
   .cta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-  .why-sec { padding-top: clamp(2rem, 4vw, 3.5rem); }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
   .why p { color: var(--ink-2); }
@@ -162,7 +159,6 @@ import { orgSchema } from "../lib/schema";
   @media (max-width: 680px) {
     .hero__frame > :global(.gal .gal__track) { height: 62vh; min-height: 380px; }
     .hero__frame > :global(.gal .gal__bar) { top: auto; bottom: 9rem; padding: 0 1rem; }
-    .why-sec { padding-top: 2.5rem; }
     .hero__panel { position: relative; left: auto; top: auto; transform: none; width: auto; min-height: 0; margin: -5.5rem 0.75rem 0; background: rgba(46, 36, 27, 0.9); }
   }
 </style>
