@@ -1,63 +1,101 @@
 ---
+// "What our guests say": one review at a time, auto-advancing, plus links to all reviews.
 import { site } from "../lib/site";
-const { tripadvisorUrl, googleReviewsUrl, reviewsWidgetScript, tripadvisorLocationId, tripadvisorRating, tripadvisorMinRating } = site;
-// Tripadvisor's official reviews widget, shown only while the rating meets the minimum.
-const showTa = Boolean(tripadvisorLocationId) && tripadvisorRating >= tripadvisorMinRating;
-const taId = "gd1";
-const taSrc = `https://www.jscache.com/wejs?wtype=selfserveprop&uniq=${taId}&locationId=${tripadvisorLocationId}&lang=en_US&rating=true&nreviews=5&writereviewlink=true&popIdx=true&iswide=true&border=false&display_version=2`;
-const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript || showTa;
+import { reviews } from "../data/reviews";
+const { tripadvisorUrl, googleReviewsUrl } = site;
+const shown = reviews.filter((r) => r.rating >= 4);
+const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math.round(n));
 ---
-{hasAny && (
-  <section class="section section--white" aria-labelledby="rv-h">
-    <div class="wrap">
-      <h2 id="rv-h">What our guests say</h2>
-      <p class="muted measure">Read honest reviews from travelers who've been on safari with our guides, and leave your own after your trip.</p>
-      {showTa && (
-        <div class="rv__ta">
-          <div id={`TA_selfserveprop${taId}`} class="TA_selfserveprop">
-            <ul id="TA_links" class="TA_links">
-              <li><a target="_blank" rel="noopener" href={tripadvisorUrl}>Golden Dust Safaris on Tripadvisor</a></li>
-            </ul>
-          </div>
-          <script async src={taSrc} is:inline></script>
+{(shown.length > 0 || tripadvisorUrl || googleReviewsUrl) && (
+  <section class="section section--white rv" aria-labelledby="rv-h">
+    <div class="wrap rv__grid">
+      <div class="rv__intro">
+        <h2 id="rv-h">What our guests say</h2>
+        <p class="muted">Honest reviews from travelers who've been on safari with our guides.</p>
+        <div class="rv__sources">
+          {tripadvisorUrl && <a class="rv__src" href={tripadvisorUrl} target="_blank" rel="noopener"><span>Tripadvisor</span>Read all reviews</a>}
+          {googleReviewsUrl && <a class="rv__src" href={googleReviewsUrl} target="_blank" rel="noopener"><span>Google</span>Read all reviews</a>}
         </div>
-      )}
-      {reviewsWidgetScript && (
-        <div class="rv__widget">
-          <script src={reviewsWidgetScript} defer is:inline></script>
-        </div>
-      )}
-      <div class="rv__cards">
-        {tripadvisorUrl && (
-          <a class="rv__card" href={tripadvisorUrl} target="_blank" rel="noopener">
-            <span class="rv__name">Tripadvisor</span>
-            <span class="rv__text">Golden Dust Safaris reviews on Tripadvisor</span>
-            <span class="rv__go">Read our reviews</span>
-          </a>
-        )}
-        {googleReviewsUrl && (
-          <a class="rv__card" href={googleReviewsUrl} target="_blank" rel="noopener">
-            <span class="rv__name">Google</span>
-            <span class="rv__text">Golden Dust Safaris reviews on Google</span>
-            <span class="rv__go">Read our reviews</span>
-          </a>
-        )}
       </div>
+
+      {shown.length > 0 && (
+        <div class="rv__car" aria-roledescription="carousel" aria-label="Guest reviews">
+          <div class="rv__track" data-rv-track tabindex="0">
+            {shown.map((r, i) => (
+              <figure class="rv__slide" aria-label={`Review ${i + 1} of ${shown.length}`}>
+                <p class="rv__stars" aria-label={`${r.rating} out of 5 stars`}>{stars(r.rating)}</p>
+                {r.title && <p class="rv__title">{r.title}</p>}
+                <blockquote class="rv__text">“{r.text}”</blockquote>
+                <figcaption class="rv__by">
+                  <strong>{r.name}</strong>
+                  <span>{r.source} · {r.date}{r.translated ? " · translated" : ""}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <div class="rv__nav">
+            <div class="rv__dots" aria-hidden="true">
+              {shown.map((_, i) => <span class:list={["rv__dot", i === 0 && "is-on"]}></span>)}
+            </div>
+            <div class="rv__btns">
+              <button type="button" data-rv-dir="-1" aria-label="Previous review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+              <button type="button" data-rv-dir="1" aria-label="Next review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   </section>
 )}
 
+<script>
+  document.querySelectorAll<HTMLElement>(".rv__car").forEach((car) => {
+    const track = car.querySelector<HTMLElement>("[data-rv-track]")!;
+    const dots = [...car.querySelectorAll<HTMLElement>(".rv__dot")];
+    const n = dots.length;
+    const idx = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = (i: number) => track.scrollTo({ left: ((i + n) % n) * track.clientWidth, behavior: "smooth" });
+    car.querySelectorAll<HTMLButtonElement>("[data-rv-dir]").forEach((b) => b.addEventListener("click", () => go(idx() + Number(b.dataset.rvDir))));
+    track.addEventListener("scroll", () => dots.forEach((d, j) => d.classList.toggle("is-on", j === idx())), { passive: true });
+    let paused = false;
+    car.addEventListener("mouseenter", () => (paused = true));
+    car.addEventListener("mouseleave", () => (paused = false));
+    car.addEventListener("focusin", () => (paused = true));
+    car.addEventListener("focusout", () => (paused = false));
+    car.addEventListener("touchstart", () => (paused = true), { passive: true });
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && n > 1) {
+      setInterval(() => { if (!paused && !document.hidden) go(idx() + 1); }, 6000);
+    }
+  });
+</script>
+
 <style>
-  .rv__widget { margin: 1.5rem 0; }
-  .rv__ta { margin-top: 1.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.2rem; overflow: hidden; }
-  .rv__ta :global(.TA_links) { list-style: none; margin: 0; padding: 0; }
-  .rv__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 22rem)); gap: 1rem; margin-top: 1.8rem; }
-  .rv__card {
-    display: grid; gap: 0.35rem; padding: 1.4rem 1.5rem; border-radius: 16px; text-decoration: none;
-    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  .rv { padding-top: clamp(3.5rem, 8vw, 6.5rem); padding-bottom: clamp(3.5rem, 8vw, 6.5rem); }
+  .rv__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+  .rv__sources { display: grid; gap: 0.75rem; margin-top: 1.8rem; max-width: 20rem; }
+  .rv__src {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.9rem 1.1rem; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--ink-2); font-size: 0.9rem;
   }
-  .rv__card:hover { border-color: var(--gold); box-shadow: 0 12px 28px -18px rgba(46, 36, 27, 0.5); color: var(--ink); }
-  .rv__name { font-weight: 600; font-size: 1.25rem; }
-  .rv__text { color: var(--ink-2); font-size: 0.95rem; }
-  .rv__go { margin-top: 0.6rem; justify-self: start; font-weight: 600; font-size: 0.92rem; padding: 0.5rem 1rem; border-radius: 99px; background: var(--btn); color: var(--btn-text); }
+  .rv__src span { font-weight: 600; color: var(--ink); font-size: 1rem; }
+  .rv__src:hover { border-color: var(--gold); color: var(--ink); }
+  .rv__car { background: var(--surface); border-radius: 22px; border: 1px solid var(--line); box-shadow: 0 24px 48px -30px rgba(46, 36, 27, 0.45); overflow: hidden; }
+  .rv__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .rv__track::-webkit-scrollbar { display: none; }
+  .rv__slide { flex: 0 0 100%; scroll-snap-align: start; margin: 0; padding: clamp(1.6rem, 4vw, 2.8rem) clamp(1.4rem, 4vw, 3rem) 1rem; display: flex; flex-direction: column; gap: 0.7rem; min-height: 17rem; }
+  .rv__stars { margin: 0; color: var(--gold); font-size: 1.35rem; letter-spacing: 0.12em; }
+  .rv__title { margin: 0; font-weight: 600; color: var(--rust); }
+  .rv__text { margin: 0; font-size: clamp(1.15rem, 2vw, 1.4rem); line-height: 1.5; color: var(--ink); }
+  .rv__by { margin-top: auto; display: grid; gap: 0.15rem; padding-top: 0.6rem; }
+  .rv__by span { color: var(--ink-2); font-size: 0.88rem; }
+  .rv__nav { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem clamp(1.4rem, 4vw, 3rem) 1.4rem; }
+  .rv__dots { display: flex; gap: 6px; }
+  .rv__dot { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width 0.25s, background 0.25s; }
+  .rv__dot.is-on { width: 22px; background: var(--gold); }
+  .rv__btns { display: flex; gap: 0.5rem; }
+  .rv__btns button { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--ink); }
+  .rv__btns button:hover { background: var(--gold); border-color: var(--gold); }
+  .rv__btns svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  @media (max-width: 900px) { .rv__grid { grid-template-columns: 1fr; } .rv__sources { max-width: none; grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .rv__sources { grid-template-columns: 1fr; } }
 </style>

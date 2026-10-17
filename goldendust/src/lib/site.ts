@@ -14,7 +14,7 @@ export const site = {
 
   // Reviews. Paste your profile links to show the review buttons.
   tripadvisorUrl: "https://www.tripadvisor.com/Attraction_Review-g297913-d34516684-Reviews-GOLDEN_DUST_SAFARIS-Arusha_Arusha_Region.html",
-  googleReviewsUrl: "",
+  googleReviewsUrl: "https://share.google/zsm5yBScSxpGKpaIr",
   // Tripadvisor reviews widget: shown on the site only while the overall rating is 4 or higher.
   // Update tripadvisorRating if the rating on Tripadvisor changes (5.0 from 8 reviews on 17 Oct 2026).
   tripadvisorLocationId: "34516684",

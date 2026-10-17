@@ -44,6 +44,19 @@ const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
       const i = index();
       dots.forEach((d, j) => d.classList.toggle("is-on", i === j));
     }, { passive: true });
+    // Auto-advance every 3 seconds; pauses on hover, focus or touch, and for reduced-motion users.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let paused = false;
+    const pause = () => (paused = true);
+    const resume = () => (paused = false);
+    gal.addEventListener("mouseenter", pause);
+    gal.addEventListener("mouseleave", resume);
+    gal.addEventListener("focusin", pause);
+    gal.addEventListener("focusout", resume);
+    gal.addEventListener("touchstart", pause, { passive: true });
+    if (!reduce && count > 1) {
+      setInterval(() => { if (!paused && !document.hidden) go(index() + 1); }, 3000);
+    }
     track.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") { e.preventDefault(); go(index() + 1); }
       if (e.key === "ArrowLeft") { e.preventDefault(); go(index() - 1); }
