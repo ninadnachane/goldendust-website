@@ -1,13 +1,27 @@
 ---
 import { site } from "../lib/site";
-const { tripadvisorUrl, googleReviewsUrl, reviewsWidgetScript } = site;
-const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript;
+const { tripadvisorUrl, googleReviewsUrl, reviewsWidgetScript, tripadvisorLocationId, tripadvisorRating, tripadvisorMinRating } = site;
+// Tripadvisor's official reviews widget, shown only while the rating meets the minimum.
+const showTa = Boolean(tripadvisorLocationId) && tripadvisorRating >= tripadvisorMinRating;
+const taId = "gd1";
+const taSrc = `https://www.jscache.com/wejs?wtype=selfserveprop&uniq=${taId}&locationId=${tripadvisorLocationId}&lang=en_US&rating=true&nreviews=5&writereviewlink=true&popIdx=true&iswide=true&border=false&display_version=2`;
+const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript || showTa;
 ---
 {hasAny && (
   <section class="section section--white" aria-labelledby="rv-h">
     <div class="wrap">
       <h2 id="rv-h">What our guests say</h2>
       <p class="muted measure">Read honest reviews from travelers who've been on safari with our guides, and leave your own after your trip.</p>
+      {showTa && (
+        <div class="rv__ta">
+          <div id={`TA_selfserveprop${taId}`} class="TA_selfserveprop">
+            <ul id="TA_links" class="TA_links">
+              <li><a target="_blank" rel="noopener" href={tripadvisorUrl}>Golden Dust Safaris on Tripadvisor</a></li>
+            </ul>
+          </div>
+          <script async src={taSrc} is:inline></script>
+        </div>
+      )}
       {reviewsWidgetScript && (
         <div class="rv__widget">
           <script src={reviewsWidgetScript} defer is:inline></script>
@@ -35,6 +49,8 @@ const hasAny = tripadvisorUrl || googleReviewsUrl || reviewsWidgetScript;
 
 <style>
   .rv__widget { margin: 1.5rem 0; }
+  .rv__ta { margin-top: 1.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.2rem; overflow: hidden; }
+  .rv__ta :global(.TA_links) { list-style: none; margin: 0; padding: 0; }
   .rv__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 22rem)); gap: 1rem; margin-top: 1.8rem; }
   .rv__card {
     display: grid; gap: 0.35rem; padding: 1.4rem 1.5rem; border-radius: 16px; text-decoration: none;

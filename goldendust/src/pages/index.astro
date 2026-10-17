@@ -20,7 +20,6 @@ import { orgSchema } from "../lib/schema";
         <p class="lede">We're a TALA-registered safari company in Arusha with our own Land Cruisers. Tell us your dates, budget and the animals you dream of, and we'll plan the safari that fits, and tell you honestly where you can save.</p>
         <div class="hero__cta">
           <WaButton label="Plan my safari on WhatsApp" />
-          <a href="/how-it-works" class="btn btn--ghost">How it works</a>
         </div>
       </div>
       <Gallery />
@@ -80,10 +79,10 @@ import { orgSchema } from "../lib/schema";
 <style>
   .hero { padding: clamp(2rem, 4vw, 3.5rem) 0; overflow-x: clip; background: radial-gradient(ellipse at 85% 20%, rgba(200, 154, 75, 0.14), transparent 60%); }
   .hero__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr); gap: clamp(2rem, 4vw, 3.5rem); align-items: center; }
-  /* the photos are the hero: they bleed to the right edge of the screen on desktop */
-  .hero__grid > :global(.gal) { margin-right: calc((100vw - min(100vw, var(--wrap))) / -2 - var(--gutter)); border-radius: 22px 0 0 22px; }
-  .hero__grid > :global(.gal .gal__track) { aspect-ratio: 5 / 4; }
-  .hero h1 { font-size: clamp(1.8rem, 3.75vw, 2.9rem); letter-spacing: -0.02em; }
+  /* the photos are the hero: the gallery takes most of the width */
+  .hero__grid > :global(.gal .gal__track) { aspect-ratio: 4 / 3; }
+  .hero h1 { font-size: clamp(1.55rem, 3.2vw, 2.45rem); letter-spacing: -0.02em; }
+  .hero .lede { font-size: 1.02rem; line-height: 1.7; }
   .hero__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.8rem; }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
@@ -104,7 +103,7 @@ import { orgSchema } from "../lib/schema";
   .cta h2 { color: var(--gold); }
   @media (max-width: 900px) {
     .hero__grid, .steps-wrap { grid-template-columns: 1fr; }
-    .hero__grid > :global(.gal) { margin-right: 0; border-radius: 18px; order: -1; }
+    .hero__grid > :global(.gal) { order: -1; }
     .hero__grid > :global(.gal .gal__track) { aspect-ratio: 4 / 3; }
     .why { grid-template-columns: 1fr; }
   }
