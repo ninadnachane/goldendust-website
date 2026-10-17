@@ -10,10 +10,16 @@ const id = site.instagramFeedId;
     </div>
     <p class="muted measure">Real trips, real guides and real vehicles, straight from the bush.</p>
     {id ? (
-      <>
-        <script type="module" src="https://w.behold.so/widget.js" is:inline></script>
+      <div class="ig__feed">
         <behold-widget feed-id={id}></behold-widget>
-      </>
+        <script is:inline>
+          (() => {
+            if (window.__bhldScript) return; window.__bhldScript = true;
+            const d = document, s = d.createElement("script"); s.type = "module";
+            s.src = "https://w.behold.so/widget.js"; setTimeout(() => { d.head.append(s); }, 0);
+          })();
+        </script>
+      </div>
     ) : (
       <a class="ig__empty" href={site.instagram} target="_blank" rel="noopener">
         See our latest safari photos and reels on Instagram
@@ -25,6 +31,7 @@ const id = site.instagramFeedId;
 <style>
   .ig__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
   .ig__head h2 { margin: 0; }
+  .ig__feed { margin-top: 1.5rem; }
   .ig__empty {
     display: block; margin-top: 1.5rem; padding: 2.5rem 1.5rem; text-align: center; border: 2px dashed var(--gold);
     border-radius: 10px; font-weight: 600; color: var(--rust); text-decoration: none; background: var(--surface);

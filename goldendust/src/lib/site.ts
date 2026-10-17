@@ -10,7 +10,7 @@ export const site = {
   logo: "7df076_23c9d5d8eb404c038205431f3e1857f3~mv2.png",
 
   // Instagram live feed via Behold (behold.so, free plan). Paste your feed ID here to switch it on.
-  instagramFeedId: "",
+  instagramFeedId: "65XiVaGYDVCTRo2zOnY5",
 
   // Reviews. Paste your profile links to show the review buttons.
   tripadvisorUrl: "https://www.tripadvisor.com/Attraction_Review-g297913-d34516684-Reviews-GOLDEN_DUST_SAFARIS-Arusha_Arusha_Region.html",
