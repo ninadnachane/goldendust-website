@@ -14,16 +14,16 @@ import { orgSchema } from "../lib/schema";
   schema={[orgSchema]}
 >
   <section class="hero">
-    <div class="wrap hero__grid">
-      <div class="hero__text">
+    <div class="hero__frame">
+      <Gallery />
+      <div class="hero__panel">
         <h1>Tanzania safaris planned by locals</h1>
         <p class="lede">We're a TALA-registered safari company in Arusha with our own Land Cruisers. Tell us your dates, budget and the animals you dream of, and we'll plan the safari that fits, and tell you honestly where you can save.</p>
         <div class="hero__cta">
           <WaButton label="WhatsApp" />
-          <a href="/planner" class="btn btn--ghost">Itinerary planner</a>
+          <a href="/planner" class="btn btn--glass">Itinerary planner</a>
         </div>
       </div>
-      <Gallery />
     </div>
   </section>
 
@@ -80,13 +80,25 @@ import { orgSchema } from "../lib/schema";
 </Base>
 
 <style>
-  .hero { padding: clamp(2rem, 4vw, 3.5rem) 0; overflow-x: clip; background: radial-gradient(ellipse at 85% 20%, rgba(200, 154, 75, 0.14), transparent 60%); }
-  .hero__grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr); gap: clamp(2rem, 4vw, 3.5rem); align-items: center; }
-  /* the photos are the hero: the gallery takes most of the width */
-  .hero__grid > :global(.gal .gal__track) { aspect-ratio: 4 / 3; }
-  .hero h1 { font-size: clamp(1.55rem, 3.2vw, 2.45rem); letter-spacing: -0.02em; }
-  .hero .lede { font-size: 1.02rem; line-height: 1.7; }
-  .hero__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.8rem; }
+  /* Full-width photo gallery with the headline on a frosted panel */
+  .hero { padding: clamp(0.75rem, 1.5vw, 1.25rem) clamp(0.75rem, 1.5vw, 1.25rem) 0; }
+  .hero__frame { position: relative; max-width: 1680px; margin: 0 auto; }
+  .hero__frame > :global(.gal) { border-radius: 24px; }
+  .hero__frame > :global(.gal .gal__track) { aspect-ratio: auto; height: clamp(480px, 76vh, 820px); }
+  .hero__panel {
+    position: absolute; z-index: 2; left: clamp(1rem, 4vw, 3.5rem); top: 50%; transform: translateY(-50%);
+    width: min(34rem, calc(100% - 2rem)); padding: clamp(1.4rem, 2.6vw, 2.2rem);
+    border-radius: 20px; color: var(--ivory);
+    background: rgba(46, 36, 27, 0.45);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1);
+    border: 1px solid rgba(244, 237, 224, 0.22);
+    box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
+  }
+  .hero__panel h1 { color: var(--ivory); font-size: clamp(1.7rem, 3.3vw, 2.6rem); letter-spacing: -0.02em; margin-bottom: 0.6rem; }
+  .hero__panel .lede { color: rgba(244, 237, 224, 0.92); font-size: 1rem; line-height: 1.65; margin: 0; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.4rem; }
+  .hero__cta :global(.btn--glass) { background: rgba(244, 237, 224, 0.12); color: var(--ivory); border-color: rgba(244, 237, 224, 0.6); }
+  .hero__cta :global(.btn--glass:hover) { background: var(--ivory); color: var(--dark); border-color: var(--ivory); }
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
   .why p { color: var(--ink-2); }
@@ -105,9 +117,13 @@ import { orgSchema } from "../lib/schema";
   .cta { text-align: left; }
   .cta h2 { color: var(--gold); }
   @media (max-width: 900px) {
-    .hero__grid, .steps-wrap { grid-template-columns: 1fr; }
-    .hero__grid > :global(.gal) { order: -1; }
-    .hero__grid > :global(.gal .gal__track) { aspect-ratio: 4 / 3; }
+    .steps-wrap { grid-template-columns: 1fr; }
     .why { grid-template-columns: 1fr; }
+  }
+  /* Phones: photo on top, the frosted panel overlaps its lower edge */
+  @media (max-width: 680px) {
+    .hero__frame > :global(.gal .gal__track) { height: 62vh; min-height: 380px; }
+    .hero__frame > :global(.gal .gal__bar) { top: 0; bottom: auto; padding: 1rem; background: linear-gradient(to bottom, rgba(46, 36, 27, 0.45), transparent); }
+    .hero__panel { position: relative; left: auto; top: auto; transform: none; width: auto; margin: -5.5rem 0.75rem 0; background: rgba(46, 36, 27, 0.9); }
   }
 </style>
