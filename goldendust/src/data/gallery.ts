@@ -7,7 +7,6 @@
 export type Photo = { src: string; alt: string; focus?: string; flip?: boolean };
 
 export const gallery: Photo[] = [
-  { src: "/images/gallery/serengeti-sunset-zebras.webp", alt: "Zebras grazing under acacia trees at sunrise in the Serengeti", focus: "50% 82%" },
   { src: "/images/gallery/zebras-serengeti.webp", alt: "Plains zebras grazing with an impala in the background", focus: "62% 45%" },
   { src: "/images/gallery/elephants-serengeti-plains.webp", alt: "Two elephants walking across the open Serengeti plains", focus: "55% 55%" },
   { src: "/images/gallery/cheetah-termite-mound.webp", alt: "Cheetah sitting on a termite mound, scanning the plains", focus: "50% 50%" },
