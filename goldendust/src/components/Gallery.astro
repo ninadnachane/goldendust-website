@@ -9,7 +9,7 @@ const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
   <div class="gal__track" tabindex="0" data-track>
     {gallery.map((p, i) => (
       <figure class="gal__slide" aria-label={`Photo ${i + 1} of ${gallery.length}`}>
-        <img src={src(p.src)} alt={p.alt} width="1400" height="1050" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
+        <img src={src(p.src)} alt={p.alt} width="1600" height="1067" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} style={`object-position: ${p.focus ?? "50% 50%"};${p.flip ? " transform: scaleX(-1);" : ""}`} />
       </figure>
     ))}
   </div>
