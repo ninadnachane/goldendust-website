@@ -31,6 +31,7 @@ import { orgSchema } from "../lib/schema";
   <section class="section section--white">
     <div class="wrap">
       <h2 class="measure">Why travelers plan with us</h2>
+      <p class="why__hint muted">Swipe to see all three</p>
       <div class="why">
         <div>
           <h3>You travel with the guide you've already met</h3>
@@ -109,6 +110,7 @@ import { orgSchema } from "../lib/schema";
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
   .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
   .why p { color: var(--ink-2); }
+  .why__hint { display: none; font-size: 0.85rem; margin: -0.3rem 0 0; }
   .sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem 2rem; margin-bottom: 2rem; }
   .sec-head h2 { margin: 0; }
   .sec-head p { margin: 0; }
@@ -125,7 +127,19 @@ import { orgSchema } from "../lib/schema";
   .cta h2 { color: var(--gold); }
   @media (max-width: 900px) {
     .steps-wrap { grid-template-columns: 1fr; }
-    .why { grid-template-columns: 1fr; }
+    /* Phones: the three reasons become swipeable cards instead of one long column */
+    .why {
+      display: flex; gap: 0.9rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+      margin: 1.4rem calc(var(--gutter) * -1) 0; padding: 0 var(--gutter) 0.4rem; scroll-padding-left: var(--gutter);
+    }
+    .why::-webkit-scrollbar { display: none; }
+    .why > div {
+      flex: 0 0 84%; scroll-snap-align: start; background: var(--surface); border-radius: 16px;
+      padding: 1.1rem 1.2rem 0.4rem; border: 1px solid var(--line); border-top: 3px solid var(--gold);
+    }
+    .why h3 { border-top: 0; padding-top: 0; font-size: 1.12rem; }
+    .why p { font-size: 0.95rem; line-height: 1.6; }
+    .why__hint { display: block; }
   }
   /* Phones: photo on top, the frosted panel overlaps its lower edge */
   @media (max-width: 680px) {

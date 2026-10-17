@@ -33,9 +33,11 @@ const isActive = (l: { href: string; match?: string[] }) =>
 
 <style>
   .hdr { background: var(--bg); box-shadow: 0 1px 12px rgba(46, 36, 27, 0.04); position: relative; z-index: 2; }
-  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 7.25rem; padding-top: 0.25rem; padding-bottom: 0.25rem; }
+  .hdr__in { display: flex; align-items: center; gap: 1.5rem; height: 7.25rem; }
   .hdr__logo { display: block; }
-  .hdr__logo img { height: 108px; width: auto; background: transparent; }
+  /* logo sits a little high so 'safaris' has breathing room above the photos (bar height unchanged) */
+  .hdr__logo { align-self: flex-start; padding-top: 0.35rem; }
+  .hdr__logo img { height: 94px; width: auto; background: transparent; }
   nav { margin-left: auto; }
   ul { list-style: none; display: flex; gap: 1.6rem; margin: 0; padding: 0; }
   nav a { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: var(--ink); text-decoration: none; padding: 0.3rem 0; border-bottom: 2px solid transparent; }
@@ -54,8 +56,9 @@ const isActive = (l: { href: string; match?: string[] }) =>
   }
   .hdr__plan:hover, .hdr__plan[aria-current] { background: var(--gold); color: var(--dark); }
   @media (max-width: 860px) {
-    .hdr__in { flex-wrap: wrap; gap: 0.4rem 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    .hdr__logo img { height: 76px; }
+    .hdr__in { height: auto; flex-wrap: wrap; gap: 0.4rem 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .hdr__logo { align-self: center; padding-top: 0; }
+    .hdr__logo img { height: 70px; }
     .hdr__btns { margin-left: auto; }
     .hdr__plan { padding: 0.55rem; }
     .hdr__plan span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
