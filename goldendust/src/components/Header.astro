@@ -15,7 +15,7 @@ const isActive = (l: { href: string; match?: string[] }) =>
 <header class="hdr">
   <div class="wrap hdr__in">
     <a href="/" class="hdr__logo" aria-label={`${site.name} home`}>
-      <img src="/images/logo-wordmark.webp" alt={site.name} width="560" height="118" />
+      <img src="/images/logo-header.webp" alt={site.name} width="520" height="254" />
     </a>
     <nav aria-label="Main">
       <ul>
@@ -30,9 +30,9 @@ const isActive = (l: { href: string; match?: string[] }) =>
 
 <style>
   .hdr { background: var(--bg); box-shadow: 0 1px 12px rgba(46, 36, 27, 0.04); position: relative; z-index: 2; }
-  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 5.75rem; }
+  .hdr__in { display: flex; align-items: center; gap: 1.5rem; min-height: 7.25rem; padding-top: 0.25rem; padding-bottom: 0.25rem; }
   .hdr__logo { display: block; }
-  .hdr__logo img { height: 52px; width: auto; background: transparent; }
+  .hdr__logo img { height: 108px; width: auto; background: transparent; }
   nav { margin-left: auto; }
   ul { list-style: none; display: flex; gap: 1.6rem; margin: 0; padding: 0; }
   nav a { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: var(--ink); text-decoration: none; padding: 0.3rem 0; border-bottom: 2px solid transparent; }
@@ -46,7 +46,7 @@ const isActive = (l: { href: string; match?: string[] }) =>
   .hdr__wa :global(svg) { width: 1.15rem; height: 1.15rem; }
   @media (max-width: 860px) {
     .hdr__in { flex-wrap: wrap; gap: 0.4rem 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
-    .hdr__logo img { height: 38px; }
+    .hdr__logo img { height: 76px; }
     .hdr__wa { margin-left: auto; }
     nav { order: 3; width: 100%; margin: 0; overflow-x: auto; }
     ul { gap: 1rem; padding-bottom: 0.2rem; justify-content: space-between; }
