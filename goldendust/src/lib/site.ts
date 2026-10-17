@@ -22,7 +22,7 @@ export const site = {
   tripadvisorMinRating: 4,
   // Optional: a reviews widget (e.g. Trustindex or Elfsight) that shows Google and TripAdvisor reviews.
   // Paste the widget's script URL here; leave empty to show only the buttons above.
-  reviewsWidgetScript: "",
+  reviewsWidgetScript: "https://cdn.trustindex.io/loader.js?fe6343283866847aa956544c5ac",   // Trustindex: Google reviews
 };
 
 export const waLink = (text = "Hi Golden Dust Safaris, I'd like help planning a Tanzania safari.") =>
