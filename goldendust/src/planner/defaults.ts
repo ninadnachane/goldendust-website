@@ -45,7 +45,8 @@ export const defaultConfig: Config = {
     { id: "low", name: "Low season", ranges: [] },
   ],
   defaultSeasonId: "low",
-  // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff; NCA figures need checking.
+  // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff.
+  // NCA (Ngorongoro) transit/entry $71.80 per adult and crater descent $295 per vehicle confirmed by Golden Dust (18 Oct 2026).
   feeZones: [
     { id: "serengeti", name: "Serengeti National Park", adultDay: 82.6, childDay: 23.6, concessionAdult: 70.8, concessionChild: 11.8, campAdult: 35.4, campChild: 5.9, vehicleDay: 0 },
     { id: "ncaa", name: "Ngorongoro Conservation Area", adultDay: 71.8, childDay: 23.6, concessionAdult: 0, concessionChild: 0, campAdult: 0, campChild: 0, vehicleDay: 0 },
