@@ -10,7 +10,7 @@ const base: Record<Category, RoomRates> = {
 const scale = (r: RoomRates, k: number): RoomRates => ({
   single: Math.round(r.single * k), double: Math.round(r.double * k), triple: Math.round(r.triple * k), child: Math.round(r.child * k),
 });
-const rates = (c: Category) => ({ low: base[c], high: scale(base[c], 1.3), green: scale(base[c], 0.75) });
+const rates = (c: Category) => ({ high: scale(base[c], 1.3), green: scale(base[c], 0.75) });
 
 const areas = [
   { id: "tarangire", side: "east", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, active: true },
@@ -28,7 +28,7 @@ for (const a of areas) for (const c of ["budget", "comfort", "luxury"] as Catego
   lodges.push({ id: `${a.id}-${c}`, name: `Sample ${catName[c]} (${a.name})`, areaId: a.id, category: c, active: true, insidePark: c !== "budget", rates: rates(c) });
 for (const c of ["budget", "comfort", "luxury"] as Category[])
   lodges.push({ id: `arusha-${c}`, name: `Sample ${c} hotel (Arusha)`, areaId: "arusha", category: c, active: true,
-    rates: { low: scale(base[c], 0.5), high: scale(base[c], 0.6), green: scale(base[c], 0.45) } });
+    rates: { high: scale(base[c], 0.6), green: scale(base[c], 0.45) } });
 
 export const defaultConfig: Config = {
   settings: {
@@ -40,11 +40,11 @@ export const defaultConfig: Config = {
     craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80,
   },
   seasons: [
-    { id: "high", name: "High season", ranges: [{ from: "06-01", to: "10-31" }, { from: "12-20", to: "01-05" }] },
+    // Two lodge seasons: Green season (April–May), High season for every other date (the default).
     { id: "green", name: "Green season", ranges: [{ from: "04-01", to: "05-31" }] },
-    { id: "low", name: "Low season", ranges: [] },
+    { id: "high", name: "High season", ranges: [] },
   ],
-  defaultSeasonId: "low",
+  defaultSeasonId: "high",
   // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff.
   // NCA (Ngorongoro) transit/entry $71.80 per adult and crater descent $295 per vehicle confirmed by Golden Dust (18 Oct 2026).
   feeZones: [

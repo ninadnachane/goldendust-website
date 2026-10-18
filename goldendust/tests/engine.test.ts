@@ -28,7 +28,7 @@ test("total = (park fees + others × 1.10) × 1.07, matches a hand calculation",
     (2 * 82.6 + 23.6) * 3 + (2 * 70.8 + 11.8) * 3 +    // Serengeti entry + concession, 3 nights
     (2 * 71.8 + 23.6) +                                 // Ngorongoro area entry, 1 night (rim stay)
     (2 * 71.8 + 23.6);                                  // NCA transit: Tarangire → Serengeti in one day
-  const acc = (160 + 45) + (320 + 90) * 5;
+  const acc = (192 + 54) + (416 + 117) * 5;            // high season: Arusha hotel + 5 lodge nights
   const transport = 180 * 6 + 40 * 6 + 80;             // vehicle + guide + airport transfer
   const meals = 2 * 15 + 10;
   assert.equal(q.totals.park, round(park));
@@ -114,12 +114,19 @@ test("cheapest mix of rooms, a single traveller pays a room", () => {
   assert.equal(roomPlan(4, rt).cost, 240);
 });
 
-test("lodge seasons follow the calendar, including ranges across new year", () => {
-  assert.equal(seasonFor(cfg, "2026-07-15").id, "high");
-  assert.equal(seasonFor(cfg, "2026-12-31").id, "high");
-  assert.equal(seasonFor(cfg, "2027-01-03").id, "high");
-  assert.equal(seasonFor(cfg, "2027-04-20").id, "green");
-  assert.equal(seasonFor(cfg, "2027-02-10").id, "low");
+test("two lodge seasons: Green (April–May) and High for every other date", () => {
+  assert.deepEqual(cfg.seasons.map((x) => x.id).sort(), ["green", "high"]);
+  assert.equal(seasonFor(cfg, "2027-04-01").id, "green");
+  assert.equal(seasonFor(cfg, "2027-05-31").id, "green");
+  for (const d of ["2027-03-31", "2027-06-01", "2026-11-08", "2026-12-31", "2027-01-15"]) assert.equal(seasonFor(cfg, d).id, "high", d);
+});
+
+test("season ranges can cross the new year", () => {
+  const c: Config = JSON.parse(JSON.stringify(cfg));
+  c.seasons[0].ranges = [{ from: "12-20", to: "01-05" }];
+  assert.equal(seasonFor(c, "2026-12-25").id, "green");
+  assert.equal(seasonFor(c, "2027-01-03").id, "green");
+  assert.equal(seasonFor(c, "2027-01-10").id, "high");
 });
 
 test("park fees are the same in every season", () => {
