@@ -59,15 +59,14 @@ import { site } from "../lib/site";
         ...t.stops.map((s) => `<li><span class="rt__dot"></span><b>${esc(areaName(s.areaId))}</b><small>${s.nights} night${s.nights > 1 ? "s" : ""}</small></li>`),
         `<li><span class="rt__dot rt__dot--end"></span><b>${esc(o.arrivalName)}</b><small>Departure</small></li>`].join("");
       const cover = `<div class="sheet sheet--cover">
-          <div class="cv" style="background-image:url('/images/gallery/zebras-walking-grassland.webp')">
-            <img src="/images/logo-header.webp" alt="Golden Dust Safaris" class="cv__logo">
-            <div class="cv__txt">
-              <p class="eyebrow eyebrow--light">${guest.name ? `Prepared for ${esc(guest.name)}` : "Your private safari"}</p>
-              <h1>Your Tanzania safari</h1>
-              <p class="cv__route">${routeNames.map(esc).join("<i>·</i>")}</p>
-            </div>
-          </div>
+          <img class="cv__img" src="/images/gallery/zebras-walking-grassland.webp" alt="Zebras on the plains">
           <div class="cvb">
+            <div class="cvh">
+              <div><p class="eyebrow">${guest.name ? `Prepared for ${esc(guest.name)}` : "Your private safari"}</p>
+                <h1>Your Tanzania safari</h1>
+                <p class="cv__route">${routeNames.map(esc).join("<i>·</i>")}</p></div>
+              <img src="/images/logo-header.webp" alt="Golden Dust Safaris" class="cv__logo">
+            </div>
             <div class="facts">
               <div><span class="eyebrow">Dates</span><strong>${fmt(t.startDate, { day: "numeric", month: "short" })} – ${fmt(end, { day: "numeric", month: "short", year: "numeric" })}</strong></div>
               <div><span class="eyebrow">Duration</span><strong>${t.totalNights + 1} days · ${t.totalNights} nights</strong></div>
@@ -76,11 +75,6 @@ import { site } from "../lib/site";
             </div>
             <p class="eyebrow sec">Your route</p>
             <ol class="rt">${stopsLine}</ol>
-            ${priced ? `<div class="tot">
-                <div><span class="eyebrow">Total for your group</span><strong>$${usd(priced.total)}</strong></div>
-                <div class="tot__pp"><span class="eyebrow">Per person</span><strong>$${usd(perPerson)}</strong></div>
-                <p>Private vehicle and guide, park fees, accommodation and meals as listed. Full breakdown on page 3.</p>
-              </div>` : ""}
             <div class="cvf"><span>${guest.ref ? `Ref ${esc(guest.ref)} · ` : ""}Issued ${long(new Date().toISOString().slice(0, 10))}</span><span>goldendustsafaris.com</span></div>
           </div>
         </div>`;
@@ -112,32 +106,36 @@ import { site } from "../lib/site";
         if (!seen.has(l.name)) { seen.add(l.name); stays.push({ l, area: areaName(s.areaId), nights: s.nights }); }
       }
       const withPics = stays.filter((x) => x.l.images.length);
-      const wide = withPics.length <= 2 && t.stops.length <= 4;
-      const three = withPics.length > 4;
-      const per = wide ? 3 : three ? 1 : 2;
-      const staysHtml = withPics.length ? `<section class="ws-sec"><header class="ph-h ph-h--sub"><p class="eyebrow">Your camps &amp; lodges</p><h2>Where you'll stay</h2></header>
-          <div class="ws ${wide ? "ws--wide" : three ? "ws--three" : ""}">${withPics.map((x) => `<figure class="lc">
-            <div class="lc__imgs n${Math.min(per, x.l.images.length)}">${x.l.images.slice(0, per).map((im) => `<img src="/media/${esc(im)}" alt="">`).join("")}</div>
-            <figcaption><b>${esc(x.l.name)}</b><span>${esc(x.area)} · ${x.nights} night${x.nights > 1 ? "s" : ""}</span>${x.l.description ? `<p>${esc(x.l.description)}</p>` : ""}</figcaption>
+      const n = withPics.length;
+      // layout chosen so the photos fill the space above Investment on page 3
+      const lay = n <= 1 ? { cols: 1, per: 3, h: 66 } : n === 2 ? { cols: 1, per: 3, h: 42 } : n <= 4 ? { cols: 2, per: 2, h: 36 } : n <= 6 ? { cols: 3, per: 1, h: 34 } : { cols: 3, per: 1, h: 22 };
+      const staysHtml = n ? `<section class="ws-sec"><header class="ph-h ph-h--sub"><p class="eyebrow">Your camps &amp; lodges</p><h2>Where you'll stay</h2></header>
+          <div class="ws" style="grid-template-columns: repeat(${lay.cols}, 1fr); --ph: ${lay.h}mm">${withPics.map((x) => `<figure class="lc">
+            <div class="lc__imgs n${Math.min(lay.per, x.l.images.length)}">${x.l.images.slice(0, lay.per).map((im) => `<img src="/media/${esc(im)}" alt="">`).join("")}</div>
+            <figcaption><b>${esc(x.l.name)}</b><span>${esc(x.area)} · ${x.nights} night${x.nights > 1 ? "s" : ""}</span>${x.l.description && lay.cols < 3 ? `<p>${esc(x.l.description)}</p>` : ""}</figcaption>
           </figure>`).join("")}</div></section>` : "";
-      const days = `<div class="sheet"><header class="ph-h"><p class="eyebrow">Day by day</p><h2>Your journey</h2></header><div class="jr">${rows.join("")}</div>${staysHtml}</div>`;
 
-      // ---- page 3: investment + fine print
+      // ---- page 2: journey + what's included
       const doc = o.doc ?? { included: [], excluded: [], payment: "", notes: [] };
+      const days = `<div class="sheet${t.stops.length > 4 ? " compact" : ""}"><header class="ph-h"><p class="eyebrow">Day by day</p><h2>Your journey</h2></header><div class="jr">${rows.join("")}</div>
+          <div class="ie">
+            <div><p class="eyebrow sec">Included</p><ul class="ok">${doc.included.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+            <div><p class="eyebrow sec">Not included</p><ul class="no">${doc.excluded.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+          </div>
+          ${doc.notes.length ? `<div class="nt">${doc.notes.map((x) => `<p>${esc(x)}</p>`).join("")}</div>` : ""}
+        </div>`;
+
+      // ---- page 3: where you'll stay + investment
       const lines: [string, number][] = priced ? [["Park fees", priced.park], ["Vehicle & guide", priced.transport], ["Accommodation", priced.accommodation], ["Meals", priced.meals], ["Our margin", priced.margin]] : [];
       const details = `<div class="sheet">
-          <header class="ph-h"><p class="eyebrow">The details</p><h2>Investment</h2></header>
+          ${staysHtml}
+          <header class="ph-h ${n ? "ph-h--sub inv-h" : ""}"><p class="eyebrow">The details</p><h2>Investment</h2></header>
           ${priced ? `<table class="price">
               ${lines.map(([k, v]) => `<tr><td>${esc(k)}</td><td>$${usd(v)}</td></tr>`).join("")}
               <tr class="price__tot"><td>Total for your group</td><td>$${usd(priced.total)}</td></tr>
               <tr class="price__pp"><td></td><td>about $${usd(perPerson)} per person</td></tr>
             </table>` : `<p>We'll confirm the price with you on WhatsApp.</p>`}
           ${doc.payment ? `<p class="pay">${esc(doc.payment)}</p>` : ""}
-          <div class="ie">
-            <div><p class="eyebrow sec">Included</p><ul class="ok">${doc.included.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
-            <div><p class="eyebrow sec">Not included</p><ul class="no">${doc.excluded.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
-          </div>
-          ${doc.notes.length ? `<div class="nt">${doc.notes.map((n) => `<p>${esc(n)}</p>`).join("")}</div>` : ""}
           <div class="cta"><div><p class="eyebrow eyebrow--light">Ready when you are</p><p class="cta__h">Reply on WhatsApp and your guide will check availability.</p></div>
             <div class="cta__c"><strong>${esc(phone)}</strong><span>goldendustsafaris.com</span></div></div>
           <p class="legal">Golden Dust Safaris · TALA-registered tour operator · Arusha, Tanzania${guest.ref ? ` · Ref ${esc(guest.ref)}` : ""}</p>
@@ -201,14 +199,13 @@ import { site } from "../lib/site";
 
     /* cover */
     .sheet--cover { padding: 0; display: flex; flex-direction: column; height: 297mm; }
-    .cv { position: relative; height: 150mm; flex: none; background-size: cover; background-position: center 60%; display: flex; flex-direction: column; justify-content: space-between; padding: 12mm 16mm 13mm; color: #fff; }
-    .cv::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20, 14, 9, 0.35), rgba(20, 14, 9, 0) 35%, rgba(20, 14, 9, 0.15) 55%, rgba(20, 14, 9, 0.78)); }
-    .cv > * { position: relative; }
-    .cv__logo { height: 17mm; width: auto; align-self: flex-start; background: rgba(255, 255, 255, 0.92); padding: 2mm 3.5mm; border-radius: 3mm; }
-    .cv h1 { font-size: 3.6rem; line-height: 1.05; margin: 2.5mm 0 3mm; }
-    .cv__route { margin: 0; font-size: 1.3rem; font-weight: 500; opacity: 0.95; }
+    .cv__img { width: 100%; height: 168mm; object-fit: cover; display: block; flex: none; }
+    .cvh { display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; margin-bottom: 7mm; }
+    .cvh h1 { font-size: 3.4rem; line-height: 1.05; margin: 2mm 0 2.5mm; }
+    .cv__route { margin: 0; font-size: 1.25rem; font-weight: 500; color: var(--ink-2); }
     .cv__route i { font-style: normal; color: var(--gold); margin: 0 2.2mm; }
-    .cvb { flex: 1; display: flex; flex-direction: column; padding: 8mm 16mm 9mm; min-height: 0; }
+    .cv__logo { height: 21mm; width: auto; flex: none; }
+    .cvb { flex: 1; display: flex; flex-direction: column; padding: 9mm 16mm 9mm; min-height: 0; }
     .facts { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .facts > div { padding: 4mm 3mm 4mm 0; display: grid; gap: 1.2mm; }
     .facts > div + div { padding-left: 4mm; border-left: 1px solid var(--line); }
@@ -222,11 +219,7 @@ import { site } from "../lib/site";
     .rt__dot--end { background: var(--dark); }
     .rt b { font-size: 1.02rem; font-weight: 600; line-height: 1.25; }
     .rt small { color: var(--ink-2); font-size: 0.9rem; }
-    .tot { margin-top: auto; flex: none; display: grid; grid-template-columns: auto auto 1fr; align-items: end; gap: 3mm 9mm; background: var(--sand); border-radius: 4mm; padding: 5mm 7mm; }
-    .tot strong { display: block; font-size: 2.5rem; font-weight: 600; line-height: 1.1; margin-top: 1mm; }
-    .tot__pp strong { font-size: 1.6rem; color: var(--ink-2); }
-    .tot p { margin: 0; color: var(--ink-2); font-size: 0.95rem; align-self: center; }
-    .cvf { display: flex; justify-content: space-between; margin-top: 6mm; color: var(--ink-2); font-size: 0.88rem; }
+    .cvf { display: flex; justify-content: space-between; margin-top: auto; color: var(--ink-2); font-size: 0.88rem; }
 
     /* page headers */
     .ph-h { margin-bottom: 5mm; display: grid; gap: 1.2mm; }
@@ -246,34 +239,37 @@ import { site } from "../lib/site";
     .st__stay { display: grid; gap: 0.6mm; padding-left: 4mm; border-left: 2px solid var(--gold); margin-top: 3.4mm; }
     .st__stay span { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
     .st__stay b { font-weight: 600; font-size: 1.02rem; line-height: 1.3; }
+    .compact .st { padding: 1.7mm 0; }
+    .compact .st__body p:not(.eyebrow) { font-size: 0.9rem; }
+    .compact .st__stay { margin-top: 2.4mm; }
+    .compact .ie li { font-size: 0.9rem; }
+    .compact .ie ul { gap: 1mm; }
+    .compact .sec { margin: 5mm 0 2mm; }
+    .compact .nt { margin-top: 4mm; font-size: 0.85rem; }
     /* where you'll stay */
-    .ws-sec { margin-top: 7mm; }
+    .ws-sec { margin: 0 0 7mm; }
+    .inv-h { margin-top: 0; }
     .ph-h--sub { break-after: avoid; page-break-after: avoid; }
     .ph-h--sub h2 { font-size: 1.8rem; }
     .ws { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm 6mm; }
-    .ws--wide { grid-template-columns: 1fr; }
-    .ws--three { grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
-    .ws--three .lc__imgs img { height: 24mm; }
-    .ws--three .lc figcaption p { display: none; }
     .lc { margin: 0; break-inside: avoid; }
     .lc__imgs { display: grid; gap: 1.5mm; border-radius: 3mm; overflow: hidden; }
     .lc__imgs.n2 { grid-template-columns: 1.4fr 1fr; }
     .lc__imgs.n3 { grid-template-columns: 2fr 1fr 1fr; }
-    .lc__imgs img { width: 100%; height: 28mm; object-fit: cover; display: block; }
-    .ws--wide .lc__imgs img { height: 36mm; }
+    .lc__imgs img { width: 100%; height: var(--ph, 40mm); object-fit: cover; display: block; }
     .lc figcaption { display: grid; gap: 0.4mm; margin-top: 2mm; }
     .lc figcaption b { font-weight: 600; font-size: 1.05rem; }
     .lc figcaption span { color: var(--gold-d); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; }
     .lc figcaption p { margin: 0.6mm 0 0; color: var(--ink-2); font-size: 0.92rem; }
     /* details */
     .price { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 4mm; font-size: 1.1rem; }
-    .price td { padding: 2.2mm 6mm; }
-    .price tr:first-child td { padding-top: 5mm; }
+    .price td { padding: 1.7mm 6mm; }
+    .price tr:first-child td { padding-top: 3.5mm; }
     .price td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
     .price__tot td { border-top: 2px solid var(--ink); padding-top: 3.5mm !important; font-weight: 700; font-size: 1.55rem; }
-    .price__pp td { color: var(--ink-2); font-size: 1rem; padding-top: 0 !important; padding-bottom: 5mm; }
+    .price__pp td { color: var(--ink-2); font-size: 1rem; padding-top: 0 !important; padding-bottom: 3.5mm; }
     .pay { color: var(--ink-2); font-size: 0.92rem; margin: 2.5mm 0 0; }
-    .ie { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
+    .ie { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; margin-top: 2mm; }
     .ie ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.6mm; }
     .ie li { position: relative; padding-left: 5.5mm; font-size: 0.98rem; }
     .ok li::before { content: ""; position: absolute; left: 0.5mm; top: 0.9mm; width: 1.4mm; height: 2.6mm; border: solid var(--gold-d); border-width: 0 0.5mm 0.5mm 0; transform: rotate(45deg); }
@@ -281,8 +277,8 @@ import { site } from "../lib/site";
     .no li::before { content: ""; position: absolute; left: 0; top: 2.3mm; width: 2.6mm; border-top: 0.5mm solid #c4b6a3; }
     .nt { margin-top: 6mm; padding: 4mm 5mm; background: var(--sand); border-radius: 3mm; color: var(--ink-2); font-size: 0.92rem; }
     .nt p { margin: 0 0 1.5mm; } .nt p:last-child { margin: 0; }
-    .cta { margin-top: 7mm; display: flex; justify-content: space-between; align-items: center; gap: 6mm; background: var(--dark); color: #fff; border-radius: 4mm; padding: 6mm 7mm; break-inside: avoid; }
-    .cta__h { margin: 1mm 0 0; font-size: 1.3rem; font-weight: 600; max-width: 95mm; }
+    .cta { margin-top: 5mm; display: flex; justify-content: space-between; align-items: center; gap: 6mm; background: var(--dark); color: #fff; border-radius: 4mm; padding: 4mm 6mm; break-inside: avoid; }
+    .cta__h { margin: 0.6mm 0 0; font-size: 1.15rem; font-weight: 600; max-width: 95mm; }
     .cta__c { text-align: right; display: grid; gap: 0.5mm; }
     .cta__c strong { font-size: 1.4rem; color: var(--gold); }
     .cta__c span { opacity: 0.8; }
@@ -293,8 +289,9 @@ import { site } from "../lib/site";
       .doc { padding: 0; }
       .sheet { width: 100%; min-height: 0; margin: 0 0 6px; padding: 7vw 5vw 14vw; box-shadow: none; }
       .sheet--cover { padding: 0; height: auto; }
-      .cv { height: 105vw; padding: 5vw; }
-      .cv h1 { font-size: 2.8rem; }
+      .cv__img { height: 70vw; }
+      .cvh h1 { font-size: 2.6rem; }
+      .cv__logo { height: 14vw; }
       .cvb { padding: 6vw 5vw 8vw; }
       .facts { grid-template-columns: 1fr 1fr; }
       .facts > div:nth-child(3) { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
@@ -303,11 +300,9 @@ import { site } from "../lib/site";
       .rt::before { left: 1.6mm; right: auto; top: 1.6mm; bottom: 1.6mm; border-top: 0; border-left: 1.5px dashed var(--gold); }
       .rt li, .rt li:last-child { display: grid; grid-template-columns: 6mm auto 1fr; align-items: baseline; gap: 2vw; text-align: left; }
       .rt li:last-child .rt__dot { margin-left: 0; }
-      .tot { grid-template-columns: 1fr 1fr; margin-top: 6vw; }
-      .tot p { grid-column: 1 / -1; }
-      .st { grid-template-columns: 15mm 1fr; }
+          .st { grid-template-columns: 15mm 1fr; }
       .st__stay { grid-column: 2; margin-top: 1vw; }
-      .ws { grid-template-columns: 1fr; }
+      .ws { grid-template-columns: 1fr !important; --ph: 46vw !important; }
       .ie { grid-template-columns: 1fr; gap: 5vw; }
       .cta { flex-direction: column; align-items: flex-start; }
       .cta__c { text-align: left; }
