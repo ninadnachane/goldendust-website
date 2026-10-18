@@ -1,4 +1,4 @@
-// Full build used by Cloudflare: tests → images → site → checks.
+// Full build used by Cloudflare: tests → images → site → page checks → broken links → spelling.
 // If any step fails the build stops (nothing is deployed, the live site stays as it was)
 // and an email goes to NOTIFY_EMAIL (default hello@goldendustsafaris.com) via Resend.
 // Needs RESEND_API_KEY as a *build* variable in Cloudflare (Settings → Build → Variables and secrets).
@@ -9,6 +9,8 @@ const steps = [
   ["Download images", "node", ["scripts/fetch-images.mjs"]],
   ["Build site", "npx", ["astro", "build"]],
   ["Check built site", "node", ["scripts/check-build.mjs"]],
+  ["Check for broken links", "node", ["scripts/check-links.mjs"]],
+  ["Spell check", "node", ["scripts/check-spelling.mjs"]],
 ];
 
 async function notify(step, output) {
@@ -17,7 +19,7 @@ async function notify(step, output) {
   const commit = (process.env.WORKERS_CI_COMMIT_SHA || "").slice(0, 7);
   const branch = process.env.WORKERS_CI_BRANCH || "";
   if (!key) { console.error("(No RESEND_API_KEY build variable, so no failure email was sent.)"); return; }
-  const failed = output.split("\n").filter((l) => /^not ok|failed|Error|missing|must /i.test(l)).slice(0, 30).join("\n");
+  const failed = output.split("\n").filter((l) => /^not ok|failed|Error|missing|must |^- |Possible spelling|Unknown word/i.test(l)).slice(0, 40).join("\n");
   const tail = output.split("\n").slice(-60).join("\n");
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",

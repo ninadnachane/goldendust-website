@@ -1,0 +1,50 @@
+{
+  "version": "0.2",
+  "language": "en-GB,en",
+  "import": [
+    "@cspell/dict-en-gb/cspell-ext.json"
+  ],
+  "ignoreRegExpList": [
+    "/GD-\\d+/g",
+    "/\\b[A-Z0-9]{2,}\\b/g",
+    "/[^\\x00-\\u024f\\s]+/gu"
+  ],
+  "words": [
+    "Ajinkya",
+    "Arusha",
+    "Behold",
+    "boma",
+    "daladala",
+    "Deshmukh",
+    "Enkiterata",
+    "goldendustsafaris",
+    "Grumeti",
+    "Karatu",
+    "Katavi",
+    "Kilimanjaro",
+    "kopje",
+    "kopjes",
+    "Leonie",
+    "Maasai",
+    "Manyara",
+    "Meru",
+    "Momella",
+    "Ndutu",
+    "Ngorongoro",
+    "Nyerere",
+    "Ruaha",
+    "Rufiji",
+    "Selous",
+    "Serengeti",
+    "Seronera",
+    "sh\u00fak\u00e0",
+    "Sopa",
+    "TANAPA",
+    "Tanvi",
+    "Tarangire",
+    "Tripadvisor",
+    "ugali",
+    "Vadhavkar",
+    "WhatsApp"
+  ]
+}
