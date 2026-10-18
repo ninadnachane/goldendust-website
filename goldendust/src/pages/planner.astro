@@ -74,11 +74,25 @@ import { site } from "../lib/site";
               <ol class="sum__trip" data-trip></ol>
               <div data-price></div>
             </div>
-            <a class="btn sum__wa" data-send href="#" target="_blank" rel="noopener" aria-disabled="true">Send my itinerary on WhatsApp</a>
+            <button type="button" class="btn sum__wa" data-send aria-disabled="true">Send my itinerary on WhatsApp</button>
             <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation and your first night in Arusha. International flights, visas, tips and drinks are extra.</p>
           </div>
         </aside>
       </div>
+
+      <dialog class="ct" data-contact aria-labelledby="ct-h">
+        <form class="ct__in" data-contact-form novalidate>
+          <div class="ct__head"><h2 id="ct-h">Send your itinerary</h2><button type="button" class="ct__x" data-ct-close aria-label="Close">✕</button></div>
+          <p class="ct__lede">Your guide will reply on WhatsApp, usually within a few hours, to check availability and fine-tune the plan.</p>
+          <label>Your name<input name="name" autocomplete="name" required maxlength="100" /></label>
+          <label>WhatsApp number<input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+31 6 1234 5678" required /></label>
+          <label><span>Email <small>(optional)</small></span><input name="email" type="email" autocomplete="email" /></label>
+          <label class="ct__hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+          <p class="ct__err" role="alert" data-ct-err></p>
+          <button type="submit" class="btn ct__go">Continue to WhatsApp</button>
+          <p class="ct__fine">We save your details and itinerary only to plan your trip with you. We never share them. Ask us any time and we'll delete them.</p>
+        </form>
+      </dialog>
 
       <noscript><p>The planner needs JavaScript. You can also <a href={`https://wa.me/${site.whatsapp}`}>plan with us on WhatsApp</a>.</p></noscript>
       <div class="pl__fallback" data-fallback hidden>
@@ -199,7 +213,7 @@ import { site } from "../lib/site";
         <div class="lodges">${lodges.map((l) => `<label class="lodge">
           <input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}">
           <span class="lodge__img">${l.images.length
-            ? `<img src="/media/${esc(l.images[0])}" alt="${esc(l.name)}" loading="lazy">${l.images.length > 1 ? `<button type="button" class="lodge__more" data-gal="${esc(l.id)}">${l.images.length} photos</button>` : ""}`
+            ? `<button type="button" class="lodge__view" data-gal="${esc(l.id)}" data-gal-stop="${i}" aria-label="View photos of ${esc(l.name)}"><img src="/media/${esc(l.images[0])}" alt="" loading="lazy"><span class="lodge__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>${l.images.length > 1 ? `${l.images.length} photos` : "View"}</span></button>`
             : `<span class="lodge__none">Photos coming soon</span>`}</span>
           <span class="lodge__txt"><strong>${esc(l.name)}</strong>${l.description ? `<span>${esc(l.description)}</span>` : ""}</span>
           <span class="lodge__tick" aria-hidden="true"></span>
@@ -217,32 +231,49 @@ import { site } from "../lib/site";
       if (s.nights <= a.minNights) return flash(`${a.name} needs at least ${a.minNights} night${a.minNights > 1 ? "s" : ""}.`);
       s.nights--; renderWhere(); update();
     }));
-    root.querySelectorAll<HTMLButtonElement>("[data-gal]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGallery(b.dataset.gal!); }));
+    root.querySelectorAll<HTMLButtonElement>("[data-gal]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGallery(b.dataset.gal!, Number(b.dataset.galStop)); }));
     root.querySelectorAll<HTMLInputElement>("[data-lodge]").forEach((el) => el.addEventListener("change", () => { st.stops[Number(el.dataset.lodge)].lodgeId = el.value; update(); }));
   }
 
-  // photo viewer
-  function openGallery(id: string) {
+  // photo viewer: enlarged, swipe or scroll through all photos, choose the lodge from here
+  function openGallery(id: string, stopIndex: number) {
     const l = O.lodges.find((x) => x.id === id);
     if (!l || !l.images.length) return;
-    let i = 0;
+    const n = l.images.length;
     const d = document.createElement("dialog");
     d.className = "gv";
     d.setAttribute("aria-label", `${l.name} photos`);
-    const draw = () => {
-      d.innerHTML = `<div class="gv__in"><img src="/media/${esc(l.images[i])}" alt="${esc(l.name)}, photo ${i + 1} of ${l.images.length}">
-        <div class="gv__bar"><strong>${esc(l.name)}</strong><span>${i + 1} / ${l.images.length}</span>
-        <button type="button" data-gv="-1" aria-label="Previous photo">‹</button><button type="button" data-gv="1" aria-label="Next photo">›</button>
-        <button type="button" data-gv-close aria-label="Close">✕</button></div></div>`;
-      d.querySelectorAll<HTMLButtonElement>("[data-gv]").forEach((b) => b.addEventListener("click", () => { i = (i + Number(b.dataset.gv) + l.images.length) % l.images.length; draw(); }));
-      d.querySelector("[data-gv-close]")!.addEventListener("click", () => d.close());
-    };
-    draw();
-    d.addEventListener("keydown", (e) => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { i = (i + (e.key === "ArrowRight" ? 1 : -1) + l.images.length) % l.images.length; draw(); } });
+    d.innerHTML = `<div class="gv__in">
+        <div class="gv__top"><div><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
+          <button type="button" class="gv__x" data-gv-close aria-label="Close">✕</button></div>
+        <div class="gv__stage">
+          <div class="gv__track" tabindex="0">${l.images.map((im, k) => `<figure><img src="/media/${esc(im)}" alt="${esc(l.name)}, photo ${k + 1} of ${n}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("")}</div>
+          ${n > 1 ? `<button type="button" class="gv__nav gv__prev" data-gv="-1" aria-label="Previous photo">‹</button><button type="button" class="gv__nav gv__next" data-gv="1" aria-label="Next photo">›</button>` : ""}
+        </div>
+        <div class="gv__bottom">${n > 1 ? `<span class="gv__dots">${l.images.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</span><span class="gv__count" data-gv-count>1 / ${n}</span>` : "<span></span>"}
+          <button type="button" class="btn gv__pick" data-gv-pick>${st.stops[stopIndex]?.lodgeId === l.id ? "Selected ✓" : "Choose this lodge"}</button></div>
+      </div>`;
+    const track = d.querySelector<HTMLElement>(".gv__track")!;
+    const idx = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = (k: number) => track.scrollTo({ left: ((k + n) % n) * track.clientWidth, behavior: "smooth" });
+    track.addEventListener("scroll", () => {
+      const k = idx();
+      const c = d.querySelector("[data-gv-count]"); if (c) c.textContent = `${k + 1} / ${n}`;
+      d.querySelectorAll(".gv__dots i").forEach((dot, j) => dot.classList.toggle("on", j === k));
+    }, { passive: true });
+    d.querySelectorAll<HTMLButtonElement>("[data-gv]").forEach((b) => b.addEventListener("click", () => go(idx() + Number(b.dataset.gv))));
+    d.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); go(idx() + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); go(idx() - 1); } });
+    d.querySelector("[data-gv-close]")!.addEventListener("click", () => d.close());
+    d.querySelector("[data-gv-pick]")!.addEventListener("click", () => {
+      if (st.stops[stopIndex]) { st.stops[stopIndex].lodgeId = l.id; renderWhere(); update(); }
+      d.close();
+    });
     d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
-    d.addEventListener("close", () => d.remove());
+    d.addEventListener("close", () => { d.remove(); document.documentElement.style.overflow = ""; });
     root.append(d);
+    document.documentElement.style.overflow = "hidden";
     d.showModal();
+    track.focus({ preventScroll: true });
   }
 
   let toast: number | undefined;
@@ -268,9 +299,9 @@ import { site } from "../lib/site";
     $("[data-trip]").innerHTML = items.join("") || "<li>Start by choosing your dates.</li>";
   }
 
-  function waText(total?: number) {
+  function waText(total?: number, name?: string, ref?: string) {
     const lines = [
-      "Hi Golden Dust Safaris, I built this itinerary on your planner:",
+      `Hi Golden Dust Safaris${name ? `, this is ${name}` : ""}. I built this itinerary on your planner${ref ? ` (ref ${ref})` : ""}:`,
       `• ${st.adults} adult${st.adults > 1 ? "s" : ""}${st.ages.length ? `, children aged ${st.ages.join(", ")}` : ""}`,
       `• Arriving ${st.date ? nice(st.date) : "(date tbc)"}, ${st.nights} nights`,
       `• Style: ${O.categories.find((c) => c.id === st.category)?.name ?? "tbc"}`,
@@ -282,14 +313,51 @@ import { site } from "../lib/site";
     return lines.join("\n");
   }
 
-  let timer: number | undefined, seq = 0;
+  let timer: number | undefined, seq = 0, lastTotal = 0;
+
+  // ---- send on WhatsApp: collect name + number, save the lead, then open WhatsApp
+  const store = { get: (k: string) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
+  function openContact() {
+    const send = $("[data-send]");
+    if (send.getAttribute("aria-disabled") === "true") { flash("Finish your itinerary first: dates, style and where to go."); return; }
+    const d = $<HTMLDialogElement>("[data-contact]");
+    const f = $<HTMLFormElement>("[data-contact-form]");
+    (f.elements.namedItem("name") as HTMLInputElement).value ||= store.get("gd_name");
+    (f.elements.namedItem("phone") as HTMLInputElement).value ||= store.get("gd_phone");
+    (f.elements.namedItem("email") as HTMLInputElement).value ||= store.get("gd_email");
+    $("[data-ct-err]").textContent = "";
+    d.showModal();
+  }
+  async function submitContact(e: Event) {
+    e.preventDefault();
+    const f = e.target as HTMLFormElement;
+    const v = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value.trim();
+    const err = $("[data-ct-err]");
+    const phone = v("phone").replace(/[^\d+]/g, "").replace(/^00/, "+");
+    if (v("name").length < 2) { err.textContent = "Please add your name."; return; }
+    if (!/^\+\d{8,15}$/.test(phone)) { err.textContent = "Please add your WhatsApp number with the country code, starting with + (e.g. +31 6 1234 5678)."; return; }
+    const btn = f.querySelector<HTMLButtonElement>(".ct__go")!;
+    btn.disabled = true; btn.textContent = "Saving…";
+    // open the WhatsApp tab now (inside the click) so pop-up blockers allow it
+    const win = window.matchMedia("(pointer: fine)").matches ? window.open("", "_blank") : null;
+    const trip = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
+    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip }) })
+      .then(async (x) => ({ ok: x.ok, d: await x.json().catch(() => ({})) })).catch(() => ({ ok: false, d: { network: true } as any }));
+    btn.disabled = false; btn.textContent = "Continue to WhatsApp";
+    if (!r.ok && !r.d.network) { win?.close(); err.textContent = r.d.error || "Something went wrong. Please try again."; return; }
+    store.set("gd_name", v("name")); store.set("gd_phone", phone); store.set("gd_email", v("email"));
+    const text = waText(lastTotal || undefined, v("name"), r.d.ref);
+    const url = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(text)}`;
+    $<HTMLDialogElement>("[data-contact]").close();
+    if (win) win.location.href = url; else window.location.href = url;
+  }
   const mini = (html: string) => { $("[data-mini]").innerHTML = html; };
   function update() {
     renderPeople(); renderTrip(); renderSteps();
-    const send = $<HTMLAnchorElement>("[data-send]");
+    const send = $<HTMLButtonElement>("[data-send]");
     const price = $("[data-price]");
     const ready = st.date && st.category && st.stops.length;
-    send.href = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText())}`;
+    lastTotal = 0;
     if (!ready) {
       const w = !st.date ? "Choose your arrival date" : !st.category ? "Choose your safari style" : "Choose where you'd like to go";
       price.innerHTML = `<p class="sum__wait">${w} to see your price.</p>`;
@@ -325,7 +393,7 @@ import { site } from "../lib/site";
         </dl>
         <p class="sum__total"><span>Total</span><strong>${usd(p.total)}</strong></p>
         <p class="sum__pp">about ${usd(r.perPerson)} per person${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</p>`;
-      send.href = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText(p.total))}`;
+      lastTotal = p.total;
       send.removeAttribute("aria-disabled");
     }, 250);
   }
@@ -371,6 +439,10 @@ import { site } from "../lib/site";
     }));
     root.querySelectorAll<HTMLButtonElement>("[data-next]").forEach((b) => b.addEventListener("click", () => openStep(Number(b.dataset.next), true)));
     const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
+    $("[data-send]").addEventListener("click", openContact);
+    $("[data-contact-form]").addEventListener("submit", submitContact);
+    $("[data-ct-close]").addEventListener("click", () => $<HTMLDialogElement>("[data-contact]").close());
+    $<HTMLDialogElement>("[data-contact]").addEventListener("click", (e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDialogElement).close(); });
     tog.addEventListener("click", () => { const o = !box.classList.contains("is-open"); box.classList.toggle("is-open", o); tog.setAttribute("aria-expanded", String(o)); });
     renderStyles(); renderWhere(); update();
   }
@@ -437,19 +509,42 @@ import { site } from "../lib/site";
   .pl .lodge__img { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--tint); overflow: hidden; }
   .pl .lodge__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .pl .lodge__none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2); font-size: 0.85rem; }
-  .pl .lodge__more { position: absolute; right: 0.5rem; bottom: 0.5rem; font: inherit; font-size: 0.78rem; font-weight: 600; border: 0; border-radius: 99px; padding: 0.25rem 0.65rem; background: rgba(46, 36, 27, 0.75); color: var(--ivory); cursor: pointer; }
+  .pl .lodge__view { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: zoom-in; display: block; width: 100%; }
+  .pl .lodge__more { position: absolute; right: 0.5rem; bottom: 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; border-radius: 99px; padding: 0.3rem 0.7rem; background: rgba(46, 36, 27, 0.78); color: var(--ivory); }
+  .pl .lodge__more svg { width: 0.85rem; height: 0.85rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
   .pl .lodge__txt { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.65rem 0.8rem 0.8rem; }
   .pl .lodge__txt strong { font-size: 0.95rem; }
   .pl .lodge__txt span { color: var(--ink-2); font-size: 0.85rem; line-height: 1.4; }
   .pl .lodge__tick { position: absolute; top: 0.5rem; left: 0.5rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: rgba(255, 255, 255, 0.92); border: 2px solid var(--line); }
   .pl .lodge:has(input:checked) .lodge__tick { background: var(--gold); border-color: var(--gold); }
   .pl .lodge:has(input:checked) .lodge__tick::after { content: ""; position: absolute; left: 0.45rem; top: 0.2rem; width: 0.35rem; height: 0.7rem; border: solid var(--dark); border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  .pl .gv { border: 0; padding: 0; background: transparent; max-width: min(64rem, calc(100% - 1.5rem)); width: 100%; }
+  .pl .gv { border: 0; padding: 0; background: var(--dark); color: var(--ivory); width: min(68rem, calc(100% - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); border-radius: 16px; overflow: hidden; }
   .pl .gv::backdrop { background: rgba(20, 15, 10, 0.85); }
-  .pl .gv__in img { width: auto; height: auto; max-width: 100%; max-height: 78vh; display: block; margin: 0 auto; border-radius: 10px; background: none; }
-  .pl .gv__bar { display: flex; align-items: center; gap: 0.6rem; color: var(--ivory); padding: 0.6rem 0.2rem; }
-  .pl .gv__bar span { margin-right: auto; opacity: 0.8; }
-  .pl .gv__bar button { font: inherit; font-size: 1.2rem; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.92); color: var(--dark); cursor: pointer; }
+  .pl .gv__in { display: flex; flex-direction: column; max-height: calc(100dvh - 2rem); }
+  .pl .gv__top { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem 0.7rem 1.2rem; }
+  .pl .gv__top strong { font-family: var(--display); font-size: 1.1rem; }
+  .pl .gv__top p { margin: 0.2rem 0 0; font-size: 0.88rem; opacity: 0.8; }
+  .pl .gv__x { flex: none; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.15); color: var(--ivory); font-size: 1rem; cursor: pointer; }
+  .pl .gv__stage { position: relative; flex: 1; min-height: 0; }
+  .pl .gv__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; height: min(70dvh, 46rem); outline: none; }
+  .pl .gv__track::-webkit-scrollbar { display: none; }
+  .pl .gv__track figure { flex: 0 0 100%; margin: 0; scroll-snap-align: center; display: grid; place-items: center; background: #1d1711; }
+  .pl .gv__track img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+  .pl .gv__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.92); color: var(--dark); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+  .pl .gv__prev { left: 0.8rem; } .pl .gv__next { right: 0.8rem; }
+  .pl .gv__bottom { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem 0.9rem 1.2rem; }
+  .pl .gv__dots { display: flex; gap: 5px; }
+  .pl .gv__dots i { width: 7px; height: 7px; border-radius: 99px; background: rgba(244, 237, 224, 0.4); transition: width 0.2s; }
+  .pl .gv__dots i.on { width: 20px; background: var(--gold); }
+  .pl .gv__count { font-size: 0.85rem; opacity: 0.75; margin-right: auto; }
+  .pl .gv__pick { margin-left: auto; }
+  @media (max-width: 700px) {
+    .pl .gv { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; margin: 0; }
+    .pl .gv__in { height: 100dvh; max-height: 100dvh; }
+    .pl .gv__track { height: 100%; }
+    .pl .gv__nav { display: none; }
+    .pl .gv__bottom { padding-bottom: calc(0.9rem + env(safe-area-inset-bottom)); }
+  }
   .pl .pl__sum { position: sticky; top: 1rem; }
   .pl .sum { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 48px -32px rgba(46, 36, 27, 0.5); padding: 1.3rem; }
   .pl .sum__h { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.6rem; }
@@ -466,7 +561,24 @@ import { site } from "../lib/site";
   .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
   .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
   .pl .sum__wa { width: 100%; justify-content: center; margin-top: 1.1rem; }
-  .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+  .pl .sum__wa { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+  .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; }
+  .pl .ct { border: 0; padding: 0; border-radius: 16px; width: min(26rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
+  .pl .ct::backdrop { background: rgba(46, 36, 27, 0.55); }
+  .pl .ct__in { display: grid; gap: 0.8rem; padding: 1.2rem 1.3rem 1.3rem; }
+  .pl .ct__head { display: flex; justify-content: space-between; align-items: center; }
+  .pl .ct__head h2 { margin: 0; font-size: 1.25rem; }
+  .pl .ct__x { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; color: var(--ink); }
+  .pl .ct__lede { margin: 0; color: var(--ink-2); font-size: 0.92rem; }
+  .pl .ct label { display: grid; gap: 0.3rem; font-weight: 600; font-size: 0.92rem; }
+  .pl .ct label small { font-weight: 400; color: var(--ink-2); }
+  .pl .ct input { font: inherit; font-weight: 400; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 10px; }
+  .pl .ct input:focus { outline: 2px solid var(--gold); outline-offset: 0; }
+  .pl .ct__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .pl .ct__err { color: var(--rust); margin: 0; min-height: 0; font-size: 0.9rem; }
+  .pl .ct__err:empty { display: none; }
+  .pl .ct__go { width: 100%; justify-content: center; border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+  .pl .ct__fine { margin: 0; font-size: 0.78rem; color: var(--ink-2); }
   .pl .sum__fine { color: var(--ink-2); font-size: 0.8rem; margin: 0.8rem 0 0; }
   .pl .toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 1rem); background: var(--dark); color: var(--ivory); padding: 0.7rem 1.1rem; border-radius: 10px; font-size: 0.92rem; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; max-width: calc(100% - 2rem); z-index: 50; }
   .pl .toast.is-on { opacity: 1; transform: translate(-50%, 0); }

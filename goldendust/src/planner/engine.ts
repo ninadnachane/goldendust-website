@@ -5,7 +5,7 @@
 
 export type Category = "budget" | "comfort" | "luxury";
 export const CATEGORIES: { id: Category; name: string; blurb: string }[] = [
-  { id: "budget", name: "Budget", blurb: "Camping in the parks" },
+  { id: "budget", name: "Budget", blurb: "Tents in public campsites, shared washrooms" },
   { id: "comfort", name: "Comfort", blurb: "Comfortable lodges and tented camps" },
   { id: "luxury", name: "Luxury", blurb: "Premium lodges and camps" },
 ];

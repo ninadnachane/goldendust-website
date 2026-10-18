@@ -24,7 +24,8 @@
   </header>
 
   <nav class="tabs" role="tablist" data-tabs>
-    <button role="tab" data-tab="test" aria-selected="true">Test calculator</button>
+    <button role="tab" data-tab="leads" aria-selected="true">Leads</button>
+    <button role="tab" data-tab="test" aria-selected="false">Test calculator</button>
     <button role="tab" data-tab="costs">Costs &amp; rules</button>
     <button role="tab" data-tab="seasons">Seasons</button>
     <button role="tab" data-tab="parks">Park fees</button>
@@ -36,7 +37,15 @@
   <div class="issues" data-issues hidden></div>
 
   <main class="panes">
-    <section class="pane" data-pane="test">
+    <section class="pane" data-pane="leads">
+      <div class="leads__bar"><h2>Itineraries sent by guests</h2>
+        <label>Show<select data-lead-filter><option value="">All</option><option value="new">New</option><option value="contacted">Contacted</option><option value="booked">Booked</option><option value="lost">Lost</option></select></label>
+        <button type="button" class="btn btn--ghost sm" data-lead-csv>Download CSV</button></div>
+      <p class="hint">Every guest who taps "Send my itinerary on WhatsApp" is saved here, even if they never press send in WhatsApp. Prices are what the planner showed at that moment.</p>
+      <div data-leads>Loading…</div>
+    </section>
+
+    <section class="pane" data-pane="test" hidden>
       <div class="test">
         <form class="test__form" data-test-form>
           <h2>Trip</h2>
@@ -414,6 +423,55 @@
       });
     }
 
+    // ---------- leads
+    type Lead = { id: number; ref: string; created_at: string; name: string; phone: string; email: string | null; summary: string; total: number | null; status: string; notes: string };
+    let leads: Lead[] = [];
+    async function loadLeads() {
+      const host = $("[data-leads]");
+      host.textContent = "Loading…";
+      const r = await fetch("/api/admin/leads");
+      if (r.status === 401) { location.replace("/admin/login"); return; }
+      leads = (await r.json()).leads || [];
+      renderLeads();
+    }
+    const statuses = ["new", "contacted", "booked", "lost"];
+    function renderLeads() {
+      const f = $<HTMLSelectElement>("[data-lead-filter]").value;
+      const rows = leads.filter((l) => !f || l.status === f);
+      const counts = statuses.map((s) => `${leads.filter((l) => l.status === s).length} ${s}`).join(" · ");
+      $("[data-leads]").innerHTML = `<p class="hint">${leads.length} total · ${counts}</p><div class="tbl"><table class="leads"><thead><tr><th>Received (UTC)</th><th>Ref</th><th>Guest</th><th>Trip</th><th class="n">Planner price</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${
+        rows.map((l) => `<tr data-lead="${l.id}" class="st-${esc(l.status)}">
+          <td class="nw">${esc(l.created_at)}</td><td class="nw">${esc(l.ref)}</td>
+          <td><strong>${esc(l.name)}</strong><br><a href="https://wa.me/${esc(l.phone.replace("+", ""))}" target="_blank" rel="noopener">${esc(l.phone)}</a>${l.email ? `<br><a href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : ""}</td>
+          <td class="sm">${esc(l.summary)}</td><td class="n">${l.total != null ? money(l.total) : "–"}</td>
+          <td><select data-ls>${statuses.map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+          <td><input type="text" data-ln value="${esc(l.notes)}" placeholder="Add a note"></td>
+          <td><button type="button" class="del" data-ld aria-label="Delete lead">✕</button></td></tr>`).join("") || '<tr><td colspan="8" class="empty">No leads yet.</td></tr>'
+      }</tbody></table></div>`;
+      const patch = (id: number, body: object) => fetch(`/api/admin/leads/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      document.querySelectorAll<HTMLElement>("[data-lead]").forEach((tr) => {
+        const id = Number(tr.dataset.lead);
+        const l = leads.find((x) => x.id === id)!;
+        tr.querySelector<HTMLSelectElement>("[data-ls]")!.addEventListener("change", (e) => { l.status = (e.target as HTMLSelectElement).value; patch(id, { status: l.status }); renderLeads(); });
+        tr.querySelector<HTMLInputElement>("[data-ln]")!.addEventListener("change", (e) => { l.notes = (e.target as HTMLInputElement).value; patch(id, { notes: l.notes }); });
+        tr.querySelector<HTMLButtonElement>("[data-ld]")!.addEventListener("click", async () => {
+          if (!confirm(`Delete ${l.name}'s details permanently? (Use this when a guest asks to be removed.)`)) return;
+          await fetch(`/api/admin/leads/${id}`, { method: "DELETE" });
+          leads = leads.filter((x) => x.id !== id); renderLeads();
+        });
+      });
+    }
+    $("[data-lead-filter]").addEventListener("change", renderLeads);
+    $("[data-lead-csv]").addEventListener("click", () => {
+      const q = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const csv = ["Received (UTC),Ref,Name,WhatsApp,Email,Trip,Planner price (USD),Status,Notes", ...leads.map((l) => [l.created_at, l.ref, l.name, l.phone, l.email, l.summary, l.total, l.status, l.notes].map(q).join(","))].join("\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
+      a.download = `golden-dust-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+
     // ---------- lodge photos
     let photoLodge: any = null;
     const dlg = $<HTMLDialogElement>("[data-photo-dlg]");
@@ -476,6 +534,7 @@
       document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
       document.querySelectorAll<HTMLElement>("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
       if (b.dataset.tab === "history") renderHistory();
+      if (b.dataset.tab === "leads") loadLeads();
     }));
     $("[data-lf-area]").addEventListener("change", renderLodges);
     $("[data-lf-cat]").addEventListener("change", renderLodges);
@@ -505,7 +564,7 @@
     fetch("/api/admin/config").then((r) => { if (r.status === 401) { location.replace("/admin/login"); throw new Error("signed out"); } return r.json(); }).then((d) => {
       cfg = d.config; meta = d;
       $("[data-who]").textContent = d.email ? `Signed in as ${d.email}` : "";
-      initTest(); renderAll();
+      initTest(); renderAll(); loadLeads();
     }).catch(() => { $("[data-status]").textContent = "Couldn't load the rates. Refresh to try again."; });
   </script>
 
@@ -574,6 +633,16 @@
     table.sum tr.line td { border-top: 2px solid var(--ink-2); }
     table.sum tr.total td { font-weight: 700; font-size: 1.05rem; background: var(--ivory); }
     .top__who { color: var(--ink-2); font-size: 0.85rem; }
+    .leads__bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .leads__bar h2 { margin-right: auto; }
+    .leads__bar label { display: flex; gap: 0.4rem; align-items: center; }
+    table.leads td { vertical-align: top; font-size: 0.86rem; }
+    table.leads td.sm { max-width: 26rem; color: var(--ink-2); }
+    table.leads td.nw { white-space: nowrap; }
+    table.leads td input[type="text"] { min-width: 12rem; }
+    table.leads tr.st-new td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+    table.leads tr.st-booked td { background: #f3f7ec; }
+    table.leads tr.st-lost td { color: var(--ink-2); }
     .linkbtn { font: inherit; background: none; border: 0; color: var(--rust); cursor: pointer; text-decoration: underline; padding: 0 0.2rem; }
     .dlg { border: 0; border-radius: 14px; padding: 0; width: min(56rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45); }
     .dlg::backdrop { background: rgba(46, 36, 27, 0.5); }

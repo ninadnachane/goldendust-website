@@ -74,6 +74,7 @@ export default {
       const q = quote(config, toRequest(body));
       return json({ ok: q.ok, errors: q.errors, people: q.people, priced: q.priced, perPerson: q.totals.perPerson });
     }
+    if (p === "/api/planner/lead" && req.method === "POST") return saveLead(req, env);
     const media = p.match(/^\/media\/([a-f0-9-]{36}\.(?:webp|jpg|png))$/);
     if (media && req.method === "GET") {
       const row = await env.DB.prepare("SELECT content_type, data FROM images WHERE id = ?").bind(media[1]).first<{ content_type: string; data: ArrayBuffer }>();
@@ -116,6 +117,43 @@ export default {
   },
 };
 
+// ---------- leads (guests sending their itinerary on WhatsApp)
+function tripSummary(cfg: Config, r: QuoteRequest) {
+  const cat = r.category ? r.category[0].toUpperCase() + r.category.slice(1) : "";
+  const stops = r.stops.map((s) => {
+    const a = cfg.areas.find((x) => x.id === s.areaId)?.name || s.areaId;
+    const l = cfg.lodges.find((x) => x.id === s.lodgeId)?.name || "";
+    return `${s.nights}n ${a}${l ? ` (${l})` : ""}`;
+  });
+  const kids = r.childAges.length ? `, kids ${r.childAges.join("/")}` : "";
+  return `${r.startDate} · ${r.totalNights} nights · ${r.adults} adult${r.adults === 1 ? "" : "s"}${kids} · ${cat} · ${stops.join(", ")}`;
+}
+
+async function saveLead(req: Request, env: Env) {
+  const origin = req.headers.get("origin");
+  if (!origin || origin !== new URL(req.url).origin) return json({ error: "Bad origin" }, 403);
+  const b = await req.json<any>().catch(() => null);
+  if (!b || b.website) return json({ ok: true, ref: "" }); // honeypot: pretend it worked
+  const name = String(b.name || "").trim().replace(/\s+/g, " ").slice(0, 100);
+  const phone = String(b.phone || "").replace(/[^\d+]/g, "").replace(/^00/, "+");
+  const email = String(b.email || "").trim().slice(0, 200);
+  if (name.length < 2) return json({ error: "Please add your name." }, 400);
+  if (!/^\+\d{8,15}$/.test(phone)) return json({ error: "Please add your WhatsApp number with the country code, e.g. +31 6 1234 5678." }, 400);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "That email doesn't look right." }, 400);
+  const ip = req.headers.get("cf-connecting-ip") || "local";
+  const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM leads WHERE ip = ? AND created_at > datetime('now', '-1 hour')").bind(ip).first<{ n: number }>();
+  if ((recent?.n || 0) >= 10) return json({ error: "Too many requests. Please message us on WhatsApp directly." }, 429);
+  const { config } = await loadConfig(env);
+  const r = toRequest(b.trip);
+  const q = quote(config, r);
+  const ins = await env.DB.prepare("INSERT INTO leads (name, phone, email, summary, total, request, ip) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .bind(name, phone, email || null, tripSummary(config, r), q.ok ? q.totals.total : null, JSON.stringify(r), ip).run();
+  const id = Number(ins.meta.last_row_id);
+  const ref = `GD-${1000 + id}`;
+  await env.DB.prepare("UPDATE leads SET ref = ? WHERE id = ?").bind(ref, id).run();
+  return json({ ok: true, ref });
+}
+
 const IMAGE_TYPES: Record<string, string> = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png" };
 const MAX_IMAGE = 1_500_000;
 
@@ -150,6 +188,22 @@ async function adminApi(req: Request, env: Env, p: string, email: string): Promi
     const body = await req.json<any>().catch(() => null);
     const cfg = body?.config ? normalise(body.config) : (await loadConfig(env)).config;
     return json(quote(cfg, toRequest(body?.request)));
+  }
+  if (p === "/api/admin/leads" && req.method === "GET") {
+    const { results } = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, summary, total, status, notes FROM leads ORDER BY id DESC LIMIT 1000").all();
+    return json({ leads: results });
+  }
+  const lm = p.match(/^\/api\/admin\/leads\/(\d+)$/);
+  if (lm && req.method === "PATCH") {
+    const b = await req.json<any>().catch(() => ({}));
+    const status = ["new", "contacted", "booked", "lost"].includes(b?.status) ? b.status : null;
+    if (status) await env.DB.prepare("UPDATE leads SET status = ? WHERE id = ?").bind(status, Number(lm[1])).run();
+    if (typeof b?.notes === "string") await env.DB.prepare("UPDATE leads SET notes = ? WHERE id = ?").bind(b.notes.slice(0, 2000), Number(lm[1])).run();
+    return json({ ok: true });
+  }
+  if (lm && req.method === "DELETE") {
+    await env.DB.prepare("DELETE FROM leads WHERE id = ?").bind(Number(lm[1])).run();
+    return json({ ok: true });
   }
   if (p === "/api/admin/images" && req.method === "POST") {
     const type = (req.headers.get("content-type") || "").split(";")[0].trim();
