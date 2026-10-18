@@ -41,7 +41,7 @@
       <div class="leads__bar"><h2>Itineraries sent by guests</h2>
         <label>Show<select data-lead-filter><option value="">All</option><option value="new">New</option><option value="contacted">Contacted</option><option value="booked">Booked</option><option value="lost">Lost</option></select></label>
         <button type="button" class="btn btn--ghost sm" data-lead-csv>Download CSV</button></div>
-      <p class="hint">Every guest who taps "Send my itinerary on WhatsApp" is saved here, even if they never press send in WhatsApp. Prices are what the planner showed at that moment.</p>
+      <p class="hint">Every guest who taps "Send my itinerary on WhatsApp" or "Download as PDF" is saved here, even if they never press send in WhatsApp. Prices are what the planner showed at that moment.</p>
       <div data-leads>Loading…</div>
     </section>
 
@@ -438,7 +438,7 @@
     }
 
     // ---------- leads
-    type Lead = { id: number; ref: string; created_at: string; name: string; phone: string; email: string | null; summary: string; total: number | null; status: string; notes: string };
+    type Lead = { id: number; ref: string; created_at: string; name: string; phone: string; email: string | null; summary: string; total: number | null; status: string; notes: string; source?: string };
     let leads: Lead[] = [];
     async function loadLeads() {
       const host = $("[data-leads]");
@@ -455,7 +455,7 @@
       const counts = statuses.map((s) => `${leads.filter((l) => l.status === s).length} ${s}`).join(" · ");
       $("[data-leads]").innerHTML = `<p class="hint">${leads.length} total · ${counts}</p><div class="tbl"><table class="leads"><thead><tr><th>Received (UTC)</th><th>Ref</th><th>Guest</th><th>Trip</th><th class="n">Planner price</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${
         rows.map((l) => `<tr data-lead="${l.id}" class="st-${esc(l.status)}">
-          <td class="nw">${esc(l.created_at)}</td><td class="nw">${esc(l.ref)}</td>
+          <td class="nw">${esc(l.created_at)}</td><td class="nw">${esc(l.ref)}<br><span class="src src--${esc(l.source || "whatsapp")}">${l.source === "pdf" ? "PDF download" : "WhatsApp"}</span></td>
           <td><strong>${esc(l.name)}</strong><br><a href="https://wa.me/${esc(l.phone.replace("+", ""))}" target="_blank" rel="noopener">${esc(l.phone)}</a>${l.email ? `<br><a href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : ""}</td>
           <td class="sm">${esc(l.summary)}</td><td class="n">${l.total != null ? money(l.total) : "–"}</td>
           <td><select data-ls>${statuses.map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
@@ -478,7 +478,7 @@
     $("[data-lead-filter]").addEventListener("change", renderLeads);
     $("[data-lead-csv]").addEventListener("click", () => {
       const q = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-      const csv = ["Received (UTC),Ref,Name,WhatsApp,Email,Trip,Planner price (USD),Status,Notes", ...leads.map((l) => [l.created_at, l.ref, l.name, l.phone, l.email, l.summary, l.total, l.status, l.notes].map(q).join(","))].join("\n");
+      const csv = ["Received (UTC),Ref,Came from,Name,WhatsApp,Email,Trip,Planner price (USD),Status,Notes", ...leads.map((l) => [l.created_at, l.ref, l.source === "pdf" ? "PDF download" : "WhatsApp", l.name, l.phone, l.email, l.summary, l.total, l.status, l.notes].map(q).join(","))].join("\n");
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
       a.download = `golden-dust-leads-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -649,6 +649,8 @@
     table.sum tr.line td { border-top: 2px solid var(--ink-2); }
     table.sum tr.total td { font-weight: 700; font-size: 1.05rem; background: var(--ivory); }
     .top__who { color: var(--ink-2); font-size: 0.85rem; }
+    .src { display: inline-block; margin-top: 0.2rem; font-size: 0.72rem; font-weight: 600; padding: 0.05rem 0.45rem; border-radius: 99px; background: #e7f3e6; color: #2d6a2a; }
+    .src--pdf { background: #f6ecd9; color: var(--rust); }
     .leads__bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
     .leads__bar h2 { margin-right: auto; }
     .leads__bar label { display: flex; gap: 0.4rem; align-items: center; }

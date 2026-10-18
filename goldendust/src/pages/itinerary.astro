@@ -1,7 +1,7 @@
 ---
 // Printable itinerary, 2–3 A4 pages (save as PDF from the browser).
 //   /itinerary#lead=12      admin, from the Leads tab (needs to be signed in)
-//   /itinerary#t=<data>     guest, from the planner (trip stays in the URL hash)
+//   /itinerary#ref=GD-1001&k=<token>   guest, private link created when they leave their name and mobile number
 import { site } from "../lib/site";
 ---
 <!doctype html>
@@ -165,15 +165,12 @@ import { site } from "../lib/site";
         const d = await r.json();
         return render(d.options, d.trip, d.ok ? d.priced : null, d.perPerson, { name: d.guest.name, ref: d.guest.ref });
       }
-      const raw = h.get("t");
-      if (!raw) return fail("No itinerary to show. Build one in the planner first.");
-      let data: { trip: Trip; name?: string; ref?: string };
-      try { data = JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g, "+").replace(/_/g, "/"))))); } catch { return fail("This itinerary link is damaged. Build it again in the planner."); }
-      const [o, q] = await Promise.all([
-        fetch("/api/planner/options").then((x) => x.json()),
-        fetch("/api/planner/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.trip) }).then((x) => x.json()).catch(() => null),
-      ]);
-      render(o, data.trip, q && q.ok ? q.priced : null, q?.perPerson || 0, { name: data.name, ref: data.ref });
+      const ref = h.get("ref"), k = h.get("k");
+      if (!ref || !k) return fail("Build your safari in the planner and tap Download as PDF to get your itinerary.");
+      const r = await fetch(`/api/planner/itinerary?ref=${encodeURIComponent(ref)}&k=${encodeURIComponent(k)}`);
+      if (!r.ok) return fail("This itinerary link isn't valid any more. Build your trip again in the planner.");
+      const d = await r.json();
+      render(d.options, d.trip, d.ok ? d.priced : null, d.perPerson, { name: d.guest.name, ref: d.guest.ref });
     }
     start().catch(() => fail("Something went wrong. Please try again."));
     if (/iPhone|iPad|Android/.test(navigator.userAgent)) document.querySelector("[data-tip]")!.textContent = 'Tip: tap Save as PDF, then share or "Save to Files".';

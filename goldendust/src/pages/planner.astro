@@ -75,7 +75,7 @@ import { site } from "../lib/site";
               <div data-price></div>
             </div>
             <button type="button" class="btn sum__wa" data-send aria-disabled="true">Send my itinerary on WhatsApp</button>
-            <a class="sum__pdf" data-pdf href="/itinerary" target="_blank" rel="noopener" aria-disabled="true">Download as PDF</a>
+            <button type="button" class="sum__pdf" data-pdf aria-disabled="true">Download as PDF</button>
             <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation and your first night in Arusha. International flights, visas, tips and drinks are extra.</p>
           </div>
         </aside>
@@ -84,9 +84,9 @@ import { site } from "../lib/site";
       <dialog class="ct" data-contact aria-labelledby="ct-h">
         <form class="ct__in" data-contact-form novalidate>
           <div class="ct__head"><h2 id="ct-h">Send your itinerary</h2><button type="button" class="ct__x" data-ct-close aria-label="Close">✕</button></div>
-          <p class="ct__lede">Your guide will reply on WhatsApp, usually within a few hours, to check availability and fine-tune the plan.</p>
+          <p class="ct__lede" data-ct-lede>Your guide will reply on WhatsApp, usually within a few hours, to check availability and fine-tune the plan.</p>
           <label>Your name<input name="name" autocomplete="name" required maxlength="100" /></label>
-          <label>WhatsApp number<input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+31 6 1234 5678" required /></label>
+          <label>Mobile number (WhatsApp)<input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+31 6 1234 5678" required /></label>
           <label><span>Email <small>(optional)</small></span><input name="email" type="email" autocomplete="email" /></label>
           <label class="ct__hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
           <p class="ct__err" role="alert" data-ct-err></p>
@@ -318,20 +318,28 @@ import { site } from "../lib/site";
 
   // ---- send on WhatsApp: collect name + number, save the lead, then open WhatsApp
   const store = { get: (k: string) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
-  function pdfLink(name?: string, ref?: string) {
-    const trip = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
-    const raw = btoa(unescape(encodeURIComponent(JSON.stringify({ trip, name, ref })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    return `/itinerary#t=${raw}`;
-  }
-  function openContact() {
+  // One lead per trip: if the guest already left their details for this exact trip, reuse it.
+  let lastLead: { key: string; ref: string; token: string } | null = null;
+  let mode: "whatsapp" | "pdf" = "whatsapp";
+  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops });
+  const pdfUrl = (ref: string, token: string) => `/itinerary#ref=${encodeURIComponent(ref)}&k=${encodeURIComponent(token)}`;
+  function openContact(m: "whatsapp" | "pdf") {
     const send = $("[data-send]");
     if (send.getAttribute("aria-disabled") === "true") { flash("Finish your itinerary first: dates, style and where to go."); return; }
+    mode = m;
+    const key = JSON.stringify(tripNow());
+    if (m === "pdf" && lastLead && lastLead.key === key) { window.open(pdfUrl(lastLead.ref, lastLead.token), "_blank"); return; }
     const d = $<HTMLDialogElement>("[data-contact]");
     const f = $<HTMLFormElement>("[data-contact-form]");
     (f.elements.namedItem("name") as HTMLInputElement).value ||= store.get("gd_name");
     (f.elements.namedItem("phone") as HTMLInputElement).value ||= store.get("gd_phone");
     (f.elements.namedItem("email") as HTMLInputElement).value ||= store.get("gd_email");
     $("[data-ct-err]").textContent = "";
+    $("#ct-h").textContent = m === "pdf" ? "Get your itinerary as a PDF" : "Send your itinerary";
+    $("[data-ct-lede]").textContent = m === "pdf"
+      ? "Leave your name and mobile number and your PDF opens straight away. Your guide may follow up on WhatsApp to help with the plan."
+      : "Your guide will reply on WhatsApp, usually within a few hours, to check availability and fine-tune the plan.";
+    f.querySelector<HTMLButtonElement>(".ct__go")!.textContent = m === "pdf" ? "Open my PDF" : "Continue to WhatsApp";
     d.showModal();
   }
   async function submitContact(e: Event) {
@@ -341,19 +349,22 @@ import { site } from "../lib/site";
     const err = $("[data-ct-err]");
     const phone = v("phone").replace(/[^\d+]/g, "").replace(/^00/, "+");
     if (v("name").length < 2) { err.textContent = "Please add your name."; return; }
-    if (!/^\+\d{8,15}$/.test(phone)) { err.textContent = "Please add your WhatsApp number with the country code, starting with + (e.g. +31 6 1234 5678)."; return; }
+    if (!/^\+\d{8,15}$/.test(phone)) { err.textContent = "Please add your mobile number with the country code, starting with + (e.g. +31 6 1234 5678)."; return; }
     const btn = f.querySelector<HTMLButtonElement>(".ct__go")!;
+    const label = btn.textContent;
     btn.disabled = true; btn.textContent = "Saving…";
-    // open the WhatsApp tab now (inside the click) so pop-up blockers allow it
-    const win = window.matchMedia("(pointer: fine)").matches ? window.open("", "_blank") : null;
-    const trip = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
-    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip }) })
+    // open the new tab now (inside the click) so pop-up blockers allow it
+    const win = mode === "pdf" || window.matchMedia("(pointer: fine)").matches ? window.open("", "_blank") : null;
+    const trip = tripNow();
+    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip, source: mode }) })
       .then(async (x) => ({ ok: x.ok, d: await x.json().catch(() => ({})) })).catch(() => ({ ok: false, d: { network: true } as any }));
-    btn.disabled = false; btn.textContent = "Continue to WhatsApp";
-    if (!r.ok && !r.d.network) { win?.close(); err.textContent = r.d.error || "Something went wrong. Please try again."; return; }
+    btn.disabled = false; btn.textContent = label;
+    if (!r.ok && (mode === "pdf" || !r.d.network)) { win?.close(); err.textContent = r.d.error || "We couldn't save your details. Please check your connection and try again."; return; }
     store.set("gd_name", v("name")); store.set("gd_phone", phone); store.set("gd_email", v("email"));
-    const text = waText(lastTotal || undefined, v("name"), r.d.ref);
-    const url = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(text)}`;
+    if (r.d.ref && r.d.token) lastLead = { key: JSON.stringify(trip), ref: r.d.ref, token: r.d.token };
+    const url = mode === "pdf"
+      ? pdfUrl(r.d.ref, r.d.token)
+      : `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText(lastTotal || undefined, v("name"), r.d.ref))}`;
     $<HTMLDialogElement>("[data-contact]").close();
     if (win) win.location.href = url; else window.location.href = url;
   }
@@ -402,7 +413,7 @@ import { site } from "../lib/site";
         <p class="sum__pp">about ${usd(r.perPerson)} per person${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</p>`;
       lastTotal = p.total;
       send.removeAttribute("aria-disabled");
-      const pdf = $<HTMLAnchorElement>("[data-pdf]"); pdf.href = pdfLink(store.get("gd_name") || undefined); pdf.removeAttribute("aria-disabled");
+      $("[data-pdf]").removeAttribute("aria-disabled");
     }, 250);
   }
 
@@ -447,7 +458,8 @@ import { site } from "../lib/site";
     }));
     root.querySelectorAll<HTMLButtonElement>("[data-next]").forEach((b) => b.addEventListener("click", () => openStep(Number(b.dataset.next), true)));
     const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
-    $("[data-send]").addEventListener("click", openContact);
+    $("[data-send]").addEventListener("click", () => openContact("whatsapp"));
+    $("[data-pdf]").addEventListener("click", () => openContact("pdf"));
     $("[data-contact-form]").addEventListener("submit", submitContact);
     $("[data-ct-close]").addEventListener("click", () => $<HTMLDialogElement>("[data-contact]").close());
     $<HTMLDialogElement>("[data-contact]").addEventListener("click", (e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDialogElement).close(); });
@@ -569,7 +581,7 @@ import { site } from "../lib/site";
   .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
   .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
   .pl .sum__wa { width: 100%; justify-content: center; margin-top: 1.1rem; }
-  .pl .sum__pdf { display: block; text-align: center; margin-top: 0.6rem; font-weight: 600; font-size: 0.9rem; color: var(--rust); }
+  .pl .sum__pdf { display: block; width: 100%; text-align: center; margin-top: 0.6rem; font: inherit; font-weight: 600; font-size: 0.9rem; color: var(--rust); background: none; border: 0; text-decoration: underline; cursor: pointer; }
   .pl .sum__pdf[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
   .pl .sum__wa { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
   .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; }

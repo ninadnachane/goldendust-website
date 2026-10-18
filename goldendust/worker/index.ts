@@ -75,6 +75,13 @@ export default {
       return json({ ok: q.ok, errors: q.errors, people: q.people, priced: q.priced, perPerson: q.totals.perPerson });
     }
     if (p === "/api/planner/lead" && req.method === "POST") return saveLead(req, env);
+    if (p === "/api/planner/itinerary" && req.method === "GET") {
+      const ref = url.searchParams.get("ref") || "", k = url.searchParams.get("k") || "";
+      if (!/^GD-\d+$/.test(ref) || !/^[a-f0-9]{32}$/.test(k)) return json({ error: "Not found" }, 404);
+      const row = await env.DB.prepare("SELECT id, ref, created_at, name, total, request, token FROM leads WHERE ref = ?").bind(ref).first<any>();
+      if (!row || row.token !== k) return json({ error: "Not found" }, 404);
+      return itineraryDoc(env, row, false);
+    }
     const media = p.match(/^\/media\/([a-f0-9-]{36}\.(?:webp|jpg|png))$/);
     if (media && req.method === "GET") {
       const row = await env.DB.prepare("SELECT content_type, data FROM images WHERE id = ?").bind(media[1]).first<{ content_type: string; data: ArrayBuffer }>();
@@ -146,12 +153,23 @@ async function saveLead(req: Request, env: Env) {
   const { config } = await loadConfig(env);
   const r = toRequest(b.trip);
   const q = quote(config, r);
-  const ins = await env.DB.prepare("INSERT INTO leads (name, phone, email, summary, total, request, ip) VALUES (?, ?, ?, ?, ?, ?, ?)")
-    .bind(name, phone, email || null, tripSummary(config, r), q.ok ? q.totals.total : null, JSON.stringify(r), ip).run();
+  const source = b.source === "pdf" ? "pdf" : "whatsapp";
+  const token = [...crypto.getRandomValues(new Uint8Array(16))].map((x) => x.toString(16).padStart(2, "0")).join("");
+  const ins = await env.DB.prepare("INSERT INTO leads (name, phone, email, summary, total, request, ip, token, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(name, phone, email || null, tripSummary(config, r), q.ok ? q.totals.total : null, JSON.stringify(r), ip, token, source).run();
   const id = Number(ins.meta.last_row_id);
   const ref = `GD-${1000 + id}`;
   await env.DB.prepare("UPDATE leads SET ref = ? WHERE id = ?").bind(ref, id).run();
-  return json({ ok: true, ref });
+  return json({ ok: true, ref, token });
+}
+
+// Itinerary data for the PDF page. Guests need their private link (ref + token); the admin uses the lead id.
+async function itineraryDoc(env: Env, row: any, admin: boolean) {
+  const { config } = await loadConfig(env);
+  const trip = toRequest(JSON.parse(row.request));
+  const q = quote(config, trip, "1970-01-01");
+  const guest = admin ? { name: row.name, phone: row.phone, email: row.email, ref: row.ref, created_at: row.created_at, total: row.total } : { name: row.name, ref: row.ref };
+  return json({ guest, trip, options: publicOptions(config), ok: q.ok, errors: q.errors, priced: q.priced, perPerson: q.totals.perPerson, people: q.people });
 }
 
 const IMAGE_TYPES: Record<string, string> = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png" };
@@ -190,7 +208,7 @@ async function adminApi(req: Request, env: Env, p: string, email: string): Promi
     return json(quote(cfg, toRequest(body?.request)));
   }
   if (p === "/api/admin/leads" && req.method === "GET") {
-    const { results } = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, summary, total, status, notes FROM leads ORDER BY id DESC LIMIT 1000").all();
+    const { results } = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, summary, total, status, notes, source FROM leads ORDER BY id DESC LIMIT 1000").all();
     return json({ leads: results });
   }
   const lm = p.match(/^\/api\/admin\/leads\/(\d+)$/);
@@ -205,10 +223,7 @@ async function adminApi(req: Request, env: Env, p: string, email: string): Promi
   if (ld && req.method === "GET") {
     const row = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, total, request FROM leads WHERE id = ?").bind(Number(ld[1])).first<any>();
     if (!row) return json({ error: "Not found" }, 404);
-    const { config } = await loadConfig(env);
-    const trip = toRequest(JSON.parse(row.request));
-    const q = quote(config, trip, "1970-01-01");
-    return json({ guest: { name: row.name, phone: row.phone, email: row.email, ref: row.ref, created_at: row.created_at, total: row.total }, trip, options: publicOptions(config), ok: q.ok, errors: q.errors, priced: q.priced, perPerson: q.totals.perPerson, people: q.people });
+    return itineraryDoc(env, row, true);
   }
   if (lm && req.method === "DELETE") {
     await env.DB.prepare("DELETE FROM leads WHERE id = ?").bind(Number(lm[1])).run();
