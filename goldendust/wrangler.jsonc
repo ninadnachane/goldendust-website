@@ -14,8 +14,8 @@
     {
       "binding": "DB",
       "database_name": "goldendust-planner",
-      // Filled in when the database is created in Cloudflare (not yet).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Created 18 Oct 2026 (Western Europe).
+      "database_id": "8da49ac9-b5ad-4e97-ac04-0234274f1c1f",
       "migrations_dir": "migrations"
     }
   ],
