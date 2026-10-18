@@ -74,6 +74,9 @@ test("NCA transit: one day per crossing between east and Serengeti without an NC
   assert.equal(sumOf(quote(cfg, twoWay, TODAY), /transit/), round(nca * 2));
   // a night on the crater rim on the way back replaces the return transit = 1
   assert.equal(sumOf(quote(cfg, trip(), TODAY), /transit/), round(nca));
+  // Ndutu also counts as beyond the crater highlands: there and back on different days = 2
+  const ndutu = trip({ totalNights: 4, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-comfort" }, { areaId: "ndutu", nights: 2, lodgeId: "ndutu-comfort" }] });
+  assert.equal(sumOf(quote(cfg, ndutu, TODAY), /transit/), round(nca * 2));
   // Tarangire and Manyara only: never crosses = 0
   const east = trip({ totalNights: 3, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-comfort" }, { areaId: "manyara", nights: 1, lodgeId: "manyara-comfort" }] });
   assert.equal(line(quote(cfg, east, TODAY), /transit/).length, 0);
