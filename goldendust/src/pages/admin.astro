@@ -16,6 +16,7 @@
   <header class="top">
     <div class="top__brand"><img src="/images/logo-header.webp" alt="" width="104" height="51" /><span>Planner admin</span></div>
     <div class="top__status" data-status>Loading…</div>
+    <div class="top__who"><span data-who></span> <a href="/cdn-cgi/access/logout">Sign out</a></div>
     <div class="top__save">
       <input type="text" data-note placeholder="What changed? (e.g. 2027 park fees)" aria-label="Note for this save" />
       <button type="button" class="btn btn--gold" data-save disabled>Save changes</button>
@@ -37,7 +38,7 @@
   <main class="panes">
     <section class="pane" data-pane="test">
       <div class="test">
-        <form class="test__form" data-test-form onsubmit="return false">
+        <form class="test__form" data-test-form>
           <h2>Trip</h2>
           <div class="grid2">
             <label>Arrival date<input type="date" name="startDate" /></label>
@@ -99,6 +100,19 @@
     </section>
   </main>
 
+  <dialog class="dlg" data-photo-dlg>
+    <form method="dialog" class="dlg__in">
+      <div class="dlg__head"><h2 data-pd-title>Photos</h2><button value="close" class="del" aria-label="Close">✕</button></div>
+      <label class="dlg__desc">Short description guests see (one or two lines)
+        <textarea rows="2" maxlength="220" data-pd-desc placeholder="e.g. Eight tents on a kopje overlooking the Seronera valley, with a pool."></textarea>
+      </label>
+      <p class="hint">The first photo is the main one in the planner. Photos are resized to 1600 px WebP in your browser before upload. Use your own photos or ones the lodge allows you to use.</p>
+      <div class="thumbs" data-pd-thumbs></div>
+      <label class="btn btn--ghost upl">+ Add photos<input type="file" accept="image/jpeg,image/png,image/webp" multiple data-pd-file hidden /></label>
+      <p class="hint" data-pd-status></p>
+    </form>
+  </dialog>
+
   <script>
     import { quote, checkConfig, CATEGORIES, money, addDays, type Config, type Line } from "../planner/engine";
 
@@ -132,7 +146,7 @@
     }
 
     // ---------- generic table editor
-    type Col = { key: string; label: string; type: "text" | "number" | "bool" | "select" | "readonly"; options?: () => { v: string; t: string }[]; step?: string; group?: string };
+    type Col = { key: string; label: string; type: "text" | "number" | "bool" | "select" | "readonly" | "button"; options?: () => { v: string; t: string }[]; step?: string; group?: string; text?: (r: any) => string; onClick?: (r: any) => void };
     function table(host: HTMLElement, rows: any[], cols: Col[], opts: { add?: () => void; remove?: (r: any) => void; reorder?: boolean; filter?: (r: any) => boolean; rerender: () => void }) {
       const shown = rows.filter((r) => (opts.filter ? opts.filter(r) : true));
       const groups = cols.some((c) => c.group);
@@ -148,6 +162,7 @@
         const cells = cols.map((c) => {
           const v = get(r, c.key);
           if (c.type === "readonly") return `<td class="ro">${esc(v)}</td>`;
+          if (c.type === "button") return `<td><button type="button" class="btn btn--ghost sm" data-btn="${i}" data-col="${c.key}">${esc(c.text!(r))}</button></td>`;
           if (c.type === "bool") return `<td class="c"><input type="checkbox" data-i="${i}" data-k="${c.key}" ${v ? "checked" : ""}></td>`;
           if (c.type === "select") return `<td><select data-i="${i}" data-k="${c.key}">${c.options!().map((o) => `<option value="${esc(o.v)}" ${o.v === v ? "selected" : ""}>${esc(o.t)}</option>`).join("")}</select></td>`;
           if (c.type === "number") return `<td><input type="number" step="${c.step || "0.01"}" min="0" data-i="${i}" data-k="${c.key}" value="${v ?? 0}"></td>`;
@@ -167,6 +182,7 @@
           if (col.type === "select" || col.type === "bool") opts.rerender();
         });
       });
+      host.querySelectorAll<HTMLButtonElement>("[data-btn]").forEach((b) => b.addEventListener("click", () => cols.find((c) => c.key === b.dataset.col)!.onClick!(rows[Number(b.dataset.btn)])));
       host.querySelector("[data-add]")?.addEventListener("click", () => { opts.add!(); markDirty(); opts.rerender(); });
       host.querySelectorAll<HTMLButtonElement>("[data-del]").forEach((b) => b.addEventListener("click", () => {
         const r = rows[Number(b.dataset.del)];
@@ -274,6 +290,7 @@
         { key: "areaId", label: "Area", type: "select", options: areaOptions },
         { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
         { key: "active", label: "Shown", type: "bool" },
+        { key: "photos", label: "Photos & text", type: "button", text: (r) => `${(r.images || []).length} photo${(r.images || []).length === 1 ? "" : "s"}${r.description ? " · text" : ""}`, onClick: openPhotos },
       ];
       for (const s of cfg.seasons) for (const [k, t] of [["single", "Single"], ["double", "Double"], ["triple", "Triple"], ["child", "Child"]] as const)
         cols.push({ key: `rates.${s.id}.${k}`, label: t, type: "number", group: s.name });
@@ -389,12 +406,66 @@
       pick("tarangire", 1); pick("central-serengeti", 2); pick("ngorongoro", 1);
       if (!stops.length && cfg.areas[0]) stops.push({ areaId: cfg.areas[0].id, nights: 1, lodgeId: "" });
       f.addEventListener("input", () => { renderStops(); runTest(); });
+      f.addEventListener("submit", (e) => e.preventDefault());
       $("[data-add-stop]").addEventListener("click", () => {
         const next = cfg.areas.find((a) => !stops.some((s) => s.areaId === a.id));
         if (next) stops.push({ areaId: next.id, nights: next.minNights, lodgeId: "" });
         renderStops(); runTest();
       });
     }
+
+    // ---------- lodge photos
+    let photoLodge: any = null;
+    const dlg = $<HTMLDialogElement>("[data-photo-dlg]");
+    function openPhotos(l: any) {
+      photoLodge = l;
+      l.images ??= [];
+      $("[data-pd-title]").textContent = l.name;
+      $<HTMLTextAreaElement>("[data-pd-desc]").value = l.description || "";
+      $("[data-pd-status]").textContent = "";
+      renderThumbs();
+      dlg.showModal();
+    }
+    function renderThumbs() {
+      const l = photoLodge;
+      $("[data-pd-thumbs]").innerHTML = l.images.map((id: string, i: number) => `<figure class="thumb${i === 0 ? " is-main" : ""}"><img src="/media/${esc(id)}" alt=""><figcaption>
+        ${i === 0 ? "<span>Main</span>" : `<button type="button" data-main="${i}">Make main</button>`}
+        <button type="button" data-left="${i}" aria-label="Move left">←</button><button type="button" data-right="${i}" aria-label="Move right">→</button>
+        <button type="button" class="rm" data-rmimg="${i}" aria-label="Remove">✕</button></figcaption></figure>`).join("") || '<p class="hint">No photos yet.</p>';
+      const mv = (i: number, j: number) => { if (j < 0 || j >= l.images.length) return; [l.images[i], l.images[j]] = [l.images[j], l.images[i]]; changed(); };
+      const changed = () => { markDirty(); renderThumbs(); renderLodges(); };
+      dlg.querySelectorAll<HTMLButtonElement>("[data-main]").forEach((b) => b.addEventListener("click", () => { const i = Number(b.dataset.main); l.images.unshift(l.images.splice(i, 1)[0]); changed(); }));
+      dlg.querySelectorAll<HTMLButtonElement>("[data-left]").forEach((b) => b.addEventListener("click", () => mv(Number(b.dataset.left), Number(b.dataset.left) - 1)));
+      dlg.querySelectorAll<HTMLButtonElement>("[data-right]").forEach((b) => b.addEventListener("click", () => mv(Number(b.dataset.right), Number(b.dataset.right) + 1)));
+      dlg.querySelectorAll<HTMLButtonElement>("[data-rmimg]").forEach((b) => b.addEventListener("click", () => { l.images.splice(Number(b.dataset.rmimg), 1); changed(); }));
+    }
+    $<HTMLTextAreaElement>("[data-pd-desc]").addEventListener("change", (e) => { photoLodge.description = (e.target as HTMLTextAreaElement).value.trim(); markDirty(); renderLodges(); });
+    async function shrink(file: File): Promise<Blob> {
+      const bmp = await createImageBitmap(file);
+      const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
+      return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("resize failed"))), "image/webp", 0.82));
+    }
+    $<HTMLInputElement>("[data-pd-file]").addEventListener("change", async (e) => {
+      const input = e.target as HTMLInputElement;
+      const files = [...(input.files || [])];
+      const status = $("[data-pd-status]");
+      for (const [n, f] of files.entries()) {
+        status.textContent = `Uploading ${n + 1} of ${files.length}…`;
+        try {
+          const blob = await shrink(f);
+          const r = await fetch("/api/admin/images", { method: "POST", headers: { "content-type": blob.type || "image/webp" }, body: blob });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || r.status);
+          photoLodge.images.push(d.id);
+          markDirty(); renderThumbs(); renderLodges();
+        } catch (err) { status.textContent = `${f.name}: ${String((err as Error).message || err)}`; input.value = ""; return; }
+      }
+      status.textContent = `Uploaded ${files.length} photo${files.length === 1 ? "" : "s"}. Remember to save your changes.`;
+      input.value = "";
+    });
 
     function renderAll() {
       renderStatus(); renderIssues(); renderSettings(); renderSeasons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
@@ -424,6 +495,7 @@
 
     fetch("/api/admin/config").then((r) => r.json()).then((d) => {
       cfg = d.config; meta = d;
+      $("[data-who]").textContent = d.email ? `Signed in as ${d.email}` : "";
       initTest(); renderAll();
     }).catch(() => { $("[data-status]").textContent = "Couldn't load the rates. Refresh to try again."; });
   </script>
@@ -449,7 +521,7 @@
     .btn--gold { background: var(--gold); color: var(--dark); }
     .btn[disabled] { opacity: 0.45; cursor: default; }
     .btn--ghost { margin-top: 0.6rem; }
-    .btn.sm { padding: 0.2rem 0.7rem; margin: 0; }
+    .btn.sm { padding: 0.2rem 0.7rem; margin: 0; white-space: nowrap; }
     .tabs { display: flex; gap: 0.2rem; padding: 0 1.2rem; border-bottom: 1px solid var(--line); background: var(--surface); overflow-x: auto; }
     .tabs button { font: inherit; font-weight: 600; background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.8rem 0.9rem; cursor: pointer; color: var(--ink-2); white-space: nowrap; }
     .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
@@ -492,6 +564,25 @@
     table.sum { max-width: 46rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
     table.sum tr.line td { border-top: 2px solid var(--ink-2); }
     table.sum tr.total td { font-weight: 700; font-size: 1.05rem; background: var(--ivory); }
+    .top__who { color: var(--ink-2); font-size: 0.85rem; }
+    .top__who a { color: var(--rust); margin-left: 0.4rem; }
+    .dlg { border: 0; border-radius: 14px; padding: 0; width: min(56rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45); }
+    .dlg::backdrop { background: rgba(46, 36, 27, 0.5); }
+    .dlg__in { padding: 1rem 1.3rem 1.3rem; }
+    .dlg__head { display: flex; justify-content: space-between; align-items: center; }
+    .dlg__head h2 { margin: 0.4rem 0; }
+    .dlg__desc { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 500; }
+    .dlg textarea { font: inherit; padding: 0.5rem; border: 1px solid var(--line); border-radius: 6px; }
+    .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.7rem; }
+    .thumb { margin: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--ivory); }
+    .thumb.is-main { outline: 3px solid var(--gold); }
+    .thumb img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+    .thumb figcaption { display: flex; gap: 0.25rem; align-items: center; padding: 0.3rem; font-size: 0.78rem; flex-wrap: wrap; }
+    .thumb figcaption span { font-weight: 600; color: var(--rust); margin-right: auto; }
+    .thumb figcaption button { font: inherit; background: #fff; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; padding: 0.1rem 0.35rem; }
+    .thumb figcaption [data-main] { margin-right: auto; }
+    .thumb .rm:hover { color: var(--red); border-color: var(--red); }
+    .upl { display: inline-block; }
     @media (max-width: 980px) { .test { grid-template-columns: 1fr; } .test__form { position: static; } }
   </style>
 </body>

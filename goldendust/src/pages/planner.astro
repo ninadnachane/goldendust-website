@@ -80,7 +80,7 @@ import { site } from "../lib/site";
     categories: { id: string; name: string; blurb: string }[];
     arrivalName: string;
     areas: { id: string; name: string; minNights: number }[];
-    lodges: { id: string; name: string; areaId: string; category: string }[];
+    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[] }[];
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
@@ -147,7 +147,14 @@ import { site } from "../lib/site";
       return `<div class="stop">
         <div class="stop__top"><strong>${esc(a.name)}</strong>
           <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="One night less in ${esc(a.name)}">−</button><output>${s.nights} night${s.nights > 1 ? "s" : ""}</output><button type="button" data-sinc="${i}" aria-label="One more night in ${esc(a.name)}">+</button></div></div>
-        <div class="lodges">${lodges.map((l) => `<label class="lodge"><input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}"><span>${esc(l.name)}</span></label>`).join("")}</div>
+        <div class="lodges">${lodges.map((l) => `<label class="lodge">
+          <input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}">
+          <span class="lodge__img">${l.images.length
+            ? `<img src="/media/${esc(l.images[0])}" alt="${esc(l.name)}" loading="lazy">${l.images.length > 1 ? `<button type="button" class="lodge__more" data-gal="${esc(l.id)}">${l.images.length} photos</button>` : ""}`
+            : `<span class="lodge__none">Photos coming soon</span>`}</span>
+          <span class="lodge__txt"><strong>${esc(l.name)}</strong>${l.description ? `<span>${esc(l.description)}</span>` : ""}</span>
+          <span class="lodge__tick" aria-hidden="true"></span>
+        </label>`).join("")}</div>
       </div>`;
     }).join("");
     root.querySelectorAll<HTMLButtonElement>("[data-sinc]").forEach((b) => b.addEventListener("click", () => {
@@ -161,7 +168,32 @@ import { site } from "../lib/site";
       if (s.nights <= a.minNights) return flash(`${a.name} needs at least ${a.minNights} night${a.minNights > 1 ? "s" : ""}.`);
       s.nights--; renderWhere(); update();
     }));
+    root.querySelectorAll<HTMLButtonElement>("[data-gal]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGallery(b.dataset.gal!); }));
     root.querySelectorAll<HTMLInputElement>("[data-lodge]").forEach((el) => el.addEventListener("change", () => { st.stops[Number(el.dataset.lodge)].lodgeId = el.value; update(); }));
+  }
+
+  // photo viewer
+  function openGallery(id: string) {
+    const l = O.lodges.find((x) => x.id === id);
+    if (!l || !l.images.length) return;
+    let i = 0;
+    const d = document.createElement("dialog");
+    d.className = "gv";
+    d.setAttribute("aria-label", `${l.name} photos`);
+    const draw = () => {
+      d.innerHTML = `<div class="gv__in"><img src="/media/${esc(l.images[i])}" alt="${esc(l.name)}, photo ${i + 1} of ${l.images.length}">
+        <div class="gv__bar"><strong>${esc(l.name)}</strong><span>${i + 1} / ${l.images.length}</span>
+        <button type="button" data-gv="-1" aria-label="Previous photo">‹</button><button type="button" data-gv="1" aria-label="Next photo">›</button>
+        <button type="button" data-gv-close aria-label="Close">✕</button></div></div>`;
+      d.querySelectorAll<HTMLButtonElement>("[data-gv]").forEach((b) => b.addEventListener("click", () => { i = (i + Number(b.dataset.gv) + l.images.length) % l.images.length; draw(); }));
+      d.querySelector("[data-gv-close]")!.addEventListener("click", () => d.close());
+    };
+    draw();
+    d.addEventListener("keydown", (e) => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { i = (i + (e.key === "ArrowRight" ? 1 : -1) + l.images.length) % l.images.length; draw(); } });
+    d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+    d.addEventListener("close", () => d.remove());
+    root.append(d);
+    d.showModal();
   }
 
   let toast: number | undefined;
@@ -324,10 +356,27 @@ import { site } from "../lib/site";
   .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
   .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
   .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .pl .lodges { display: grid; gap: 0.45rem; margin-top: 0.7rem; }
-  .pl .lodge { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.75rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
-  .pl .lodge:has(input:checked) { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
-  .pl .lodge input { accent-color: var(--gold); }
+  .pl .lodges { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.7rem; margin-top: 0.8rem; }
+  .pl .lodge { position: relative; display: flex; flex-direction: column; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }
+  .pl .lodge input { position: absolute; opacity: 0; pointer-events: none; }
+  .pl .lodge:has(input:checked) { border-color: var(--gold); box-shadow: 0 10px 24px -16px rgba(46, 36, 27, 0.6); }
+  .pl .lodge:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .pl .lodge__img { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--tint); overflow: hidden; }
+  .pl .lodge__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pl .lodge__none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2); font-size: 0.85rem; }
+  .pl .lodge__more { position: absolute; right: 0.5rem; bottom: 0.5rem; font: inherit; font-size: 0.78rem; font-weight: 600; border: 0; border-radius: 99px; padding: 0.25rem 0.65rem; background: rgba(46, 36, 27, 0.75); color: var(--ivory); cursor: pointer; }
+  .pl .lodge__txt { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.65rem 0.8rem 0.8rem; }
+  .pl .lodge__txt strong { font-size: 0.95rem; }
+  .pl .lodge__txt span { color: var(--ink-2); font-size: 0.85rem; line-height: 1.4; }
+  .pl .lodge__tick { position: absolute; top: 0.5rem; left: 0.5rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: rgba(255, 255, 255, 0.92); border: 2px solid var(--line); }
+  .pl .lodge:has(input:checked) .lodge__tick { background: var(--gold); border-color: var(--gold); }
+  .pl .lodge:has(input:checked) .lodge__tick::after { content: ""; position: absolute; left: 0.45rem; top: 0.2rem; width: 0.35rem; height: 0.7rem; border: solid var(--dark); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .pl .gv { border: 0; padding: 0; background: transparent; max-width: min(64rem, calc(100% - 1.5rem)); width: 100%; }
+  .pl .gv::backdrop { background: rgba(20, 15, 10, 0.85); }
+  .pl .gv__in img { width: auto; height: auto; max-width: 100%; max-height: 78vh; display: block; margin: 0 auto; border-radius: 10px; background: none; }
+  .pl .gv__bar { display: flex; align-items: center; gap: 0.6rem; color: var(--ivory); padding: 0.6rem 0.2rem; }
+  .pl .gv__bar span { margin-right: auto; opacity: 0.8; }
+  .pl .gv__bar button { font: inherit; font-size: 1.2rem; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.92); color: var(--dark); cursor: pointer; }
   .pl .pl__sum { position: sticky; top: 1rem; }
   .pl .sum { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 48px -32px rgba(46, 36, 27, 0.5); padding: 1.3rem; }
   .pl .sum__h { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.6rem; }

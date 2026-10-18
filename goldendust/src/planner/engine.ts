@@ -47,6 +47,8 @@ export type RoomRates = { single: number; double: number; triple: number; child:
 export type Lodge = {
   id: string; name: string; areaId: string; category: Category; active: boolean;
   rates: Record<string, RoomRates>; // keyed by season id
+  description?: string; // one or two lines shown to guests
+  images?: string[]; // image ids uploaded in /admin, served from /media/<id>
 };
 
 export type Config = {
@@ -243,7 +245,7 @@ export function publicOptions(cfg: Config) {
     categories: CATEGORIES,
     arrivalName: cfg.arrival.name,
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights })),
-    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category })),
+    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };
 }
 

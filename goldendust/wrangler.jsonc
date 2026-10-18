@@ -8,7 +8,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/admin", "/admin.*", "/admin/*"]
+    "run_worker_first": ["/api/*", "/media/*", "/admin", "/admin.*", "/admin/*"]
   },
   "d1_databases": [
     {
@@ -19,5 +19,11 @@
       "migrations_dir": "migrations"
     }
   ],
+  "vars": {
+    // Only these emails can use /admin (checked by the Worker on top of Cloudflare Access).
+    "ADMIN_EMAILS": "hello@goldendustsafaris.com"
+    // ACCESS_TEAM_DOMAIN and ACCESS_AUD are added once Cloudflare Access is set up.
+    // Until then the admin stays locked.
+  },
   "observability": { "enabled": true }
 }
