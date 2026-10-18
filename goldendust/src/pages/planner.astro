@@ -60,6 +60,7 @@ import { site } from "../lib/site";
               <p class="note">Night 1 is in <strong data-arrival-name>Arusha</strong>, included. Choose areas for your <strong data-safari-nights></strong>; we'll put them in the best order.</p>
               <div class="chips" data-areas></div>
               <div class="stops" data-stops></div>
+              <label class="crater" data-crater-box hidden><input type="checkbox" data-crater><span><strong>Add a Ngorongoro Crater game drive</strong><small>A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.</small></span></label>
             </div>
           </section>
         </div>
@@ -111,6 +112,7 @@ import { site } from "../lib/site";
     arrivalName: string;
     areas: { id: string; name: string; minNights: number }[];
     lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[] }[];
+    crater?: boolean;
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
@@ -120,7 +122,7 @@ import { site } from "../lib/site";
   const nice = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
   let O: Opt;
-  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[], open: 1, reached: 1 };
+  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[], crater: false, open: 1, reached: 1 };
   const mobile = () => window.matchMedia("(max-width: 900px)").matches;
 
   function openStep(n: number, scroll = false) {
@@ -142,7 +144,7 @@ import { site } from "../lib/site";
       1: `${st.adults} adult${st.adults > 1 ? "s" : ""}${kids}`,
       2: st.date ? `${nice(st.date)} · ${st.nights} nights` : "",
       3: cat,
-      4: st.stops.length ? O.areas.filter((a) => st.stops.some((s) => s.areaId === a.id)).map((a) => a.name).join(", ") : "",
+      4: st.stops.length ? O.areas.filter((a) => st.stops.some((s) => s.areaId === a.id)).map((a) => a.name).join(", ") + (st.crater ? " + Crater" : "") : "",
     };
     root.querySelectorAll<HTMLElement>("[data-step]").forEach((el) => {
       const n = Number(el.dataset.step);
@@ -296,6 +298,7 @@ import { site } from "../lib/site";
       items.push(`<li><span>${st.date ? nice(addDays(st.date, n)) : `Night ${n + 1}`}</span>${s.nights} night${s.nights > 1 ? "s" : ""} ${esc(a.name)}${l ? ` · ${esc(l.name)}` : ""}</li>`);
       n += s.nights;
     }
+    if (st.crater) items.push(`<li><span>Day trip</span>Ngorongoro Crater game drive</li>`);
     if (st.date) items.push(`<li><span>${nice(addDays(st.date, st.nights))}</span>Back to Arusha / airport</li>`);
     $("[data-trip]").innerHTML = items.join("") || "<li>Start by choosing your dates.</li>";
   }
@@ -308,6 +311,7 @@ import { site } from "../lib/site";
       `• Style: ${O.categories.find((c) => c.id === st.category)?.name ?? "tbc"}`,
       `• Night 1: ${O.arrivalName}`,
       ...st.stops.map((s) => `• ${s.nights} night${s.nights > 1 ? "s" : ""} ${O.areas.find((a) => a.id === s.areaId)?.name}: ${O.lodges.find((l) => l.id === s.lodgeId)?.name ?? ""}`),
+      ...(st.crater ? ["• Ngorongoro Crater game drive"] : []),
     ];
     if (total) lines.push(`• Planner price: ${usd(total)}`);
     lines.push("Could you check availability?");
@@ -321,7 +325,7 @@ import { site } from "../lib/site";
   // One lead per trip: if the guest already left their details for this exact trip, reuse it.
   let lastLead: { key: string; ref: string; token: string } | null = null;
   let mode: "whatsapp" | "pdf" = "whatsapp";
-  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops });
+  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops, crater: st.crater });
   const pdfUrl = (ref: string, token: string) => `/itinerary#ref=${encodeURIComponent(ref)}&k=${encodeURIComponent(token)}`;
   function openContact(m: "whatsapp" | "pdf") {
     const send = $("[data-send]");
@@ -394,7 +398,7 @@ import { site } from "../lib/site";
     price.classList.add("is-loading");
     timer = window.setTimeout(async () => {
       const my = ++seq;
-      const body = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
+      const body = tripNow();
       const r = await fetch("/api/planner/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((x) => x.json()).catch(() => null);
       if (my !== seq) return;
       price.classList.remove("is-loading");
@@ -404,7 +408,7 @@ import { site } from "../lib/site";
       mini(`<span class="sum__ml">Total</span><strong>${usd(p.total)}</strong><span class="sum__mp">${usd(r.perPerson)} pp</span>`);
       price.innerHTML = `<dl class="sum__rows">
           <div><dt>Park fees</dt><dd>${usd(p.park)}</dd></div>
-          <div><dt>Vehicle &amp; guide${r.people.vehicles > 1 ? ` (${r.people.vehicles} vehicles)` : ""}</dt><dd>${usd(p.transport)}</dd></div>
+          <div><dt>Vehicle, guide &amp; transfers${r.people.vehicles > 1 ? ` (${r.people.vehicles} vehicles)` : ""}</dt><dd>${usd(p.transport)}</dd></div>
           <div><dt>Accommodation</dt><dd>${usd(p.accommodation)}</dd></div>
           <div><dt>Meals</dt><dd>${usd(p.meals)}</dd></div>
           <div><dt>Our margin</dt><dd>${usd(p.margin)}</dd></div>
@@ -458,6 +462,8 @@ import { site } from "../lib/site";
     }));
     root.querySelectorAll<HTMLButtonElement>("[data-next]").forEach((b) => b.addEventListener("click", () => openStep(Number(b.dataset.next), true)));
     const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
+    if (O.crater) $("[data-crater-box]").hidden = false;
+    $<HTMLInputElement>("[data-crater]").addEventListener("change", (e) => { st.crater = (e.target as HTMLInputElement).checked; update(); });
     $("[data-send]").addEventListener("click", () => openContact("whatsapp"));
     $("[data-pdf]").addEventListener("click", () => openContact("pdf"));
     $("[data-contact-form]").addEventListener("submit", submitContact);
@@ -518,6 +524,12 @@ import { site } from "../lib/site";
   .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
   .pl .chip[aria-pressed="true"] small { color: var(--dark); }
   .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+  .pl .crater { display: flex; gap: 0.7rem; align-items: flex-start; margin-top: 1rem; padding: 0.8rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; }
+  .pl .crater[hidden] { display: none; }
+  .pl .crater:has(input:checked) { border-color: var(--gold); background: var(--tint); }
+  .pl .crater input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; accent-color: var(--gold); flex: none; }
+  .pl .crater span { display: grid; gap: 0.2rem; }
+  .pl .crater small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.4; }
   .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
   .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
   .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }

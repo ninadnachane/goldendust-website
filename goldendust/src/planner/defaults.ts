@@ -13,19 +13,19 @@ const scale = (r: RoomRates, k: number): RoomRates => ({
 const rates = (c: Category) => ({ low: base[c], high: scale(base[c], 1.3), green: scale(base[c], 0.75) });
 
 const areas = [
-  { id: "tarangire", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "manyara", blurb: "Game drives around Lake Manyara: groundwater forest, flamingos and tree-climbing lions if you're lucky.", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "ndutu", blurb: "Game drives on the Ndutu plains, where the herds gather to calve from January to March.", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "south-serengeti", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "central-serengeti", blurb: "Game drives in the central Serengeti around Seronera, home to many of the park's big cats.", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "north-serengeti", blurb: "Game drives in the northern Serengeti, where the herds cross the Mara River from July.", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "ngorongoro", blurb: "Down into the Ngorongoro Crater for a game drive on the crater floor.", name: "Ngorongoro", feeZoneId: "ncaa", minNights: 1, vehicleFee: 295, vehicleFeeLabel: "Crater descent fee", active: true },
+  { id: "tarangire", side: "east", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, active: true },
+  { id: "manyara", side: "east", blurb: "Game drives around Lake Manyara: groundwater forest, flamingos and tree-climbing lions if you're lucky.", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, active: true },
+  { id: "ndutu", side: "nca", blurb: "Game drives on the Ndutu plains, where the herds gather to calve from January to March.", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, active: true },
+  { id: "south-serengeti", side: "west", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
+  { id: "central-serengeti", side: "west", blurb: "Game drives in the central Serengeti around Seronera, home to many of the park's big cats.", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
+  { id: "north-serengeti", side: "west", blurb: "Game drives in the northern Serengeti, where the herds cross the Mara River from July.", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, active: true },
+  { id: "ngorongoro", side: "nca", blurb: "A night on the Ngorongoro Crater rim, high above the crater floor.", name: "Ngorongoro (crater rim)", feeZoneId: "ncaa", minNights: 1, active: true },
 ];
 
 const catName: Record<Category, string> = { budget: "camp", comfort: "comfort lodge", luxury: "luxury lodge" };
 const lodges: Lodge[] = [];
 for (const a of areas) for (const c of ["budget", "comfort", "luxury"] as Category[])
-  lodges.push({ id: `${a.id}-${c}`, name: `Sample ${catName[c]} (${a.name})`, areaId: a.id, category: c, active: true, rates: rates(c) });
+  lodges.push({ id: `${a.id}-${c}`, name: `Sample ${catName[c]} (${a.name})`, areaId: a.id, category: c, active: true, insidePark: c !== "budget", rates: rates(c) });
 for (const c of ["budget", "comfort", "luxury"] as Category[])
   lodges.push({ id: `arusha-${c}`, name: `Sample ${c} hotel (Arusha)`, areaId: "arusha", category: c, active: true,
     rates: { low: scale(base[c], 0.5), high: scale(base[c], 0.6), green: scale(base[c], 0.45) } });
@@ -37,6 +37,7 @@ export const defaultConfig: Config = {
     adminPct: 10, marginPct: 7, leadDays: 20,
     childMinAge: 5, childMaxAge: 15,
     minTotalNights: 2, maxTotalNights: 21, maxGuests: 21,
+    craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80,
   },
   seasons: [
     { id: "high", name: "High season", ranges: [{ from: "06-01", to: "10-31" }, { from: "12-20", to: "01-05" }] },
@@ -44,11 +45,12 @@ export const defaultConfig: Config = {
     { id: "low", name: "Low season", ranges: [] },
   ],
   defaultSeasonId: "low",
+  // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff; NCA figures need checking.
   feeZones: [
-    { id: "serengeti", name: "Serengeti National Park", adultDay: 82.6, childDay: 23.6, adultNight: 59, childNight: 11.8 },
-    { id: "ncaa", name: "Ngorongoro Conservation Area", adultDay: 71.8, childDay: 23.6, adultNight: 0, childNight: 0 },
-    { id: "tarangire", name: "Tarangire National Park", adultDay: 53.1, childDay: 17.7, adultNight: 0, childNight: 0 },
-    { id: "manyara", name: "Lake Manyara National Park", adultDay: 53.1, childDay: 17.7, adultNight: 0, childNight: 0 },
+    { id: "serengeti", name: "Serengeti National Park", adultDay: 82.6, childDay: 23.6, concessionAdult: 70.8, concessionChild: 11.8, campAdult: 35.4, campChild: 5.9, vehicleDay: 0 },
+    { id: "ncaa", name: "Ngorongoro Conservation Area", adultDay: 71.8, childDay: 23.6, concessionAdult: 0, concessionChild: 0, campAdult: 0, campChild: 0, vehicleDay: 0 },
+    { id: "tarangire", name: "Tarangire National Park", adultDay: 59, childDay: 17.7, concessionAdult: 47.2, concessionChild: 11.8, campAdult: 35.4, campChild: 5.9, vehicleDay: 0 },
+    { id: "manyara", name: "Lake Manyara National Park", adultDay: 59, childDay: 17.7, concessionAdult: 47.2, concessionChild: 11.8, campAdult: 35.4, campChild: 5.9, vehicleDay: 0 },
   ],
   areas,
   lodges,

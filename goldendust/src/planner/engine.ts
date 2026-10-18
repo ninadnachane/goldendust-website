@@ -2,6 +2,14 @@
 // Shared by the Cloudflare Worker (guest quotes, admin test calculator).
 // All money is in USD. Costs in the config are YOUR costs; the engine adds
 // the admin markup (to everything except park fees) and then the margin.
+//
+// Park fee rules (all fees entered incl. VAT, peak-season rates):
+//  1. Entry fee per person for each day (= night) in a park area.
+//  2. Overnight: Budget → public campsite fee; lodge inside the park → concession fee; lodge outside → nothing.
+//  3. NCA transit: each drive between east (Arusha, Tarangire, Manyara) and west (Serengeti) without a night in
+//     the Ngorongoro Conservation Area = one NCA entry day (going and coming back on different days = 2).
+//  4. Ngorongoro Crater (separate choice): crater fee per vehicle, plus one NCA day if the trip isn't in the NCA anyway.
+//  5. Vehicle entry fee per vehicle for each park day.
 
 export type Category = "budget" | "comfort" | "luxury";
 export const CATEGORIES: { id: Category; name: string; blurb: string }[] = [
@@ -25,22 +33,33 @@ export type Settings = {
   minTotalNights: number;
   maxTotalNights: number;
   maxGuests: number;
+  craterFee: number; // Ngorongoro Crater descent, per vehicle, incl. VAT
+  airportTransfer: number; // airport pick-up and drop-off, per booking
+  ncaZoneId: string; // which park fee zone is the Ngorongoro Conservation Area (for transit days)
 };
 
 export type SeasonRange = { from: string; to: string }; // "MM-DD", inclusive; may wrap the year end
 export type Season = { id: string; name: string; ranges: SeasonRange[] };
 
+// All park fees are entered INCLUDING VAT, at peak-season rates (no park-fee seasons).
 export type FeeZone = {
   id: string; name: string;
-  adultDay: number; childDay: number; // per person per day
-  adultNight: number; childNight: number; // per person per night (concession/camping fee), 0 if none
+  adultDay: number; childDay: number; // entry / conservation fee, per person per day
+  concessionAdult: number; concessionChild: number; // per person per night, only for lodges/camps INSIDE the park
+  campAdult: number; campChild: number; // public campsite fee per person per night (Budget trips)
+  vehicleDay: number; // vehicle entry, per vehicle per day in the park
+  adultNight?: number; childNight?: number; // old field names, upgraded automatically
 };
+
+// Where an area sits on the road from Arusha: driving between "east" and "west" crosses the Ngorongoro Conservation Area.
+export type Side = "east" | "nca" | "west";
 
 export type Area = {
   id: string; name: string; feeZoneId: string;
+  side: Side;
   minNights: number;
-  vehicleFee: number; vehicleFeeLabel: string; // once per visit, per vehicle (e.g. crater descent)
   active: boolean;
+  vehicleFee?: number; vehicleFeeLabel?: string; // old fields (crater fee now lives in settings), ignored
   blurb?: string; // one line for the itinerary PDF, e.g. "Game drives in Tarangire, known for elephants and baobabs"
 };
 
@@ -51,6 +70,7 @@ export type RoomRates = { single: number; double: number; triple: number; child:
 export type Lodge = {
   id: string; name: string; areaId: string; category: Category; active: boolean;
   rates: Record<string, RoomRates>; // keyed by season id
+  insidePark?: boolean; // true → park concession fee per person per night (Comfort/Luxury)
   description?: string; // one or two lines shown to guests
   images?: string[]; // image ids uploaded in /admin, served from /media/<id>
 };
@@ -73,6 +93,7 @@ export type QuoteRequest = {
   category: Category;
   totalNights: number; // incl. the Arusha arrival night
   stops: { areaId: string; nights: number; lodgeId: string }[];
+  crater?: boolean; // Ngorongoro Crater game drive, chosen separately
 };
 
 export type Group = "park" | "transport" | "accommodation" | "meals";
@@ -97,6 +118,21 @@ export function addDays(iso: string, days: number) {
   const d = new Date(iso + "T00:00:00Z");
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
+}
+
+// Brings older saved rate data up to the current shape (new fields get safe defaults).
+export function upgradeConfig(cfg: Config): Config {
+  const c: Config = JSON.parse(JSON.stringify(cfg));
+  c.feeZones = c.feeZones.map((z) => ({
+    ...z,
+    concessionAdult: z.concessionAdult ?? z.adultNight ?? 0, concessionChild: z.concessionChild ?? z.childNight ?? 0,
+    campAdult: z.campAdult ?? 0, campChild: z.campChild ?? 0, vehicleDay: z.vehicleDay ?? 0,
+  }));
+  c.areas = c.areas.map((a) => ({ ...a, side: a.side ?? (/seren/i.test(a.feeZoneId) ? "west" : /nca|ngoro/i.test(a.feeZoneId) ? "nca" : "east") }));
+  c.lodges = c.lodges.map((l) => ({ ...l, insidePark: l.insidePark ?? l.areaId !== "arusha" }));
+  const legacyCrater = Math.max(0, ...c.areas.map((a) => a.vehicleFee || 0));
+  c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
+  return c;
 }
 
 export function seasonFor(cfg: Config, iso: string): Season {
@@ -167,6 +203,7 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
   else if (q.stops.length && used !== safariNights)
     e.push(`You have ${safariNights} safari night${safariNights === 1 ? "" : "s"} to share out (plus your first night in Arusha) and ${used} assigned.`);
   if (!cfg.lodges.find((l) => l.id === cfg.arrival.lodges[q.category] && l.active)) e.push("The Arusha arrival hotel isn't set up for this category.");
+  if (q.crater && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro Crater isn't available right now.");
   return e;
 }
 
@@ -199,27 +236,52 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   };
   stayAt(cfg.arrival.lodges[q.category], 0, `Night 1 ${cfg.arrival.name}`);
 
+  // ---- park fees (all incl. VAT, peak-season rates)
+  const pp = (adult: number, child: number) => adults * adult + children * child;
+  const ppCalc = (adult: number, child: number) => `${adults} × ${money(adult)}${children ? ` + ${children} × ${money(child)}` : ""}`;
+  const times = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+  const nca = cfg.feeZones.find((z) => z.id === s.ncaZoneId);
   let night = 1;
   for (const st of q.stops) {
     const area = cfg.areas.find((a) => a.id === st.areaId)!;
     const zone = cfg.feeZones.find((z) => z.id === area.feeZoneId);
+    const lodge = cfg.lodges.find((l) => l.id === st.lodgeId);
     for (let k = 0; k < st.nights; k++) { stayAt(st.lodgeId, night, `Night ${night + 1} ${area.name}`); night++; }
-    if (zone) {
-      const dayCost = adults * zone.adultDay + children * zone.childDay;
-      lines.push({ group: "park", label: `${zone.name} entry: ${area.name}, ${st.nights} day${st.nights > 1 ? "s" : ""}`,
-        calc: `(${adults} × ${money(zone.adultDay)}${children ? ` + ${children} × ${money(zone.childDay)}` : ""}) × ${st.nights} day${st.nights > 1 ? "s" : ""}`, cost: r2(dayCost * st.nights) });
-      const nightCost = adults * zone.adultNight + children * zone.childNight;
-      if (nightCost > 0) lines.push({ group: "park", label: `${zone.name} night fee: ${area.name}, ${st.nights} night${st.nights > 1 ? "s" : ""}`,
-        calc: `(${adults} × ${money(zone.adultNight)}${children ? ` + ${children} × ${money(zone.childNight)}` : ""}) × ${st.nights} night${st.nights > 1 ? "s" : ""}`, cost: r2(nightCost * st.nights) });
-    } else errors.push(`${area.name} has no park fee zone.`);
-    if (area.vehicleFee > 0) lines.push({ group: "park", label: `${area.vehicleFeeLabel || "Vehicle fee"}: ${area.name}`,
-      calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(area.vehicleFee)}`, cost: r2(vehicles * area.vehicleFee) });
+    if (!zone) { errors.push(`${area.name} has no park fee zone.`); continue; }
+    const n = st.nights;
+    // Rule 1: entry fee for each day in the park
+    lines.push({ group: "park", label: `${zone.name} entry: ${area.name}, ${times(n, "day")}`, calc: `(${ppCalc(zone.adultDay, zone.childDay)}) × ${times(n, "day")}`, cost: r2(pp(zone.adultDay, zone.childDay) * n) });
+    // Rule 2: overnight fee — Budget → public campsite; lodge inside the park → concession; otherwise none
+    if (q.category === "budget") {
+      if (pp(zone.campAdult, zone.campChild) > 0) lines.push({ group: "park", label: `${zone.name} public campsite: ${area.name}, ${times(n, "night")}`, calc: `(${ppCalc(zone.campAdult, zone.campChild)}) × ${times(n, "night")}`, cost: r2(pp(zone.campAdult, zone.campChild) * n) });
+    } else if (lodge?.insidePark) {
+      if (pp(zone.concessionAdult, zone.concessionChild) > 0) lines.push({ group: "park", label: `${zone.name} concession (lodge inside the park): ${area.name}, ${times(n, "night")}`, calc: `(${ppCalc(zone.concessionAdult, zone.concessionChild)}) × ${times(n, "night")}`, cost: r2(pp(zone.concessionAdult, zone.concessionChild) * n) });
+    }
+    // Rule 5: vehicle entry for each day in the park
+    if (zone.vehicleDay > 0) lines.push({ group: "park", label: `${zone.name} vehicle entry: ${area.name}, ${times(n, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(zone.vehicleDay)} × ${times(n, "day")}`, cost: r2(vehicles * zone.vehicleDay * n) });
+  }
+  // Rule 3: Ngorongoro Conservation Area transit — one NCA day for each drive between east and west without a night in the NCA
+  const sides: Side[] = ["east", ...q.stops.map((st) => cfg.areas.find((a) => a.id === st.areaId)?.side ?? "east"), "east"];
+  let crossings = 0;
+  for (let i = 1; i < sides.length; i++) if ((sides[i - 1] === "east" && sides[i] === "west") || (sides[i - 1] === "west" && sides[i] === "east")) crossings++;
+  const ncaDay = (label: string, days: number) => {
+    if (!nca || days < 1) return;
+    lines.push({ group: "park", label: `${nca.name} ${label}, ${times(days, "day")}`, calc: `(${ppCalc(nca.adultDay, nca.childDay)}) × ${times(days, "day")}`, cost: r2(pp(nca.adultDay, nca.childDay) * days) });
+    if (nca.vehicleDay > 0) lines.push({ group: "park", label: `${nca.name} vehicle entry (${label}), ${times(days, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(nca.vehicleDay)} × ${times(days, "day")}`, cost: r2(vehicles * nca.vehicleDay * days) });
+  };
+  ncaDay("transit", crossings);
+  // Rule 4: Ngorongoro Crater — chosen separately; crater fee per vehicle, plus an NCA day if the trip isn't already in the NCA
+  if (q.crater) {
+    const inNca = crossings > 0 || sides.includes("nca");
+    if (!inNca) ncaDay("entry for the crater day", 1);
+    lines.push({ group: "park", label: "Ngorongoro Crater descent", calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(s.craterFee)}`, cost: r2(vehicles * s.craterFee) });
   }
 
   const safariNights = q.totalNights - 1;
   const days = safariNights + s.vehicleDaysExtra;
   lines.push({ group: "transport", label: `Safari vehicle, ${days} days`, calc: `${vehicles} × ${money(s.vehicleDay)} × ${days} days (${safariNights} safari nights + ${s.vehicleDaysExtra})`, cost: r2(vehicles * s.vehicleDay * days) });
   lines.push({ group: "transport", label: `Guide, ${days} days`, calc: `${vehicles} × ${money(s.guideDay)} × ${days} days`, cost: r2(vehicles * s.guideDay * days) });
+  if ((s.airportTransfer ?? 0) > 0) lines.push({ group: "transport", label: "Airport pick-up and drop-off", calc: `${money(s.airportTransfer)} per booking`, cost: r2(s.airportTransfer) });
   lines.push({ group: "meals", label: "First-day lunch", calc: `${adults} × ${money(s.firstLunchAdult)}${children ? ` + ${children} × ${money(s.firstLunchChild)}` : ""}`, cost: r2(adults * s.firstLunchAdult + children * s.firstLunchChild) });
 
   const sum = (g: Group) => r2(lines.filter((l) => l.group === g).reduce((a, l) => a + l.cost, 0));
@@ -254,6 +316,7 @@ export function publicOptions(cfg: Config) {
       return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
     })),
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
+    crater: cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId),
     doc: cfg.doc ?? null,
     lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };
@@ -269,7 +332,11 @@ export function checkConfig(cfg: Config): string[] {
   ids(cfg.seasons, "season"); ids(cfg.feeZones, "fee zone"); ids(cfg.areas, "area"); ids(cfg.lodges, "lodge");
   if (!cfg.seasons.some((s) => s.id === cfg.defaultSeasonId)) e.push("Default season doesn't exist.");
   cfg.seasons.forEach((s) => s.ranges.forEach((r) => { if (!/^\d{2}-\d{2}$/.test(r.from) || !/^\d{2}-\d{2}$/.test(r.to)) e.push(`Season "${s.name}" has a range that isn't MM-DD.`); }));
-  cfg.areas.forEach((a) => { if (!cfg.feeZones.some((z) => z.id === a.feeZoneId)) e.push(`Area "${a.name}" points to a missing fee zone.`); });
+  cfg.areas.forEach((a) => {
+    if (!cfg.feeZones.some((z) => z.id === a.feeZoneId)) e.push(`Area "${a.name}" points to a missing fee zone.`);
+    if (!["east", "nca", "west"].includes(a.side)) e.push(`Area "${a.name}" needs a side (east, NCA or west).`);
+  });
+  if (cfg.settings.ncaZoneId && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro (NCA) fee zone in Costs & rules doesn't exist.");
   cfg.lodges.forEach((l) => {
     if (l.areaId !== "arusha" && !cfg.areas.some((a) => a.id === l.areaId)) e.push(`Lodge "${l.name}" points to a missing area.`);
     if (!CATEGORIES.some((c) => c.id === l.category)) e.push(`Lodge "${l.name}" has an unknown category.`);
