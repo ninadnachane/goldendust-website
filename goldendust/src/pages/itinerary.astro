@@ -1,7 +1,7 @@
 ---
-// Printable itinerary (save as PDF from the browser).
+// Printable itinerary, 2–3 A4 pages (save as PDF from the browser).
 //   /itinerary#lead=12      admin, from the Leads tab (needs to be signed in)
-//   /itinerary#t=<data>     guest, from the planner (trip stays in the URL hash, never sent to a server log)
+//   /itinerary#t=<data>     guest, from the planner (trip stays in the URL hash)
 import { site } from "../lib/site";
 ---
 <!doctype html>
@@ -13,7 +13,7 @@ import { site } from "../lib/site";
   <title>Your Tanzania safari | Golden Dust Safaris</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
-<body data-wa={site.whatsapp} data-phone={site.phoneDisplay}>
+<body data-phone={site.phoneDisplay}>
   <div class="bar no-print">
     <a href="/planner" class="bar__back" data-back>← Back</a>
     <span class="bar__tip" data-tip>Tip: in the print window choose "Save as PDF".</span>
@@ -22,95 +22,120 @@ import { site } from "../lib/site";
   <main class="doc" data-doc><p class="loading">Preparing your itinerary…</p></main>
 
   <script>
+    type L = { name: string; description: string; images: string[] };
     type Opt = {
-      categories: { id: string; name: string; blurb: string }[];
+      categories: { id: string; name: string }[];
       arrivalName: string;
-      arrivalLodges: Record<string, { name: string; description: string; images: string[] } | null>;
-      areas: { id: string; name: string }[];
-      lodges: { id: string; name: string; areaId: string; description: string; images: string[] }[];
+      arrivalLodges: Record<string, L | null>;
+      areas: { id: string; name: string; blurb: string }[];
+      lodges: (L & { id: string; areaId: string })[];
+      doc: { included: string[]; excluded: string[]; payment: string; notes: string[] } | null;
     };
     type Trip = { startDate: string; adults: number; childAges: number[]; category: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[] };
     type Priced = { park: number; transport: number; accommodation: number; meals: number; margin: number; total: number };
 
-    const body = document.body;
     const docEl = document.querySelector<HTMLElement>("[data-doc]")!;
+    const phone = document.body.dataset.phone || "";
     const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-    const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+    const usd = (n: number) => Math.round(n).toLocaleString("en-US");
     const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
-    const fmt = (iso: string, o: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
+    const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
+    const short = (iso: string) => fmt(iso, { weekday: "short", day: "numeric", month: "short" });
     const long = (iso: string) => fmt(iso, { day: "numeric", month: "long", year: "numeric" });
+    const pill = (t: string) => `<h2 class="pill">${esc(t)}</h2>`;
 
-    function lodgeBlock(l: { name: string; description: string; images: string[] } | null | undefined) {
-      if (!l) return "";
-      const imgs = l.images.slice(0, 3);
-      return `<div class="lodge">
-        ${imgs.length ? `<div class="lodge__imgs n${imgs.length}">${imgs.map((id) => `<img src="/media/${esc(id)}" alt="">`).join("")}</div>` : ""}
-        <p class="lodge__name">Overnight: ${esc(l.name)}</p>
-        ${l.description ? `<p class="lodge__desc">${esc(l.description)}</p>` : ""}
-      </div>`;
+    function circle(img: string | undefined, fallback: string) {
+      return img ? `<img class="circ" src="/media/${esc(img)}" alt="">` : `<span class="circ circ--x">${esc(fallback)}</span>`;
     }
 
     function render(o: Opt, t: Trip, priced: Priced | null, perPerson: number, guest: { name?: string; ref?: string }) {
-      const cat = o.categories.find((c) => c.id === t.category);
+      const cat = o.categories.find((c) => c.id === t.category)?.name ?? t.category;
       const end = addDays(t.startDate, t.totalNights);
-      const kids = t.childAges.length ? `, ${t.childAges.length} child${t.childAges.length > 1 ? "ren" : ""} (age ${t.childAges.join(", ")})` : "";
+      const areaName = (id: string) => o.areas.find((a) => a.id === id)?.name ?? id;
+      const route = [...new Set(t.stops.map((s) => areaName(s.areaId).replace(/^(North|Central|South) /, "")))].join(" | ");
+      const guests = `${t.adults} adult${t.adults > 1 ? "s" : ""}${t.childAges.length ? `, ${t.childAges.length} child${t.childAges.length > 1 ? "ren" : ""} (${t.childAges.join(", ")})` : ""}`;
+      const arrival = o.arrivalLodges[t.category];
+
+      // --- day rows
+      const row = (left: string, label: string, sub: string, lines: [string, string][]) => `<section class="day">
+          <div class="day__l">${left}<p class="day__lab">${esc(label)}</p><p class="day__sub">${esc(sub)}</p></div>
+          <div class="day__r">${lines.map(([k, v]) => `<div class="ln"><span class="ln__k">${esc(k)}</span><span class="ln__v">${v}</span></div>`).join("")}</div>
+        </section>`;
       const days: string[] = [];
-      days.push(`<section class="day"><div class="day__when"><span class="day__n">Day 1</span><span>${fmt(t.startDate)}</span></div>
-        <div class="day__what"><h3>Arrive in ${esc(o.arrivalName)}</h3><p>Arrive and settle into your hotel, ready for the safari.</p>${lodgeBlock(o.arrivalLodges[t.category])}</div></section>`);
+      days.push(row(circle(arrival?.images[0], "1"), "Arrival day", short(t.startDate), [
+        ["Arrival", "Welcome to Tanzania. Transfer to Arusha."],
+        ["Overnight", `${esc(arrival?.name ?? o.arrivalName)}`],
+        ["Evening", "Safari briefing: we answer all the questions you have in mind."],
+      ]));
       let d = 1;
       for (const s of t.stops) {
         const a = o.areas.find((x) => x.id === s.areaId);
         const l = o.lodges.find((x) => x.id === s.lodgeId);
-        const from = d + 1, to = d + s.nights;
-        const label = s.nights > 1 ? `Days ${from}–${to}` : `Day ${from}`;
-        const when = s.nights > 1 ? `${fmt(addDays(t.startDate, d))} – ${fmt(addDays(t.startDate, d + s.nights - 1))}` : fmt(addDays(t.startDate, d));
-        days.push(`<section class="day"><div class="day__when"><span class="day__n">${label}</span><span>${when}</span></div>
-          <div class="day__what"><h3>${esc(a?.name ?? s.areaId)} <small>${s.nights} night${s.nights > 1 ? "s" : ""}</small></h3><p>Game drives with your private guide.</p>${lodgeBlock(l)}</div></section>`);
+        const label = s.nights > 1 ? `Day ${d}–${d + s.nights - 1}` : `Day ${d}`;
+        const when = s.nights > 1 ? `${short(addDays(t.startDate, d))} – ${short(addDays(t.startDate, d + s.nights - 1))}` : short(addDays(t.startDate, d));
+        days.push(row(circle(l?.images[0], String(d)), `${label} · ${areaName(s.areaId)}`, when, [
+          ["Game drives", esc(a?.blurb || `Game drives in ${areaName(s.areaId)} with your private guide.`)],
+          ["Overnight", `${esc(l?.name ?? "")}${s.nights > 1 ? ` <em>(${s.nights} nights)</em>` : ""}`],
+        ]));
         d += s.nights;
       }
-      days.push(`<section class="day"><div class="day__when"><span class="day__n">Day ${t.totalNights + 1}</span><span>${fmt(end)}</span></div>
-        <div class="day__what"><h3>Back to Arusha</h3><p>Drive back to Arusha or to the airport for your flight.</p></div></section>`);
+      days.push(row(circle(undefined, "✈"), `Day ${d} · Departure`, short(end), [
+        ["Morning", "Leave after breakfast and drive back to Arusha or to the airport for your flight."],
+      ]));
 
-      const price = priced ? `<table class="price">
-          <tr><td>Park fees</td><td>${usd(priced.park)}</td></tr>
-          <tr><td>Vehicle &amp; private guide</td><td>${usd(priced.transport)}</td></tr>
-          <tr><td>Accommodation</td><td>${usd(priced.accommodation)}</td></tr>
-          <tr><td>Meals</td><td>${usd(priced.meals)}</td></tr>
-          <tr><td>Our margin</td><td>${usd(priced.margin)}</td></tr>
-          <tr class="tot"><td>Total for your group</td><td>${usd(priced.total)}</td></tr>
-          <tr class="pp"><td></td><td>about ${usd(perPerson)} per person</td></tr>
-        </table>` : `<p>We'll confirm the price with you on WhatsApp.</p>`;
+      // --- price
+      const price = priced ? `<table class="inv">
+          <thead><tr><th>Expenses</th><th>Amount (USD)</th></tr></thead>
+          <tbody>
+            <tr><td>Vehicle &amp; guide</td><td>${usd(priced.transport)}</td></tr>
+            <tr><td>Park fees</td><td>${usd(priced.park)}</td></tr>
+            <tr><td>Accommodation</td><td>${usd(priced.accommodation)}</td></tr>
+            <tr><td>Food</td><td>${usd(priced.meals)}</td></tr>
+            <tr><td>Our margin</td><td>${usd(priced.margin)}</td></tr>
+            <tr class="b"><td>Total</td><td>${usd(priced.total)}</td></tr>
+            <tr class="b"><td>Cost per person</td><td>${usd(perPerson)}</td></tr>
+          </tbody></table>` : `<p>We'll confirm the price with you on WhatsApp.</p>`;
+
+      // --- lodge photos ("Painting a picture")
+      const seen = new Set<string>();
+      const stays: L[] = [];
+      for (const s of t.stops) { const l = o.lodges.find((x) => x.id === s.lodgeId); if (l && l.images.length && !seen.has(l.name)) { seen.add(l.name); stays.push(l); } }
+      if (arrival && arrival.images.length && !seen.has(arrival.name)) stays.push(arrival);
+      const per = stays.length <= 2 ? 3 : stays.length <= 6 ? 2 : 1;
+      const gallery = stays.length ? `${pill("Painting a picture")}<div class="pics ${stays.length <= 2 ? "pics--wide" : ""}">${stays.map((l) =>
+        `<figure class="pic"><figcaption>${esc(l.name)}</figcaption><div class="pic__row n${Math.min(per, l.images.length)}">${l.images.slice(0, per).map((im) => `<img src="/media/${esc(im)}" alt="">`).join("")}</div></figure>`).join("")}</div>` : "";
+
+      const doc = o.doc ?? { included: [], excluded: [], payment: "", notes: [] };
+      const fine = `${pill("The fine print")}<div class="fine">
+          <div><h3>Included</h3><ul>${doc.included.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+          <div><h3>Excluded</h3><ul>${doc.excluded.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        </div>${doc.notes.length ? `<div class="notes"><h3>Note</h3>${doc.notes.map((n) => `<p>${esc(n)}</p>`).join("")}</div>` : ""}`;
+      const foot = `<footer class="foot">Golden Dust Safaris · TALA-registered · Arusha, Tanzania · WhatsApp ${esc(phone)} · goldendustsafaris.com</footer>`;
 
       docEl.innerHTML = `
-        <header class="top">
-          <img src="/images/logo-header.webp" alt="Golden Dust Safaris" class="top__logo">
-          <div class="top__co">TALA-registered safari operator<br>Arusha, Tanzania<br>WhatsApp ${esc(body.dataset.phone)}</div>
-        </header>
-        <h1>Your Tanzania safari</h1>
-        <p class="sub">${guest.name ? `Prepared for ${esc(guest.name)} · ` : ""}${guest.ref ? `Ref ${esc(guest.ref)} · ` : ""}${long(new Date().toISOString().slice(0, 10))}</p>
-        <div class="facts">
-          <div><span>Dates</span><strong>${fmt(t.startDate, { day: "numeric", month: "short" })} – ${long(end)}</strong></div>
-          <div><span>Length</span><strong>${t.totalNights} nights, ${t.totalNights + 1} days</strong></div>
-          <div><span>Travellers</span><strong>${t.adults} adult${t.adults > 1 ? "s" : ""}${kids}</strong></div>
-          <div><span>Style</span><strong>${esc(cat?.name ?? t.category)}</strong></div>
+        <div class="sheet">
+          <header class="hd"><img src="/images/logo-header.webp" alt="Golden Dust Safaris" class="hd__logo"></header>
+          <div class="info">
+            <div><p class="info__route">${esc(route.toUpperCase())}</p><p class="info__len">${t.totalNights + 1}-DAY / ${t.totalNights}-NIGHT TRIP · ${esc(cat.toUpperCase())}</p></div>
+            <dl>
+              <div><dt>Arrival date</dt><dd>${long(t.startDate)}</dd></div>
+              ${guest.name ? `<div><dt>Guest name</dt><dd>${esc(guest.name)}</dd></div>` : ""}
+              <div><dt>No. of guests</dt><dd>${esc(guests)}</dd></div>
+              ${guest.ref ? `<div><dt>Reference</dt><dd>${esc(guest.ref)}</dd></div>` : ""}
+            </dl>
+          </div>
+          ${pill("Safari itinerary")}
+          ${days.join("")}
         </div>
-        <h2>Day by day</h2>
-        ${days.join("")}
-        <div class="two">
-          <section class="box"><h2>Price</h2>${price}</section>
-          <section class="box"><h2>What's included</h2>
-            <ul class="inc">
-              <li>Private safari vehicle and your own guide</li>
-              <li>All park and conservation fees</li><li>Accommodation as listed, incl. your first night in Arusha</li>
-              <li>Lunch on your first safari day</li>
-            </ul>
-            <h3>Not included</h3>
-            <ul class="exc"><li>International flights and visa</li><li>Travel insurance</li><li>Tips for guide and staff</li><li>Drinks and personal expenses</li><li>Optional extras (e.g. balloon safari)</li></ul>
-          </section>
+        <div class="sheet">
+          ${pill("Investment breakdown")}
+          ${price}
+          ${doc.payment ? `<p class="pay">${esc(doc.payment)}</p>` : ""}
+          ${gallery}
+          ${stays.length ? "" : fine + foot}
         </div>
-        <p class="fine">Prices are in US dollars and are an estimate until we've confirmed availability with each lodge. Dates and lodges can be changed: just tell us on WhatsApp.</p>
-        <footer class="foot">Golden Dust Safaris · Arusha, Tanzania · WhatsApp ${esc(body.dataset.phone)} · goldendustsafaris.com</footer>`;
-      document.title = `${guest.name ? guest.name + " – " : ""}Tanzania safari ${t.startDate}${guest.ref ? " " + guest.ref : ""} | Golden Dust Safaris`;
+        ${stays.length ? `<div class="sheet">${fine}${foot}</div>` : ""}`;
+      document.title = `${guest.name ? guest.name + " – " : ""}Safari itinerary ${t.startDate}${guest.ref ? " " + guest.ref : ""} | Golden Dust Safaris`;
       const btn = document.querySelector<HTMLButtonElement>("[data-print]")!;
       btn.disabled = false;
       btn.addEventListener("click", async () => {
@@ -148,67 +173,84 @@ import { site } from "../lib/site";
   </script>
 
   <style is:global>
-    :root { --gold: #c89a4b; --rust: #8a4b2e; --ivory: #f4ede0; --tint: #f8f3ea; --dark: #2e241b; --ink: #2b2118; --ink-2: #6b5d4f; --line: #e6dccb; }
+    :root { --gold: #c89a4b; --tan: #b39670; --paper: #efe4d3; --rust: #8a4b2e; --dark: #2e241b; --ink: #2b2118; --ink-2: #5f5244; --line: #d9c9b1; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: #ece6dc; font-family: Montserrat, system-ui, sans-serif; color: var(--ink); font-size: 14px; line-height: 1.5; }
-    .bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; background: var(--dark); color: var(--ivory); }
-    .bar__back { color: var(--ivory); text-decoration: none; font-weight: 600; }
-    .bar__tip { margin-right: auto; font-size: 0.85rem; opacity: 0.8; }
-    .bar__btn { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 0.6rem 1.2rem; background: var(--gold); color: var(--dark); cursor: pointer; }
+    html { font-size: 11px; }
+    body { margin: 0; background: #d9d2c7; font-family: Montserrat, system-ui, sans-serif; color: var(--ink); line-height: 1.45; }
+    .bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.2rem; background: var(--dark); color: #f4ede0; font-size: 1.2rem; }
+    .bar__back { color: #f4ede0; text-decoration: none; font-weight: 600; }
+    .bar__tip { margin-right: auto; opacity: 0.8; font-size: 1.1rem; }
+    .bar__btn { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 0.7rem 1.4rem; background: var(--gold); color: var(--dark); cursor: pointer; }
     .bar__btn:disabled { opacity: 0.5; }
-    .doc { width: min(210mm, 100%); margin: 1.5rem auto; background: #fff; padding: 16mm 15mm; box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.35); }
-    .loading { color: var(--ink-2); text-align: center; padding: 4rem 0; }
-    .top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--gold); padding-bottom: 0.8rem; }
-    .top__logo { height: 64px; width: auto; }
-    .top__co { text-align: right; font-size: 0.8rem; color: var(--ink-2); }
-    h1 { font-size: 1.9rem; margin: 1.1rem 0 0.1rem; font-weight: 700; }
-    .sub { color: var(--ink-2); margin: 0 0 1rem; }
-    h2 { font-size: 1.1rem; margin: 1.4rem 0 0.6rem; color: var(--rust); }
-    h3 { font-size: 1rem; margin: 0 0 0.25rem; }
-    h3 small { font-weight: 500; color: var(--ink-2); font-size: 0.85rem; }
-    .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; background: var(--tint); border-radius: 10px; padding: 0.8rem 1rem; }
-    .facts span { display: block; font-size: 0.75rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
-    .facts strong { font-size: 0.92rem; }
-    .day { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; padding: 0.8rem 0; border-top: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; }
-    .day__when { display: flex; flex-direction: column; font-size: 0.82rem; color: var(--ink-2); }
-    .day__n { font-weight: 700; color: var(--ink); font-size: 0.95rem; }
-    .day__what p { margin: 0 0 0.4rem; }
-    .lodge__imgs { display: grid; gap: 4px; margin: 0.4rem 0; border-radius: 8px; overflow: hidden; }
-    .lodge__imgs.n2 { grid-template-columns: 1fr 1fr; }
-    .lodge__imgs.n3 { grid-template-columns: 2fr 1fr 1fr; }
-    .lodge__imgs img { width: 100%; height: 34mm; object-fit: cover; display: block; }
-    .lodge__imgs.n1 img { height: 45mm; }
-    .lodge__name { font-weight: 600; margin: 0.2rem 0 0 !important; }
-    .lodge__desc { color: var(--ink-2); font-size: 0.88rem; }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; break-inside: avoid; page-break-inside: avoid; margin-top: 0.6rem; }
-    .box { border: 1px solid var(--line); border-radius: 10px; padding: 0 1rem 0.8rem; }
-    .price { width: 100%; border-collapse: collapse; }
-    .price td { padding: 0.25rem 0; }
-    .price td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
-    .price tr.tot td { border-top: 2px solid var(--ink); padding-top: 0.5rem; font-weight: 700; font-size: 1.1rem; }
-    .price tr.pp td { color: var(--ink-2); font-size: 0.85rem; padding-top: 0; }
-    .inc, .exc { margin: 0 0 0.6rem; padding-left: 1.1rem; font-size: 0.88rem; }
-    .exc { color: var(--ink-2); }
-    .fine { font-size: 0.8rem; color: var(--ink-2); margin-top: 1rem; }
-    .foot { margin-top: 1rem; padding-top: 0.6rem; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--ink-2); text-align: center; }
-    @media (max-width: 640px) {
-      .doc { margin: 0; padding: 1.2rem 1rem; box-shadow: none; }
-      .facts { grid-template-columns: 1fr 1fr; }
-      .day { grid-template-columns: 1fr; gap: 0.3rem; }
-      .day__when { flex-direction: row; gap: 0.6rem; align-items: baseline; }
-      .two { grid-template-columns: 1fr; }
+    .loading { color: var(--ink-2); text-align: center; padding: 6rem 0; font-size: 1.3rem; }
+    .doc { padding: 1.5rem 0; }
+    .sheet { width: 210mm; min-height: 297mm; margin: 0 auto 1.5rem; padding: 12mm 14mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; background: var(--paper); box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.4); position: relative; }
+    .hd { display: flex; justify-content: center; margin: -12mm -14mm 5mm; padding: 4mm 0 3mm; background: #fff; }
+    .hd__logo { height: 22mm; width: auto; }
+    .info { display: flex; justify-content: space-between; gap: 6mm; border: 1.5px solid var(--dark); border-radius: 10px; padding: 4mm 5mm; background: rgba(255, 255, 255, 0.35); }
+    .info__route { font-weight: 700; font-size: 1.25rem; margin: 0; letter-spacing: 0.02em; }
+    .info__len { margin: 1.5mm 0 0; font-weight: 600; color: var(--ink-2); }
+    .info dl { margin: 0; display: grid; gap: 1mm; min-width: 75mm; }
+    .info dl div { display: grid; grid-template-columns: 28mm 1fr; gap: 2mm; }
+    .info dt { font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
+    .info dd { margin: 0; }
+    .pill { margin: 5mm 0 3mm; background: var(--tan); color: #fff; text-align: center; border-radius: 999px; padding: 2mm 0; font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; break-after: avoid; }
+    .day { display: grid; grid-template-columns: 56mm 1fr; gap: 5mm; padding: 2.4mm 0; border-bottom: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; }
+    .day:last-child { border-bottom: 0; }
+    .day__l { display: grid; grid-template-columns: 15mm 1fr; column-gap: 3mm; align-content: center; align-items: center; }
+    .circ { grid-row: span 2; width: 15mm; height: 15mm; border-radius: 50%; object-fit: cover; display: block; margin: 0; border: 0.8mm solid #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+    .circ--x { display: grid; place-items: center; background: var(--tan); color: #fff; font-weight: 700; font-size: 1.3rem; }
+    .day__lab { margin: 0; font-weight: 700; text-transform: uppercase; font-size: 0.88rem; line-height: 1.3; align-self: end; }
+    .day__sub { margin: 0.3mm 0 0; color: var(--ink-2); font-size: 0.88rem; align-self: start; }
+    .day__r { border-left: 1.5px solid var(--dark); padding-left: 5mm; display: grid; gap: 1.4mm; align-content: center; }
+    .ln { display: grid; grid-template-columns: 22mm 1fr; gap: 3mm; position: relative; }
+    .ln::before { content: ""; position: absolute; left: calc(-5mm - 1.6mm); top: 1.2mm; width: 2.4mm; height: 2.4mm; border-radius: 50%; background: var(--dark); }
+    .ln__k { font-weight: 700; }
+    .ln__v em { color: var(--ink-2); font-style: normal; }
+    .inv { width: 100%; border-collapse: collapse; background: #fff; font-size: 1.05rem; }
+    .inv th { background: #e2d6c3; text-align: left; padding: 2.2mm 3mm; }
+    .inv th:last-child, .inv td:last-child { text-align: right; width: 40mm; }
+    .inv td { padding: 2mm 3mm; border-top: 1px solid var(--line); }
+    .inv tr.b td { font-weight: 700; background: #ece3d5; }
+    .pay { font-size: 0.95rem; color: var(--ink-2); margin: 2mm 0 0; }
+    .pics { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 5mm; }
+    .pics--wide { grid-template-columns: 1fr; }
+    .pic { margin: 0; break-inside: avoid; }
+    .pic figcaption { text-align: center; font-weight: 700; margin-bottom: 2mm; font-size: 1.05rem; }
+    .pic__row { display: grid; gap: 2mm; }
+    .pic__row.n2 { grid-template-columns: 1fr 1fr; }
+    .pic__row.n3 { grid-template-columns: 1fr 1fr 1fr; }
+    .pic__row img { width: 100%; height: 34mm; object-fit: cover; display: block; }
+    .pics--wide .pic__row img { height: 46mm; }
+    .fine { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+    .fine h3, .notes h3 { margin: 0 0 2mm; font-size: 1.05rem; text-transform: uppercase; }
+    .fine ul { margin: 0; padding-left: 4.5mm; display: grid; gap: 1mm; }
+    .notes { margin-top: 6mm; }
+    .notes p { margin: 0 0 2mm; }
+    .foot { position: absolute; left: 14mm; right: 14mm; bottom: 10mm; text-align: center; color: var(--ink-2); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 2.5mm; }
+    @media screen and (max-width: 820px) {
+      html { font-size: 10px; }
+      .doc { padding: 0; }
+      .sheet { width: 100%; min-height: 0; margin: 0 0 4px; padding: 5vw 4vw 16vw; box-shadow: none; }
+      .hd { margin: -5vw -4vw 4vw; }
+      .info { flex-direction: column; }
+      .info dl { min-width: 0; }
+      .day { grid-template-columns: 1fr; gap: 2vw; }
+      .day__l { grid-template-columns: 12vw 1fr; }
+      .circ { width: 12vw; height: 12vw; }
+      .ln { grid-template-columns: 1fr; gap: 0; }
+      .fine { grid-template-columns: 1fr; gap: 4vw; }
+      .pics { grid-template-columns: 1fr; }
       .bar__tip { display: none; }
       .bar__back { margin-right: auto; }
     }
-    @page { size: A4; margin: 12mm; }
+    @page { size: A4; margin: 0; }
     @media print {
-      html { font-size: 11.5px; }
-      body { background: #fff; font-size: 1rem; }
+      html, body { background: var(--paper); }
       .no-print { display: none !important; }
-      .doc { width: auto; margin: 0; padding: 0; box-shadow: none; }
-      .facts { grid-template-columns: repeat(4, 1fr); }
-      .day { grid-template-columns: 7.5rem 1fr; }
-      .two { grid-template-columns: 1fr 1fr; }
+      .doc { padding: 0; }
+      .sheet { margin: 0; box-shadow: none; width: 210mm; min-height: 296.5mm; break-after: page; page-break-after: always; }
+      .sheet:last-child { break-after: auto; page-break-after: auto; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>

@@ -72,6 +72,9 @@
       <h2>Arusha arrival night</h2>
       <p class="hint">Every trip starts with one night in Arusha, included. Pick the hotel used for each category (add Arusha hotels in "Lodges &amp; camps" with area "Arusha").</p>
       <div class="cards" data-arrival></div>
+      <h2>Itinerary PDF text</h2>
+      <p class="hint">Printed on every itinerary PDF. One item per line.</p>
+      <div class="doctext" data-doctext></div>
     </section>
 
     <section class="pane" data-pane="seasons" hidden>
@@ -225,6 +228,16 @@
       host.innerHTML = fields.map(([k, label, step]) => `<label class="card">${esc(label)}<input type="number" min="0" step="${step}" data-s="${k}" value="${cfg.settings[k]}"></label>`).join("");
       host.querySelectorAll<HTMLInputElement>("[data-s]").forEach((el) => el.addEventListener("change", () => { (cfg.settings as any)[el.dataset.s!] = Number(el.value) || 0; markDirty(); }));
 
+      const dt = $("[data-doctext]");
+      cfg.doc ??= { included: [], excluded: [], payment: "", notes: [] };
+      const docFields: [keyof NonNullable<Config["doc"]>, string, number][] = [["included", "Included", 10], ["excluded", "Not included", 7], ["payment", "Payment terms (under the price)", 2], ["notes", "Notes (one paragraph per line)", 4]];
+      dt.innerHTML = docFields.map(([k, label, rows]) => { const v = cfg.doc![k]; return `<label class="card">${esc(label)}<textarea rows="${rows}" data-doc="${k}">${esc(Array.isArray(v) ? v.join("\n") : v)}</textarea></label>`; }).join("");
+      dt.querySelectorAll<HTMLTextAreaElement>("[data-doc]").forEach((el) => el.addEventListener("change", () => {
+        const k = el.dataset.doc as keyof NonNullable<Config["doc"]>;
+        (cfg.doc as any)[k] = k === "payment" ? el.value.trim() : el.value.split("\n").map((x) => x.trim()).filter(Boolean);
+        markDirty();
+      }));
+
       const ar = $("[data-arrival]");
       const arusha = cfg.lodges.filter((l) => l.areaId === "arusha");
       ar.innerHTML = CATEGORIES.map((c) => `<label class="card">${c.name}<select data-arr="${c.id}">${arusha.map((l) => `<option value="${esc(l.id)}" ${cfg.arrival.lodges[c.id] === l.id ? "selected" : ""}>${esc(l.name)}${l.active ? "" : " (inactive)"}</option>`).join("")}</select></label>`).join("");
@@ -278,6 +291,7 @@
         { key: "vehicleFeeLabel", label: "Vehicle fee name", type: "text" },
         { key: "vehicleFee", label: "Vehicle fee ($)", type: "number" },
         { key: "active", label: "Shown", type: "bool" },
+        { key: "blurb", label: "Line on the itinerary PDF", type: "text" },
         { key: "id", label: "ID", type: "readonly" },
       ], {
         reorder: true,
@@ -612,6 +626,8 @@
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.7rem; }
     .card { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-weight: 500; }
     .card input { width: 100%; }
+    .doctext { display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 0.7rem; }
+    .doctext textarea { font: inherit; padding: 0.5rem; border: 1px solid var(--line); border-radius: 6px; width: 100%; }
     .filters { display: flex; gap: 1rem; margin: 0.5rem 0 0.8rem; }
     .filters label { display: flex; gap: 0.4rem; align-items: center; }
     .test { display: grid; grid-template-columns: minmax(20rem, 26rem) 1fr; gap: 2rem; align-items: start; }

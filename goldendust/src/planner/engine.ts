@@ -41,7 +41,11 @@ export type Area = {
   minNights: number;
   vehicleFee: number; vehicleFeeLabel: string; // once per visit, per vehicle (e.g. crater descent)
   active: boolean;
+  blurb?: string; // one line for the itinerary PDF, e.g. "Game drives in Tarangire, known for elephants and baobabs"
 };
+
+// Text printed on the itinerary PDF (edited in /admin → Costs & rules).
+export type DocText = { included: string[]; excluded: string[]; payment: string; notes: string[] };
 
 export type RoomRates = { single: number; double: number; triple: number; child: number }; // per room / per child, per night
 export type Lodge = {
@@ -59,6 +63,7 @@ export type Config = {
   areas: Area[]; // in route order
   lodges: Lodge[];
   arrival: { name: string; lodges: Record<Category, string> }; // Arusha arrival night, lodge per category
+  doc?: DocText;
 };
 
 export type QuoteRequest = {
@@ -248,7 +253,8 @@ export function publicOptions(cfg: Config) {
       const l = cfg.lodges.find((x) => x.id === cfg.arrival.lodges[c.id]);
       return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
     })),
-    areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights })),
+    areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
+    doc: cfg.doc ?? null,
     lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };
 }

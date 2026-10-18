@@ -13,13 +13,13 @@ const scale = (r: RoomRates, k: number): RoomRates => ({
 const rates = (c: Category) => ({ low: base[c], high: scale(base[c], 1.3), green: scale(base[c], 0.75) });
 
 const areas = [
-  { id: "tarangire", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "manyara", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "ndutu", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "south-serengeti", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "central-serengeti", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "north-serengeti", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, vehicleFee: 0, vehicleFeeLabel: "", active: true },
-  { id: "ngorongoro", name: "Ngorongoro", feeZoneId: "ncaa", minNights: 1, vehicleFee: 295, vehicleFeeLabel: "Crater descent fee", active: true },
+  { id: "tarangire", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "manyara", blurb: "Game drives around Lake Manyara: groundwater forest, flamingos and tree-climbing lions if you're lucky.", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "ndutu", blurb: "Game drives on the Ndutu plains, where the herds gather to calve from January to March.", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "south-serengeti", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "central-serengeti", blurb: "Game drives in the central Serengeti around Seronera, home to many of the park's big cats.", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "north-serengeti", blurb: "Game drives in the northern Serengeti, where the herds cross the Mara River from July.", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, vehicleFee: 0, vehicleFeeLabel: "", active: true },
+  { id: "ngorongoro", blurb: "Down into the Ngorongoro Crater for a game drive on the crater floor.", name: "Ngorongoro", feeZoneId: "ncaa", minNights: 1, vehicleFee: 295, vehicleFeeLabel: "Crater descent fee", active: true },
 ];
 
 const catName: Record<Category, string> = { budget: "camp", comfort: "comfort lodge", luxury: "luxury lodge" };
@@ -53,4 +53,20 @@ export const defaultConfig: Config = {
   areas,
   lodges,
   arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", luxury: "arusha-luxury" } },
+  doc: {
+    included: [
+      "Airport pick-up & drop-off (ARK or JRO)", "All ground transfers as per itinerary", "Private 4×4 safari vehicle with pop-up roof",
+      "Professional driver-guide (English)", "Park entrance fees", "Concession / camping fees", "Accommodation as listed",
+      "Meals on full board basis during safari (breakfast, lunch & dinner)", "Picnic lunches during game drives",
+      "Drinking water during safari (in the vehicle)", "Soft drinks & beer (only in the vehicle)", "All game drives as per itinerary",
+    ],
+    excluded: [
+      "International flights", "Visa fees", "Travel & medical insurance", "Tips & gratuities (standard tipping is USD 10-20 per person per day)",
+      "Beverages at the camps", "Personal expenses (laundry, minibar, souvenirs, phone calls)", "Optional activities (e.g. hot air balloon safari)",
+    ],
+    payment: "Advance of 30%, the rest in cash on arrival. The cancellation policy of each camp and lodge applies.",
+    notes: [
+      "Accommodation is subject to availability. Bookings aren't confirmed until you accept this quotation, so a listed property may become fully booked in the meantime. If that happens we'll propose suitable alternatives for your approval. If you're not happy with the alternatives and we can't secure your original choice, we'll give you a full refund.",
+    ],
+  },
 };
