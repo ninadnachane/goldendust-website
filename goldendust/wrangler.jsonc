@@ -20,10 +20,10 @@
     }
   ],
   "vars": {
-    // Only these emails can use /admin (checked by the Worker on top of Cloudflare Access).
-    "ADMIN_EMAILS": "hello@goldendustsafaris.com"
-    // ACCESS_TEAM_DOMAIN and ACCESS_AUD are added once Cloudflare Access is set up.
-    // Until then the admin stays locked.
+    // Only these emails can sign in to /admin. Secrets ADMIN_PASSWORD and RESEND_API_KEY
+    // are set in the Cloudflare dashboard; until both exist the admin stays locked.
+    "ADMIN_EMAILS": "hello@goldendustsafaris.com",
+    "MAIL_FROM": "Golden Dust admin <onboarding@resend.dev>"
   },
   "observability": { "enabled": true }
 }

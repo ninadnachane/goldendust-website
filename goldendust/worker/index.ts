@@ -2,89 +2,18 @@
 // Public:  GET /api/planner/options, POST /api/planner/quote, GET /media/<id> (lodge photos)
 // Admin:   /admin (page) and /api/admin/*
 //
-// Admin security (two locks):
-//  1. Cloudflare Access sits in front of /admin and /api/admin/* and only lets in
-//     the emails in its policy (one-time code sent to the inbox, no password).
-//  2. This Worker independently verifies Access's signed login token (JWT): signature
-//     against the team's public keys, audience, issuer, expiry, and the email against
-//     ADMIN_EMAILS. If Access is missing or misconfigured, the admin stays locked.
-// Local development only: DEV_ADMIN_BYPASS="1" in .dev.vars skips the check.
+// Admin security: password + one-time email code, see worker/auth.ts.
+// Login page: /admin/login. Local development only: DEV_ADMIN_BYPASS="1" in .dev.vars.
+import { authApi, sessionEmail, logoutEverywhere, type AuthEnv } from "./auth";
 import { quote, publicOptions, checkConfig, type Config, type QuoteRequest } from "../src/planner/engine";
 import { defaultConfig } from "../src/planner/defaults";
 
-interface Env {
+interface Env extends AuthEnv {
   ASSETS: Fetcher;
-  DB: D1Database;
-  ACCESS_TEAM_DOMAIN?: string; // e.g. "goldendust.cloudflareaccess.com"
-  ACCESS_AUD?: string; // Application Audience (AUD) tag from the Access application
-  ADMIN_EMAILS?: string; // comma separated
-  DEV_ADMIN_BYPASS?: string;
 }
 
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra } });
-
-// ---------- Cloudflare Access JWT verification
-type Jwk = JsonWebKey & { kid: string };
-let certCache: { at: number; keys: Jwk[] } | null = null;
-
-async function accessKeys(team: string, force = false): Promise<Jwk[]> {
-  if (!force && certCache && Date.now() - certCache.at < 10 * 60 * 1000) return certCache.keys;
-  const r = await fetch(`https://${team}/cdn-cgi/access/certs`);
-  if (!r.ok) throw new Error("certs " + r.status);
-  const d = await r.json<{ keys: Jwk[] }>();
-  certCache = { at: Date.now(), keys: d.keys || [] };
-  return certCache.keys;
-}
-
-const b64urlBytes = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "=")), (c) => c.charCodeAt(0));
-const b64urlJson = (s: string) => JSON.parse(new TextDecoder().decode(b64urlBytes(s)));
-
-function cookie(req: Request, name: string) {
-  const m = (req.headers.get("cookie") || "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-  return m ? m[1] : "";
-}
-
-export async function adminEmail(req: Request, env: Env): Promise<string | null> {
-  if (env.DEV_ADMIN_BYPASS === "1" && new URL(req.url).hostname.match(/^(localhost|127\.0\.0\.1)$/)) return "dev@localhost";
-  const team = (env.ACCESS_TEAM_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const aud = env.ACCESS_AUD || "";
-  const allowed = (env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-  if (!team || !aud || !allowed.length) return null;
-  const token = req.headers.get("cf-access-jwt-assertion") || cookie(req, "CF_Authorization");
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const header = b64urlJson(parts[0]);
-    const payload = b64urlJson(parts[1]);
-    if (header.alg !== "RS256") return null;
-    let keys = await accessKeys(team);
-    let jwk = keys.find((k) => k.kid === header.kid);
-    if (!jwk) { keys = await accessKeys(team, true); jwk = keys.find((k) => k.kid === header.kid); }
-    if (!jwk) return null;
-    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlBytes(parts[2]), new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
-    if (!ok) return null;
-    const now = Math.floor(Date.now() / 1000);
-    const auds = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-    if (!auds.includes(aud)) return null;
-    if (payload.iss !== `https://${team}`) return null;
-    if (!(payload.exp > now) || (payload.nbf && payload.nbf > now + 60)) return null;
-    const email = String(payload.email || "").toLowerCase();
-    return allowed.includes(email) ? email : null;
-  } catch (e) {
-    console.log("access verify failed", String(e));
-    return null;
-  }
-}
-
-const denied = (env: Env) =>
-  new Response(
-    env.ACCESS_TEAM_DOMAIN && env.ACCESS_AUD
-      ? "Not signed in, or this email isn't allowed to use the admin."
-      : "The admin is locked: Cloudflare Access isn't set up for this Worker yet.",
-    { status: 403, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } },
-  );
 
 const ADMIN_HEADERS: Record<string, string> = {
   "cache-control": "no-store",
@@ -96,6 +25,12 @@ const ADMIN_HEADERS: Record<string, string> = {
   "content-security-policy":
     "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
 };
+
+function withAdminHeaders(res: Response) {
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(ADMIN_HEADERS)) out.headers.set(k, v);
+  return out;
+}
 
 // ---------- config
 function normalise(cfg: Config): Config {
@@ -148,10 +83,21 @@ export default {
       });
     }
 
-    // ---- admin
+    // ---- admin login (public)
+    const auth = await authApi(req, env, p);
+    if (auth) return auth;
+    if (p === "/admin/login" || p === "/admin/login.html") {
+      if (await sessionEmail(req, env)) return Response.redirect(new URL("/admin", url).href, 302);
+      return withAdminHeaders(await env.ASSETS.fetch(new Request(new URL("/admin/login", url), req)));
+    }
+
+    // ---- admin (signed in only)
     if (p === "/admin" || p.startsWith("/admin.") || p.startsWith("/admin/") || p.startsWith("/api/admin/")) {
-      const email = await adminEmail(req, env);
-      if (!email) return denied(env);
+      const email = await sessionEmail(req, env);
+      if (!email) {
+        if (p.startsWith("/api/")) return json({ error: "Signed out. Sign in again." }, 401);
+        return Response.redirect(new URL("/admin/login", url).href, 302);
+      }
       if (p.startsWith("/api/admin/")) {
         // block cross-site requests that change data
         if (req.method !== "GET") {
@@ -162,10 +108,7 @@ export default {
         res.headers.set("x-content-type-options", "nosniff");
         return res;
       }
-      const res = await env.ASSETS.fetch(new Request(new URL("/admin", url), req));
-      const out = new Response(res.body, res);
-      for (const [k, v] of Object.entries(ADMIN_HEADERS)) out.headers.set(k, v);
-      return out;
+      return withAdminHeaders(await env.ASSETS.fetch(new Request(new URL("/admin", url), req)));
     }
 
     if (p.startsWith("/api/")) return json({ error: "Not found" }, 404);
@@ -178,6 +121,7 @@ const MAX_IMAGE = 1_500_000;
 
 async function adminApi(req: Request, env: Env, p: string, email: string): Promise<Response> {
   if (p === "/api/admin/me") return json({ email });
+  if (p === "/api/admin/logout-everywhere" && req.method === "POST") return logoutEverywhere(env);
   if (p === "/api/admin/config" && req.method === "GET") {
     const cur = await loadConfig(env);
     return json({ ...cur, email, issues: checkConfig(cur.config) });

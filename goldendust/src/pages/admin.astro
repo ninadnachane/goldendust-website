@@ -16,7 +16,7 @@
   <header class="top">
     <div class="top__brand"><img src="/images/logo-header.webp" alt="" width="104" height="51" /><span>Planner admin</span></div>
     <div class="top__status" data-status>Loading…</div>
-    <div class="top__who"><span data-who></span> <a href="/cdn-cgi/access/logout">Sign out</a></div>
+    <div class="top__who"><span data-who></span> <button type="button" class="linkbtn" data-logout>Sign out</button> <button type="button" class="linkbtn" data-logout-all title="Ends every signed-in session, on all devices">Sign out everywhere</button></div>
     <div class="top__save">
       <input type="text" data-note placeholder="What changed? (e.g. 2027 park fees)" aria-label="Note for this save" />
       <button type="button" class="btn btn--gold" data-save disabled>Save changes</button>
@@ -487,13 +487,22 @@
       const r = await fetch("/api/admin/config", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ config: cfg, note: $<HTMLInputElement>("[data-note]").value }) });
       const d = await r.json().catch(() => ({}));
       btn.textContent = "Save changes";
+      if (r.status === 401) { btn.removeAttribute("disabled"); return alert("Your session has ended. Copy anything important, then sign in again in a new tab and save from there."); }
       if (!r.ok || !d.ok) { btn.removeAttribute("disabled"); return alert("Not saved: " + (d.issues || [d.error || r.status]).join("\n")); }
       const cur = await fetch("/api/admin/config").then((x) => x.json());
       meta = cur; dirty = false; $<HTMLInputElement>("[data-note]").value = ""; renderStatus();
     });
+    const signOut = async (url: string) => {
+      if (dirty && !confirm("You have unsaved changes. Sign out anyway?")) return;
+      dirty = false;
+      await fetch(url, { method: "POST" }).catch(() => null);
+      location.replace("/admin/login");
+    };
+    $("[data-logout]").addEventListener("click", () => signOut("/api/auth/logout"));
+    $("[data-logout-all]").addEventListener("click", () => signOut("/api/admin/logout-everywhere"));
     window.addEventListener("beforeunload", (e) => { if (dirty) e.preventDefault(); });
 
-    fetch("/api/admin/config").then((r) => r.json()).then((d) => {
+    fetch("/api/admin/config").then((r) => { if (r.status === 401) { location.replace("/admin/login"); throw new Error("signed out"); } return r.json(); }).then((d) => {
       cfg = d.config; meta = d;
       $("[data-who]").textContent = d.email ? `Signed in as ${d.email}` : "";
       initTest(); renderAll();
@@ -565,7 +574,7 @@
     table.sum tr.line td { border-top: 2px solid var(--ink-2); }
     table.sum tr.total td { font-weight: 700; font-size: 1.05rem; background: var(--ivory); }
     .top__who { color: var(--ink-2); font-size: 0.85rem; }
-    .top__who a { color: var(--rust); margin-left: 0.4rem; }
+    .linkbtn { font: inherit; background: none; border: 0; color: var(--rust); cursor: pointer; text-decoration: underline; padding: 0 0.2rem; }
     .dlg { border: 0; border-radius: 14px; padding: 0; width: min(56rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45); }
     .dlg::backdrop { background: rgba(46, 36, 27, 0.5); }
     .dlg__in { padding: 1rem 1.3rem 1.3rem; }
