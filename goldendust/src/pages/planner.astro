@@ -1,18 +1,362 @@
 ---
 import Base from "../layouts/Base.astro";
 import WaButton from "../components/WaButton.astro";
+import { site } from "../lib/site";
 ---
 <Base
   title="Safari Itinerary Planner | Golden Dust Safaris"
-  description="Plan your Tanzania safari itinerary with Golden Dust Safaris. Our online planner is on its way; until then, our team in Arusha plans every trip with you on WhatsApp."
+  description="Build your own Tanzania safari itinerary: choose your dates, comfort level, parks and lodges, and see the price instantly with a full cost breakdown."
   noindex
 >
-  <section class="section">
-    <div class="wrap measure">
-      <h1>Safari itinerary planner</h1>
-      <p class="lede">Our online planner is on its way. Soon you'll be able to pick parks, dates and comfort level and see your itinerary take shape.</p>
-      <p>Until then, our team in Arusha plans every safari with you directly. Tell us your dates, group size, budget and the animals you most want to see, and we'll send you a day-by-day plan with a full cost breakdown.</p>
-      <WaButton label="Plan my safari on WhatsApp" />
+  <section class="section pl" data-planner data-wa={site.whatsapp}>
+    <div class="wrap">
+      <header class="pl__head">
+        <h1>Plan your safari</h1>
+        <p class="lede">Pick your dates, your style and the parks you'd love to see. The price updates as you go, with nothing hidden. When it looks right, send it to us and your guide takes it from there.</p>
+      </header>
+
+      <div class="pl__grid">
+        <div class="pl__steps">
+          <fieldset class="step">
+            <legend><span class="step__n">1</span>Who's travelling?</legend>
+            <div class="row">
+              <div class="count">
+                <span class="count__l">Adults</span>
+                <div class="count__c"><button type="button" data-dec="adults" aria-label="Fewer adults">−</button><output data-out="adults">2</output><button type="button" data-inc="adults" aria-label="More adults">+</button></div>
+              </div>
+              <div class="count">
+                <span class="count__l">Children <small data-child-note></small></span>
+                <div class="count__c"><button type="button" data-dec="children" aria-label="Fewer children">−</button><output data-out="children">0</output><button type="button" data-inc="children" aria-label="More children">+</button></div>
+              </div>
+            </div>
+            <div class="ages" data-ages></div>
+          </fieldset>
+
+          <fieldset class="step">
+            <legend><span class="step__n">2</span>When?</legend>
+            <div class="row">
+              <label class="fld">Arrival in Arusha<input type="date" data-date required /></label>
+              <label class="fld">Nights in Tanzania<select data-nights></select></label>
+            </div>
+            <p class="note" data-date-note></p>
+          </fieldset>
+
+          <fieldset class="step">
+            <legend><span class="step__n">3</span>Your safari style</legend>
+            <div class="styles" data-styles></div>
+          </fieldset>
+
+          <fieldset class="step" data-where hidden>
+            <legend><span class="step__n">4</span>Where would you like to go?</legend>
+            <p class="note">Your first night is in <strong data-arrival-name>Arusha</strong>, included. Choose the areas for your <strong data-safari-nights></strong>; we'll put them in the best order.</p>
+            <div class="chips" data-areas></div>
+            <div class="stops" data-stops></div>
+          </fieldset>
+        </div>
+
+        <aside class="pl__sum" aria-live="polite">
+          <div class="sum">
+            <p class="sum__h">Your safari</p>
+            <ol class="sum__trip" data-trip></ol>
+            <div data-price></div>
+            <a class="btn sum__wa" data-send href="#" target="_blank" rel="noopener" aria-disabled="true">Send my itinerary on WhatsApp</a>
+            <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation and your first night in Arusha. International flights, visas, tips and drinks are extra.</p>
+          </div>
+        </aside>
+      </div>
+
+      <noscript><p>The planner needs JavaScript. You can also <a href={`https://wa.me/${site.whatsapp}`}>plan with us on WhatsApp</a>.</p></noscript>
+      <div class="pl__fallback" data-fallback hidden>
+        <p>The planner isn't available right now. Our team in Arusha can plan your trip with you directly.</p>
+        <WaButton label="Plan my safari on WhatsApp" />
+      </div>
     </div>
   </section>
 </Base>
+
+<script>
+  type Opt = {
+    settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
+    categories: { id: string; name: string; blurb: string }[];
+    arrivalName: string;
+    areas: { id: string; name: string; minNights: number }[];
+    lodges: { id: string; name: string; areaId: string; category: string }[];
+  };
+  const root = document.querySelector<HTMLElement>("[data-planner]")!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+  const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+  const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
+  const nice = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+  let O: Opt;
+  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[] };
+
+  const safariNights = () => st.nights - 1;
+  const used = () => st.stops.reduce((a, s) => a + s.nights, 0);
+  const areaOrder = (id: string) => O.areas.findIndex((a) => a.id === id);
+
+  function renderPeople() {
+    $("[data-out=adults]").textContent = String(st.adults);
+    $("[data-out=children]").textContent = String(st.ages.length);
+    $("[data-child-note]").textContent = `(0–${O.settings.childMaxAge})`;
+    $("[data-ages]").innerHTML = st.ages.map((a, i) => `<label class="age">Child ${i + 1} age<select data-age="${i}">${
+      Array.from({ length: O.settings.childMaxAge + 1 }, (_, n) => `<option value="${n}" ${n === a ? "selected" : ""}>${n < 1 ? "Under 1" : n}</option>`).join("")}</select></label>`).join("");
+    root.querySelectorAll<HTMLSelectElement>("[data-age]").forEach((el) => el.addEventListener("change", () => { st.ages[Number(el.dataset.age)] = Number(el.value); update(); }));
+  }
+
+  function renderStyles() {
+    $("[data-styles]").innerHTML = O.categories.map((c) => `<button type="button" class="style" aria-pressed="${st.category === c.id}" data-cat="${c.id}"><strong>${esc(c.name)}</strong><span>${esc(c.blurb)}</span></button>`).join("");
+    root.querySelectorAll<HTMLButtonElement>("[data-cat]").forEach((b) => b.addEventListener("click", () => {
+      st.category = b.dataset.cat!;
+      st.stops.forEach((s) => (s.lodgeId = ""));
+      renderStyles(); renderWhere(); update();
+    }));
+  }
+
+  function renderWhere() {
+    const box = $("[data-where]");
+    box.hidden = !st.category;
+    if (!st.category) return;
+    $("[data-safari-nights]").textContent = `${safariNights()} safari night${safariNights() === 1 ? "" : "s"}`;
+    const left = safariNights() - used();
+    $("[data-areas]").innerHTML = O.areas.map((a) => {
+      const on = st.stops.some((s) => s.areaId === a.id);
+      const hasLodge = O.lodges.some((l) => l.areaId === a.id && l.category === st.category);
+      const blocked = !on && (!hasLodge || a.minNights > left);
+      const why = !hasLodge ? "No options in this style yet" : a.minNights > left ? `Needs ${a.minNights} night${a.minNights > 1 ? "s" : ""}: add nights in step 2` : "";
+      return `<button type="button" class="chip" data-area="${a.id}" aria-pressed="${on}" ${blocked ? 'aria-disabled="true"' : ""} title="${esc(why)}">${esc(a.name)}${a.minNights > 1 ? ` <small>min ${a.minNights}</small>` : ""}</button>`;
+    }).join("");
+    root.querySelectorAll<HTMLButtonElement>("[data-area]").forEach((b) => b.addEventListener("click", () => {
+      const id = b.dataset.area!;
+      const i = st.stops.findIndex((s) => s.areaId === id);
+      if (i >= 0) st.stops.splice(i, 1);
+      else {
+        if (b.getAttribute("aria-disabled") === "true") { flash(b.title); return; }
+        const a = O.areas.find((x) => x.id === id)!;
+        st.stops.push({ areaId: id, nights: Math.max(a.minNights, Math.min(safariNights() - used(), a.minNights)), lodgeId: "" });
+        st.stops.sort((x, y) => areaOrder(x.areaId) - areaOrder(y.areaId));
+      }
+      renderWhere(); update();
+    }));
+
+    $("[data-stops]").innerHTML = st.stops.map((s, i) => {
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      const lodges = O.lodges.filter((l) => l.areaId === s.areaId && l.category === st.category);
+      if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = lodges[0]?.id || "";
+      return `<div class="stop">
+        <div class="stop__top"><strong>${esc(a.name)}</strong>
+          <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="One night less in ${esc(a.name)}">−</button><output>${s.nights} night${s.nights > 1 ? "s" : ""}</output><button type="button" data-sinc="${i}" aria-label="One more night in ${esc(a.name)}">+</button></div></div>
+        <div class="lodges">${lodges.map((l) => `<label class="lodge"><input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}"><span>${esc(l.name)}</span></label>`).join("")}</div>
+      </div>`;
+    }).join("");
+    root.querySelectorAll<HTMLButtonElement>("[data-sinc]").forEach((b) => b.addEventListener("click", () => {
+      const s = st.stops[Number(b.dataset.sinc)];
+      if (used() >= safariNights()) return flash("All your nights are used. Add nights in step 2, or take one from another area.");
+      s.nights++; renderWhere(); update();
+    }));
+    root.querySelectorAll<HTMLButtonElement>("[data-sdec]").forEach((b) => b.addEventListener("click", () => {
+      const s = st.stops[Number(b.dataset.sdec)];
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      if (s.nights <= a.minNights) return flash(`${a.name} needs at least ${a.minNights} night${a.minNights > 1 ? "s" : ""}.`);
+      s.nights--; renderWhere(); update();
+    }));
+    root.querySelectorAll<HTMLInputElement>("[data-lodge]").forEach((el) => el.addEventListener("change", () => { st.stops[Number(el.dataset.lodge)].lodgeId = el.value; update(); }));
+  }
+
+  let toast: number | undefined;
+  function flash(msg: string) {
+    if (!msg) return;
+    let t = root.querySelector<HTMLElement>(".toast");
+    if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); root.append(t); }
+    t.textContent = msg; t.classList.add("is-on");
+    clearTimeout(toast); toast = window.setTimeout(() => t!.classList.remove("is-on"), 3200);
+  }
+
+  function renderTrip() {
+    const items: string[] = [];
+    if (st.date) items.push(`<li><span>${nice(st.date)}</span>Arrive, night in ${esc(O.arrivalName)}</li>`);
+    let n = 1;
+    for (const s of st.stops) {
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      const l = O.lodges.find((x) => x.id === s.lodgeId);
+      items.push(`<li><span>${st.date ? nice(addDays(st.date, n)) : `Night ${n + 1}`}</span>${s.nights} night${s.nights > 1 ? "s" : ""} ${esc(a.name)}${l ? ` · ${esc(l.name)}` : ""}</li>`);
+      n += s.nights;
+    }
+    if (st.date) items.push(`<li><span>${nice(addDays(st.date, st.nights))}</span>Back to Arusha / airport</li>`);
+    $("[data-trip]").innerHTML = items.join("") || "<li>Start by choosing your dates.</li>";
+  }
+
+  function waText(total?: number) {
+    const lines = [
+      "Hi Golden Dust Safaris, I built this itinerary on your planner:",
+      `• ${st.adults} adult${st.adults > 1 ? "s" : ""}${st.ages.length ? `, children aged ${st.ages.join(", ")}` : ""}`,
+      `• Arriving ${st.date ? nice(st.date) : "(date tbc)"}, ${st.nights} nights`,
+      `• Style: ${O.categories.find((c) => c.id === st.category)?.name ?? "tbc"}`,
+      `• Night 1: ${O.arrivalName}`,
+      ...st.stops.map((s) => `• ${s.nights} night${s.nights > 1 ? "s" : ""} ${O.areas.find((a) => a.id === s.areaId)?.name}: ${O.lodges.find((l) => l.id === s.lodgeId)?.name ?? ""}`),
+    ];
+    if (total) lines.push(`• Planner price: ${usd(total)}`);
+    lines.push("Could you check availability?");
+    return lines.join("\n");
+  }
+
+  let timer: number | undefined, seq = 0;
+  function update() {
+    renderPeople(); renderTrip();
+    const send = $<HTMLAnchorElement>("[data-send]");
+    const price = $("[data-price]");
+    const ready = st.date && st.category && st.stops.length;
+    send.href = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText())}`;
+    if (!ready) {
+      price.innerHTML = `<p class="sum__wait">${!st.date ? "Choose your arrival date" : !st.category ? "Choose your safari style" : "Choose where you'd like to go"} to see your price.</p>`;
+      send.setAttribute("aria-disabled", "true");
+      return;
+    }
+    const left = safariNights() - used();
+    if (left !== 0) {
+      price.innerHTML = `<p class="sum__wait">${left > 0 ? `${left} safari night${left > 1 ? "s" : ""} still to place. Add a night to an area, or add another area.` : `That's ${-left} night${left < -1 ? "s" : ""} too many. Remove a night, or add nights in step 2.`}</p>`;
+      send.setAttribute("aria-disabled", "true");
+      return;
+    }
+    clearTimeout(timer);
+    price.classList.add("is-loading");
+    timer = window.setTimeout(async () => {
+      const my = ++seq;
+      const body = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
+      const r = await fetch("/api/planner/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((x) => x.json()).catch(() => null);
+      if (my !== seq) return;
+      price.classList.remove("is-loading");
+      if (!r) { price.innerHTML = `<p class="sum__wait">We couldn't work out the price just now. Send us your itinerary and we'll price it for you.</p>`; send.removeAttribute("aria-disabled"); return; }
+      if (!r.ok) { price.innerHTML = `<ul class="sum__err">${r.errors.map((e: string) => `<li>${esc(e)}</li>`).join("")}</ul>`; send.setAttribute("aria-disabled", "true"); return; }
+      const p = r.priced;
+      price.innerHTML = `<dl class="sum__rows">
+          <div><dt>Park fees</dt><dd>${usd(p.park)}</dd></div>
+          <div><dt>Vehicle &amp; guide${r.people.vehicles > 1 ? ` (${r.people.vehicles} vehicles)` : ""}</dt><dd>${usd(p.transport)}</dd></div>
+          <div><dt>Accommodation</dt><dd>${usd(p.accommodation)}</dd></div>
+          <div><dt>Meals</dt><dd>${usd(p.meals)}</dd></div>
+          <div><dt>Our margin</dt><dd>${usd(p.margin)}</dd></div>
+        </dl>
+        <p class="sum__total"><span>Total</span><strong>${usd(p.total)}</strong></p>
+        <p class="sum__pp">about ${usd(r.perPerson)} per person${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</p>`;
+      send.href = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText(p.total))}`;
+      send.removeAttribute("aria-disabled");
+    }, 250);
+  }
+
+  function init(o: Opt) {
+    O = o;
+    const s = O.settings;
+    const min = addDays(new Date().toISOString().slice(0, 10), s.leadDays + 1);
+    const d = $<HTMLInputElement>("[data-date]");
+    d.min = min;
+    $("[data-date-note]").textContent = `We need ${s.leadDays} days to prepare, so the earliest arrival is ${nice(min)}.`;
+    d.addEventListener("change", () => {
+      if (d.value && d.value < min) { d.value = min; flash(`The earliest arrival is ${nice(min)}.`); }
+      st.date = d.value; update();
+    });
+    const n = $<HTMLSelectElement>("[data-nights]");
+    st.nights = Math.min(Math.max(st.nights, s.minTotalNights), s.maxTotalNights);
+    n.innerHTML = Array.from({ length: s.maxTotalNights - s.minTotalNights + 1 }, (_, i) => s.minTotalNights + i)
+      .map((v) => `<option value="${v}" ${v === st.nights ? "selected" : ""}>${v} nights (${v + 1} days)</option>`).join("");
+    n.addEventListener("change", () => {
+      st.nights = Number(n.value);
+      // trim stops from the end if the trip got shorter
+      while (used() > safariNights() && st.stops.length) {
+        const last = st.stops[st.stops.length - 1];
+        const a = O.areas.find((x) => x.id === last.areaId)!;
+        if (last.nights > a.minNights) last.nights--; else st.stops.pop();
+      }
+      renderWhere(); update();
+    });
+    $("[data-arrival-name]").textContent = O.arrivalName;
+    root.querySelectorAll<HTMLButtonElement>("[data-inc],[data-dec]").forEach((b) => b.addEventListener("click", () => {
+      const k = b.dataset.inc || b.dataset.dec;
+      const up = !!b.dataset.inc;
+      const total = st.adults + st.ages.length;
+      if (up && total >= s.maxGuests) return flash(`For groups over ${s.maxGuests}, message us and we'll plan it with you.`);
+      if (k === "adults") st.adults = Math.max(1, st.adults + (up ? 1 : -1));
+      else if (up) st.ages.push(8); else st.ages.pop();
+      update();
+    }));
+    renderStyles(); renderWhere(); update();
+  }
+
+  fetch("/api/planner/options").then((r) => (r.ok ? r.json() : Promise.reject(r.status))).then(init).catch(() => {
+    root.querySelector<HTMLElement>(".pl__grid")!.hidden = true;
+    root.querySelector<HTMLElement>("[data-fallback]")!.hidden = false;
+  });
+</script>
+
+<style is:global>
+  .pl .pl__head { max-width: 46rem; }
+  .pl .pl__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem); gap: clamp(1.5rem, 4vw, 3rem); align-items: start; margin-top: 1.5rem; }
+  .pl .pl__grid[hidden] { display: none; }
+  .pl .step { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); padding: 1.1rem 1.3rem 1.3rem; margin: 0 0 1rem; min-width: 0; }
+  .pl .step legend { font-family: var(--display); font-weight: 600; font-size: 1.1rem; padding: 0 0.4rem; display: flex; align-items: center; gap: 0.55rem; }
+  .pl .step__n { display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--gold); color: var(--dark); font-size: 0.9rem; }
+  .pl .row { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
+  .pl .count { display: flex; flex-direction: column; gap: 0.4rem; }
+  .pl .count__l { font-weight: 600; font-size: 0.95rem; }
+  .pl .count__l small { font-weight: 400; color: var(--ink-2); }
+  .pl .count__c { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .pl .count__c button { width: 2.6rem; height: 2.6rem; border: 0; background: var(--tint); font-size: 1.2rem; cursor: pointer; color: var(--ink); }
+  .pl .count__c button:hover { background: var(--gold); }
+  .pl .count__c output { min-width: 3rem; text-align: center; font-weight: 600; padding: 0 0.4rem; }
+  .pl .count__c.sm button { width: 2.1rem; height: 2.1rem; }
+  .pl .count__c.sm output { min-width: 5.5rem; font-size: 0.92rem; }
+  .pl .ages { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.9rem; }
+  .pl .age, .pl .fld { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; font-size: 0.92rem; }
+  .pl .ages select, .pl .fld input, .pl .fld select { font: inherit; font-weight: 400; padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); min-width: 12rem; }
+  .pl .ages select { min-width: 7rem; }
+  .pl .note { color: var(--ink-2); font-size: 0.92rem; margin: 0.7rem 0 0; }
+  .pl .styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+  .pl .style { display: flex; flex-direction: column; gap: 0.25rem; text-align: left; padding: 0.9rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; font: inherit; color: var(--ink); }
+  .pl .style strong { font-family: var(--display); font-size: 1.05rem; }
+  .pl .style span { color: var(--ink-2); font-size: 0.88rem; }
+  .pl .style[aria-pressed="true"] { border-color: var(--gold); background: var(--tint); box-shadow: inset 0 0 0 1px var(--gold); }
+  .pl .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+  .pl .chip { font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 1rem; border-radius: 999px; border: 2px solid var(--line); background: #fff; cursor: pointer; color: var(--ink); }
+  .pl .chip small { font-weight: 400; color: var(--ink-2); }
+  .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .pl .chip[aria-pressed="true"] small { color: var(--dark); }
+  .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+  .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
+  .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
+  .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .pl .lodges { display: grid; gap: 0.45rem; margin-top: 0.7rem; }
+  .pl .lodge { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.75rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
+  .pl .lodge:has(input:checked) { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .pl .lodge input { accent-color: var(--gold); }
+  .pl .pl__sum { position: sticky; top: 1rem; }
+  .pl .sum { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 48px -32px rgba(46, 36, 27, 0.5); padding: 1.3rem; }
+  .pl .sum__h { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.6rem; }
+  .pl .sum__trip { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.45rem; font-size: 0.9rem; }
+  .pl .sum__trip li { display: grid; grid-template-columns: 6.6rem 1fr; gap: 0.5rem; }
+  .pl .sum__trip span { color: var(--ink-2); }
+  .pl .sum__rows { margin: 0; border-top: 1px solid var(--line); padding-top: 0.7rem; }
+  .pl .sum__rows div { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.95rem; }
+  .pl .sum__rows dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .pl .sum__total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--ink); margin: 0.6rem 0 0; padding-top: 0.6rem; }
+  .pl .sum__total strong { font-family: var(--display); font-size: 1.6rem; }
+  .pl .sum__pp { margin: 0.1rem 0 0; text-align: right; color: var(--ink-2); font-size: 0.88rem; }
+  .pl .sum__wait { color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 0.8rem; margin: 0; }
+  .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
+  .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
+  .pl .sum__wa { width: 100%; justify-content: center; margin-top: 1.1rem; }
+  .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+  .pl .sum__fine { color: var(--ink-2); font-size: 0.8rem; margin: 0.8rem 0 0; }
+  .pl .toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 1rem); background: var(--dark); color: var(--ivory); padding: 0.7rem 1.1rem; border-radius: 10px; font-size: 0.92rem; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; max-width: calc(100% - 2rem); z-index: 50; }
+  .pl .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+  .pl .pl__fallback { margin-top: 1.5rem; }
+  @media (max-width: 900px) {
+    .pl .pl__grid { grid-template-columns: 1fr; }
+    .pl .pl__sum { position: static; }
+  }
+  @media (max-width: 560px) {
+    .pl .styles { grid-template-columns: 1fr; }
+    .pl .step { padding: 0.9rem 1rem 1.1rem; }
+    .pl .fld input, .pl .fld select { min-width: 0; width: 100%; }
+    .pl .row > .fld { flex: 1 1 100%; }
+  }
+</style>

@@ -1,0 +1,498 @@
+---
+// Planner admin: edit every rate, save versions, and test quotes with a full calculation.
+// Protected by the Worker (password). Rates are loaded from /api/admin/config, never baked into this page.
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Planner admin | Golden Dust Safaris</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="top">
+    <div class="top__brand"><img src="/images/logo-header.webp" alt="" width="104" height="51" /><span>Planner admin</span></div>
+    <div class="top__status" data-status>Loading…</div>
+    <div class="top__save">
+      <input type="text" data-note placeholder="What changed? (e.g. 2027 park fees)" aria-label="Note for this save" />
+      <button type="button" class="btn btn--gold" data-save disabled>Save changes</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" data-tabs>
+    <button role="tab" data-tab="test" aria-selected="true">Test calculator</button>
+    <button role="tab" data-tab="costs">Costs &amp; rules</button>
+    <button role="tab" data-tab="seasons">Seasons</button>
+    <button role="tab" data-tab="parks">Park fees</button>
+    <button role="tab" data-tab="areas">Areas</button>
+    <button role="tab" data-tab="lodges">Lodges &amp; camps</button>
+    <button role="tab" data-tab="history">History</button>
+  </nav>
+
+  <div class="issues" data-issues hidden></div>
+
+  <main class="panes">
+    <section class="pane" data-pane="test">
+      <div class="test">
+        <form class="test__form" data-test-form onsubmit="return false">
+          <h2>Trip</h2>
+          <div class="grid2">
+            <label>Arrival date<input type="date" name="startDate" /></label>
+            <label>Total nights<input type="number" name="totalNights" min="1" value="5" /></label>
+            <label>Adults<input type="number" name="adults" min="1" value="2" /></label>
+            <label>Children's ages<input type="text" name="childAges" placeholder="e.g. 8, 3" /></label>
+          </div>
+          <label>Category<select name="category"></select></label>
+          <label class="check"><input type="checkbox" name="ignoreLead" checked /> Ignore the minimum-notice rule while testing</label>
+          <h3>Itinerary <small data-nights-left></small></h3>
+          <div data-stops></div>
+          <button type="button" class="btn btn--ghost" data-add-stop>+ Add area</button>
+          <p class="hint">The test uses the rates on screen, including unsaved changes.</p>
+        </form>
+        <div class="test__out" data-test-out></div>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="costs" hidden>
+      <h2>Daily costs, markup and rules</h2>
+      <div class="cards" data-settings></div>
+      <h2>Arusha arrival night</h2>
+      <p class="hint">Every trip starts with one night in Arusha, included. Pick the hotel used for each category (add Arusha hotels in "Lodges &amp; camps" with area "Arusha").</p>
+      <div class="cards" data-arrival></div>
+    </section>
+
+    <section class="pane" data-pane="seasons" hidden>
+      <h2>Season calendar</h2>
+      <p class="hint">All lodges follow this calendar. Ranges are MM-DD to MM-DD and can cross the new year (e.g. 12-20 to 01-05). Any date not in a range uses the default season.</p>
+      <div data-seasons></div>
+    </section>
+
+    <section class="pane" data-pane="parks" hidden>
+      <h2>Park fees</h2>
+      <p class="hint">Per person, in USD. Day fees are charged for each night spent in an area. Night fees (concession/camping) are per person per night; use 0 if the park has none. Children younger than the minimum age (Costs &amp; rules) are free.</p>
+      <div data-zones></div>
+    </section>
+
+    <section class="pane" data-pane="areas" hidden>
+      <h2>Areas guests can choose</h2>
+      <p class="hint">Listed in route order: the planner sorts a guest's stops in this order. "Vehicle fee" is charged once per visit, per vehicle (e.g. the Ngorongoro crater descent).</p>
+      <div data-areas></div>
+    </section>
+
+    <section class="pane" data-pane="lodges" hidden>
+      <h2>Lodges &amp; camps</h2>
+      <p class="hint">Rates are per room per night (single, double, triple) and per child per night (child ages are set in Costs &amp; rules), for each season. The planner picks the cheapest mix of rooms for the adults.</p>
+      <div class="filters">
+        <label>Area<select data-lf-area></select></label>
+        <label>Category<select data-lf-cat></select></label>
+      </div>
+      <div data-lodges></div>
+    </section>
+
+    <section class="pane" data-pane="history" hidden>
+      <h2>Saved versions</h2>
+      <p class="hint">Every save is kept. Load an older version to look at it or test it; it only goes live if you save it again.</p>
+      <div data-history></div>
+    </section>
+  </main>
+
+  <script>
+    import { quote, checkConfig, CATEGORIES, money, addDays, type Config, type Line } from "../planner/engine";
+
+    const $ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
+    let cfg: Config;
+    let dirty = false;
+    let meta: { version: number | null; savedAt: string | null; note: string } = { version: null, savedAt: null, note: "" };
+
+    const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+    const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "item";
+    const uid = (name: string, taken: { id: string }[]) => { let id = slug(name), i = 2; while (taken.some((t) => t.id === id)) id = `${slug(name)}-${i++}`; return id; };
+    const get = (o: any, path: string) => path.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
+    const set = (o: any, path: string, v: unknown) => { const ks = path.split("."); const last = ks.pop()!; const t = ks.reduce((a, k) => (a[k] ??= {}), o); t[last] = v; };
+
+    function markDirty() {
+      dirty = true;
+      $("[data-save]").removeAttribute("disabled");
+      renderStatus();
+      renderIssues();
+      runTest();
+    }
+    function renderStatus() {
+      const v = meta.version ? `Live: version ${meta.version}, saved ${meta.savedAt} UTC` : "Live: sample data (nothing saved yet)";
+      $("[data-status]").innerHTML = `${esc(v)}${dirty ? ' · <strong class="warn">Unsaved changes</strong>' : ""}`;
+    }
+    function renderIssues() {
+      const issues = checkConfig(cfg);
+      const box = $("[data-issues]");
+      box.hidden = !issues.length;
+      box.innerHTML = issues.length ? `<strong>Fix before saving:</strong><ul>${issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : "";
+    }
+
+    // ---------- generic table editor
+    type Col = { key: string; label: string; type: "text" | "number" | "bool" | "select" | "readonly"; options?: () => { v: string; t: string }[]; step?: string; group?: string };
+    function table(host: HTMLElement, rows: any[], cols: Col[], opts: { add?: () => void; remove?: (r: any) => void; reorder?: boolean; filter?: (r: any) => boolean; rerender: () => void }) {
+      const shown = rows.filter((r) => (opts.filter ? opts.filter(r) : true));
+      const groups = cols.some((c) => c.group);
+      let head = "";
+      if (groups) {
+        const spans: { g: string; n: number }[] = [];
+        cols.forEach((c) => { const g = c.group || ""; const last = spans[spans.length - 1]; if (last && last.g === g) last.n++; else spans.push({ g, n: 1 }); });
+        head += `<tr>${opts.reorder ? "<th></th>" : ""}${spans.map((s) => `<th colspan="${s.n}" class="${s.g ? "grp" : ""}">${esc(s.g)}</th>`).join("")}<th></th></tr>`;
+      }
+      head += `<tr>${opts.reorder ? "<th></th>" : ""}${cols.map((c) => `<th>${esc(c.label)}</th>`).join("")}<th></th></tr>`;
+      const body = shown.map((r) => {
+        const i = rows.indexOf(r);
+        const cells = cols.map((c) => {
+          const v = get(r, c.key);
+          if (c.type === "readonly") return `<td class="ro">${esc(v)}</td>`;
+          if (c.type === "bool") return `<td class="c"><input type="checkbox" data-i="${i}" data-k="${c.key}" ${v ? "checked" : ""}></td>`;
+          if (c.type === "select") return `<td><select data-i="${i}" data-k="${c.key}">${c.options!().map((o) => `<option value="${esc(o.v)}" ${o.v === v ? "selected" : ""}>${esc(o.t)}</option>`).join("")}</select></td>`;
+          if (c.type === "number") return `<td><input type="number" step="${c.step || "0.01"}" min="0" data-i="${i}" data-k="${c.key}" value="${v ?? 0}"></td>`;
+          return `<td><input type="text" data-i="${i}" data-k="${c.key}" value="${esc(v)}"></td>`;
+        }).join("");
+        const move = opts.reorder ? `<td class="mv"><button type="button" data-up="${i}" aria-label="Move up">↑</button><button type="button" data-down="${i}" aria-label="Move down">↓</button></td>` : "";
+        return `<tr>${move}${cells}<td>${opts.remove ? `<button type="button" class="del" data-del="${i}" aria-label="Delete">✕</button>` : ""}</td></tr>`;
+      }).join("");
+      host.innerHTML = `<div class="tbl"><table><thead>${head}</thead><tbody>${body || `<tr><td colspan="${cols.length + 2}" class="empty">Nothing here yet.</td></tr>`}</tbody></table></div>${opts.add ? '<button type="button" class="btn btn--ghost" data-add>+ Add row</button>' : ""}`;
+      host.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-k]").forEach((el) => {
+        el.addEventListener("change", () => {
+          const col = cols.find((c) => c.key === el.dataset.k)!;
+          const row = rows[Number(el.dataset.i)];
+          const val = col.type === "bool" ? (el as HTMLInputElement).checked : col.type === "number" ? Number(el.value) || 0 : el.value;
+          set(row, col.key, val);
+          markDirty();
+          if (col.type === "select" || col.type === "bool") opts.rerender();
+        });
+      });
+      host.querySelector("[data-add]")?.addEventListener("click", () => { opts.add!(); markDirty(); opts.rerender(); });
+      host.querySelectorAll<HTMLButtonElement>("[data-del]").forEach((b) => b.addEventListener("click", () => {
+        const r = rows[Number(b.dataset.del)];
+        if (!confirm(`Delete "${r.name || r.id}"? You can still undo by not saving.`)) return;
+        opts.remove!(r); markDirty(); opts.rerender();
+      }));
+      const swap = (i: number, j: number) => { if (j < 0 || j >= rows.length) return; [rows[i], rows[j]] = [rows[j], rows[i]]; markDirty(); opts.rerender(); };
+      host.querySelectorAll<HTMLButtonElement>("[data-up]").forEach((b) => b.addEventListener("click", () => swap(Number(b.dataset.up), Number(b.dataset.up) - 1)));
+      host.querySelectorAll<HTMLButtonElement>("[data-down]").forEach((b) => b.addEventListener("click", () => swap(Number(b.dataset.down), Number(b.dataset.down) + 1)));
+    }
+
+    // ---------- tabs
+    function renderSettings() {
+      const fields: [keyof Config["settings"], string, string][] = [
+        ["vehicleDay", "Vehicle, per vehicle per day ($)", "0.01"],
+        ["guideDay", "Guide, per guide per day ($)", "0.01"],
+        ["maxPerVehicle", "Max guests per vehicle (adds a vehicle + guide above this)", "1"],
+        ["vehicleDaysExtra", "Vehicle/guide days = safari nights + …", "1"],
+        ["firstLunchAdult", "First-day lunch, per adult ($)", "0.01"],
+        ["firstLunchChild", "First-day lunch, per child ($)", "0.01"],
+        ["adminPct", "Admin fee % (on everything except park fees)", "0.1"],
+        ["marginPct", "Margin % (on the total incl. admin fee)", "0.1"],
+        ["leadDays", "Guests can't arrive within this many days", "1"],
+        ["childMinAge", "Children pay from age (younger = free)", "1"],
+        ["childMaxAge", "Children pay child rate up to age", "1"],
+        ["minTotalNights", "Minimum total nights (incl. Arusha)", "1"],
+        ["maxTotalNights", "Maximum total nights", "1"],
+        ["maxGuests", "Maximum guests in the online planner", "1"],
+      ];
+      const host = $("[data-settings]");
+      host.innerHTML = fields.map(([k, label, step]) => `<label class="card">${esc(label)}<input type="number" min="0" step="${step}" data-s="${k}" value="${cfg.settings[k]}"></label>`).join("");
+      host.querySelectorAll<HTMLInputElement>("[data-s]").forEach((el) => el.addEventListener("change", () => { (cfg.settings as any)[el.dataset.s!] = Number(el.value) || 0; markDirty(); }));
+
+      const ar = $("[data-arrival]");
+      const arusha = cfg.lodges.filter((l) => l.areaId === "arusha");
+      ar.innerHTML = CATEGORIES.map((c) => `<label class="card">${c.name}<select data-arr="${c.id}">${arusha.map((l) => `<option value="${esc(l.id)}" ${cfg.arrival.lodges[c.id] === l.id ? "selected" : ""}>${esc(l.name)}${l.active ? "" : " (inactive)"}</option>`).join("")}</select></label>`).join("");
+      ar.querySelectorAll<HTMLSelectElement>("[data-arr]").forEach((el) => el.addEventListener("change", () => { (cfg.arrival.lodges as any)[el.dataset.arr!] = el.value; markDirty(); }));
+    }
+
+    function renderSeasons() {
+      const host = $("[data-seasons]");
+      const rows = cfg.seasons.map((s) => ({ ...s, rangesText: s.ranges.map((r) => `${r.from} to ${r.to}`).join(", "), isDefault: s.id === cfg.defaultSeasonId }));
+      table(host, rows, [
+        { key: "name", label: "Season", type: "text" },
+        { key: "rangesText", label: "Date ranges (MM-DD to MM-DD, comma separated)", type: "text" },
+        { key: "isDefault", label: "Default", type: "bool" },
+        { key: "id", label: "ID", type: "readonly" },
+      ], {
+        rerender: renderSeasons,
+        add: () => { const id = uid("new season", cfg.seasons); cfg.seasons.push({ id, name: "New season", ranges: [] }); },
+        remove: (r) => { if (cfg.seasons.length < 2) return alert("Keep at least one season."); cfg.seasons = cfg.seasons.filter((s) => s.id !== r.id); },
+      });
+      // write back edits from the derived rows
+      host.querySelectorAll<HTMLInputElement>("[data-k]").forEach((el) => el.addEventListener("change", () => {
+        const r = rows[Number(el.dataset.i)];
+        const s = cfg.seasons.find((x) => x.id === r.id)!;
+        s.name = r.name;
+        s.ranges = String(r.rangesText).split(",").map((t) => t.trim()).filter(Boolean).map((t) => { const [from, to] = t.split(/\s*(?:to|-{2}|–|\.\.)\s*/); return { from: (from || "").trim(), to: (to || from || "").trim() }; });
+        if (el.dataset.k === "isDefault" && r.isDefault) cfg.defaultSeasonId = r.id;
+        markDirty(); renderSeasons(); renderLodges();
+      }));
+    }
+
+    function renderZones() {
+      table($("[data-zones]"), cfg.feeZones, [
+        { key: "name", label: "Park / fee zone", type: "text" },
+        { key: "adultDay", label: "Adult / day", type: "number" },
+        { key: "childDay", label: "Child / day", type: "number" },
+        { key: "adultNight", label: "Adult / night", type: "number" },
+        { key: "childNight", label: "Child / night", type: "number" },
+        { key: "id", label: "ID", type: "readonly" },
+      ], {
+        rerender: renderZones,
+        add: () => cfg.feeZones.push({ id: uid("new park", cfg.feeZones), name: "New park", adultDay: 0, childDay: 0, adultNight: 0, childNight: 0 }),
+        remove: (r) => { if (cfg.areas.some((a) => a.feeZoneId === r.id)) return alert("An area still uses this fee zone."); cfg.feeZones = cfg.feeZones.filter((z) => z !== r); },
+      });
+    }
+
+    function renderAreas() {
+      table($("[data-areas]"), cfg.areas, [
+        { key: "name", label: "Area", type: "text" },
+        { key: "feeZoneId", label: "Park fees from", type: "select", options: () => cfg.feeZones.map((z) => ({ v: z.id, t: z.name })) },
+        { key: "minNights", label: "Min nights", type: "number", step: "1" },
+        { key: "vehicleFeeLabel", label: "Vehicle fee name", type: "text" },
+        { key: "vehicleFee", label: "Vehicle fee ($)", type: "number" },
+        { key: "active", label: "Shown", type: "bool" },
+        { key: "id", label: "ID", type: "readonly" },
+      ], {
+        reorder: true,
+        rerender: () => { renderAreas(); renderLodges(); },
+        add: () => cfg.areas.push({ id: uid("new area", cfg.areas), name: "New area", feeZoneId: cfg.feeZones[0]?.id || "", minNights: 1, vehicleFee: 0, vehicleFeeLabel: "", active: false }),
+        remove: (r) => { if (cfg.lodges.some((l) => l.areaId === r.id)) return alert("Move or delete this area's lodges first."); cfg.areas = cfg.areas.filter((a) => a !== r); },
+      });
+    }
+
+    const areaOptions = () => [{ v: "arusha", t: "Arusha (arrival night)" }, ...cfg.areas.map((a) => ({ v: a.id, t: a.name }))];
+    function renderLodges() {
+      const fa = $<HTMLSelectElement>("[data-lf-area]"), fc = $<HTMLSelectElement>("[data-lf-cat]");
+      const keepA = fa.value, keepC = fc.value;
+      fa.innerHTML = `<option value="">All areas</option>` + areaOptions().map((o) => `<option value="${esc(o.v)}">${esc(o.t)}</option>`).join("");
+      fc.innerHTML = `<option value="">All categories</option>` + CATEGORIES.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+      fa.value = keepA; fc.value = keepC;
+      const cols: Col[] = [
+        { key: "name", label: "Name", type: "text" },
+        { key: "areaId", label: "Area", type: "select", options: areaOptions },
+        { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
+        { key: "active", label: "Shown", type: "bool" },
+      ];
+      for (const s of cfg.seasons) for (const [k, t] of [["single", "Single"], ["double", "Double"], ["triple", "Triple"], ["child", "Child"]] as const)
+        cols.push({ key: `rates.${s.id}.${k}`, label: t, type: "number", group: s.name });
+      table($("[data-lodges]"), cfg.lodges, cols, {
+        rerender: () => { renderLodges(); renderSettings(); },
+        filter: (r) => (!fa.value || r.areaId === fa.value) && (!fc.value || r.category === fc.value),
+        add: () => {
+          const areaId = fa.value || cfg.areas[0]?.id || "arusha";
+          const category = (fc.value || "comfort") as any;
+          cfg.lodges.push({ id: uid(`${areaId}-${category}-lodge`, cfg.lodges), name: "New lodge", areaId, category, active: true,
+            rates: Object.fromEntries(cfg.seasons.map((s) => [s.id, { single: 0, double: 0, triple: 0, child: 0 }])) });
+        },
+        remove: (r) => { if (Object.values(cfg.arrival.lodges).includes(r.id)) return alert("This hotel is used for the Arusha arrival night. Pick another one first (Costs & rules)."); cfg.lodges = cfg.lodges.filter((l) => l !== r); },
+      });
+    }
+
+    async function renderHistory() {
+      const host = $("[data-history]");
+      host.textContent = "Loading…";
+      const r = await fetch("/api/admin/versions").then((x) => x.json()).catch(() => ({ versions: [] }));
+      const vs = r.versions as { id: number; created_at: string; note: string }[];
+      host.innerHTML = `<div class="tbl"><table><thead><tr><th>Version</th><th>Saved (UTC)</th><th>Note</th><th></th></tr></thead><tbody>${
+        vs.map((v) => `<tr><td>${v.id}${v.id === meta.version ? " (live)" : ""}</td><td>${esc(v.created_at)}</td><td>${esc(v.note)}</td><td><button type="button" class="btn btn--ghost sm" data-load="${v.id}">Load</button></td></tr>`).join("") ||
+        '<tr><td colspan="4" class="empty">Nothing saved yet. The planner is using the sample data.</td></tr>'
+      }</tbody></table></div><button type="button" class="btn btn--ghost" data-load-defaults>Load the sample data</button>`;
+      const load = async (u: string) => {
+        if (dirty && !confirm("Discard your unsaved changes?")) return;
+        const d = await fetch(u).then((x) => x.json());
+        cfg = d.config; dirty = true; $("[data-save]").removeAttribute("disabled"); renderAll();
+      };
+      host.querySelectorAll<HTMLButtonElement>("[data-load]").forEach((b) => b.addEventListener("click", () => load(`/api/admin/versions/${b.dataset.load}`)));
+      host.querySelector("[data-load-defaults]")!.addEventListener("click", () => load("/api/admin/defaults"));
+    }
+
+    // ---------- test calculator
+    type Stop = { areaId: string; nights: number; lodgeId: string };
+    let stops: Stop[] = [];
+    const form = () => $<HTMLFormElement>("[data-test-form]");
+    function lodgesFor(areaId: string, cat: string) { return cfg.lodges.filter((l) => l.areaId === areaId && l.category === cat && l.active); }
+    function renderStops() {
+      const cat = (form().elements.namedItem("category") as HTMLSelectElement).value;
+      const host = $("[data-stops]");
+      host.innerHTML = stops.map((s, i) => {
+        const lodges = lodgesFor(s.areaId, cat);
+        if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = lodges[0]?.id || "";
+        return `<div class="stop">
+          <select data-st="${i}" data-f="areaId">${cfg.areas.map((a) => `<option value="${esc(a.id)}" ${a.id === s.areaId ? "selected" : ""}>${esc(a.name)}${a.active ? "" : " (hidden)"}</option>`).join("")}</select>
+          <input type="number" min="1" data-st="${i}" data-f="nights" value="${s.nights}" aria-label="Nights">
+          <select data-st="${i}" data-f="lodgeId">${lodges.map((l) => `<option value="${esc(l.id)}" ${l.id === s.lodgeId ? "selected" : ""}>${esc(l.name)}</option>`).join("") || '<option value="">No lodge in this category</option>'}</select>
+          <button type="button" class="del" data-rm="${i}" aria-label="Remove">✕</button></div>`;
+      }).join("");
+      host.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-st]").forEach((el) => el.addEventListener("change", () => {
+        const s = stops[Number(el.dataset.st)];
+        (s as any)[el.dataset.f!] = el.dataset.f === "nights" ? Number(el.value) || 0 : el.value;
+        renderStops(); runTest();
+      }));
+      host.querySelectorAll<HTMLButtonElement>("[data-rm]").forEach((b) => b.addEventListener("click", () => { stops.splice(Number(b.dataset.rm), 1); renderStops(); runTest(); }));
+    }
+
+    const groupNames: Record<string, string> = { park: "Park fees (no admin fee)", transport: "Vehicle & guide", accommodation: "Accommodation", meals: "Meals" };
+    function runTest() {
+      if (!cfg) return;
+      const f = form();
+      const v = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value;
+      const ages = v("childAges").split(/[,\s]+/).filter(Boolean).map(Number);
+      const totalNights = Number(v("totalNights")) || 0;
+      const used = stops.reduce((a, s) => a + s.nights, 0);
+      $("[data-nights-left]").textContent = `· ${used} of ${Math.max(0, totalNights - 1)} safari nights assigned`;
+      const req = { startDate: v("startDate"), adults: Number(v("adults")) || 0, childAges: ages, category: v("category") as any, totalNights, stops };
+      const today = (f.elements.namedItem("ignoreLead") as HTMLInputElement).checked ? "1970-01-01" : undefined;
+      const q = quote(cfg, req, today);
+      const out = $("[data-test-out]");
+      const p = q.people;
+      const errs = q.errors.length ? `<div class="err"><strong>The guest would see:</strong><ul>${q.errors.map((e) => `<li>${esc(e)}</li>`).join("")}</ul></div>` : "";
+      if (!q.lines.length) { out.innerHTML = errs || '<p class="hint">Fill in the trip to see the calculation.</p>'; return; }
+      const groups = ["park", "transport", "accommodation", "meals"].map((g) => {
+        const ls = q.lines.filter((l: Line) => l.group === g);
+        const sub = ls.reduce((a, l) => a + l.cost, 0);
+        return `<tbody><tr class="gh"><th colspan="2">${groupNames[g]}</th><th class="n">${money(sub)}</th></tr>${ls.map((l) => `<tr><td>${esc(l.label)}</td><td class="calc">${esc(l.calc)}</td><td class="n">${money(l.cost)}</td></tr>`).join("")}</tbody>`;
+      }).join("");
+      const t = q.totals, s = cfg.settings;
+      out.innerHTML = `${errs}
+        <div class="who">${p.adults} adult${p.adults === 1 ? "" : "s"} · ${p.children} child${p.children === 1 ? "" : "ren"} (${s.childMinAge}–${s.childMaxAge}) · ${p.infants} under ${s.childMinAge} (free) · ${p.vehicles} vehicle${p.vehicles > 1 ? "s" : ""} &amp; ${p.guides} guide${p.guides > 1 ? "s" : ""} · ${totalNights} nights from ${esc(req.startDate)} to ${esc(req.startDate ? addDays(req.startDate, totalNights) : "")}</div>
+        <h2>1. Your costs, line by line</h2>
+        <div class="tbl"><table class="calc-t"><thead><tr><th>Item</th><th>Calculation</th><th class="n">Cost</th></tr></thead>${groups}</table></div>
+        <h2>2. From cost to price</h2>
+        <table class="sum">
+          <tr><td>Park fees (no admin fee)</td><td class="calc"></td><td class="n">${money(t.park)}</td></tr>
+          <tr><td>Everything else</td><td class="calc">${money(t.transport)} vehicle &amp; guide + ${money(t.accommodation)} accommodation + ${money(t.meals)} meals</td><td class="n">${money(t.others)}</td></tr>
+          <tr><td>Admin fee ${s.adminPct}%</td><td class="calc">${money(t.others)} × ${s.adminPct}%</td><td class="n">${money(t.adminFee)}</td></tr>
+          <tr class="line"><td>Subtotal</td><td class="calc">${money(t.park)} + ${money(t.others)} + ${money(t.adminFee)}</td><td class="n">${money(t.subtotal)}</td></tr>
+          <tr><td>Margin ${s.marginPct}%</td><td class="calc">${money(t.subtotal)} × ${s.marginPct}%</td><td class="n">${money(t.margin)}</td></tr>
+          <tr class="total"><td>Price to guest</td><td class="calc">${money(t.perPerson)} per paying person (${p.adults + p.children})</td><td class="n">${money(t.total)}</td></tr>
+        </table>
+        <h2>3. What the guest sees</h2>
+        <table class="sum">
+          <tr><td>Park fees</td><td class="n">${money(q.priced.park)}</td></tr>
+          <tr><td>Vehicle &amp; guide</td><td class="n">${money(q.priced.transport)}</td></tr>
+          <tr><td>Accommodation</td><td class="n">${money(q.priced.accommodation)}</td></tr>
+          <tr><td>Meals</td><td class="n">${money(q.priced.meals)}</td></tr>
+          <tr><td>Margin</td><td class="n">${money(q.priced.margin)}</td></tr>
+          <tr class="total"><td>Total</td><td class="n">${money(q.priced.total)}</td></tr>
+        </table>
+        <p class="hint">Admin fees are included in vehicle &amp; guide, accommodation and meals. Accommodation absorbs any 1-cent rounding so the guest's total always adds up.</p>`;
+    }
+
+    function initTest() {
+      const f = form();
+      const sel = f.elements.namedItem("category") as HTMLSelectElement;
+      sel.innerHTML = CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === "comfort" ? "selected" : ""}>${c.name}</option>`).join("");
+      (f.elements.namedItem("startDate") as HTMLInputElement).value = addDays(new Date().toISOString().slice(0, 10), cfg.settings.leadDays + 1);
+      const pick = (id: string, n: number) => cfg.areas.some((a) => a.id === id) && stops.push({ areaId: id, nights: n, lodgeId: "" });
+      pick("tarangire", 1); pick("central-serengeti", 2); pick("ngorongoro", 1);
+      if (!stops.length && cfg.areas[0]) stops.push({ areaId: cfg.areas[0].id, nights: 1, lodgeId: "" });
+      f.addEventListener("input", () => { renderStops(); runTest(); });
+      $("[data-add-stop]").addEventListener("click", () => {
+        const next = cfg.areas.find((a) => !stops.some((s) => s.areaId === a.id));
+        if (next) stops.push({ areaId: next.id, nights: next.minNights, lodgeId: "" });
+        renderStops(); runTest();
+      });
+    }
+
+    function renderAll() {
+      renderStatus(); renderIssues(); renderSettings(); renderSeasons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
+    }
+
+    // tabs
+    document.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach((b) => b.addEventListener("click", () => {
+      document.querySelectorAll("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+      document.querySelectorAll<HTMLElement>("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
+      if (b.dataset.tab === "history") renderHistory();
+    }));
+    $("[data-lf-area]").addEventListener("change", renderLodges);
+    $("[data-lf-cat]").addEventListener("change", renderLodges);
+
+    $("[data-save]").addEventListener("click", async () => {
+      const issues = checkConfig(cfg);
+      if (issues.length) return alert("Fix the problems listed at the top first.");
+      const btn = $("[data-save]"); btn.setAttribute("disabled", ""); btn.textContent = "Saving…";
+      const r = await fetch("/api/admin/config", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ config: cfg, note: $<HTMLInputElement>("[data-note]").value }) });
+      const d = await r.json().catch(() => ({}));
+      btn.textContent = "Save changes";
+      if (!r.ok || !d.ok) { btn.removeAttribute("disabled"); return alert("Not saved: " + (d.issues || [d.error || r.status]).join("\n")); }
+      const cur = await fetch("/api/admin/config").then((x) => x.json());
+      meta = cur; dirty = false; $<HTMLInputElement>("[data-note]").value = ""; renderStatus();
+    });
+    window.addEventListener("beforeunload", (e) => { if (dirty) e.preventDefault(); });
+
+    fetch("/api/admin/config").then((r) => r.json()).then((d) => {
+      cfg = d.config; meta = d;
+      initTest(); renderAll();
+    }).catch(() => { $("[data-status]").textContent = "Couldn't load the rates. Refresh to try again."; });
+  </script>
+
+  <style is:global>
+    :root { --gold: #c89a4b; --rust: #8a4b2e; --ivory: #f4ede0; --bg: #fdfbf7; --dark: #2e241b; --ink: #2b2118; --ink-2: #6b5d4f; --line: #e6dccb; --surface: #fff; --red: #a8321e; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Montserrat, system-ui, sans-serif; font-size: 14px; color: var(--ink); background: var(--bg); }
+    h2 { font-size: 1.05rem; font-weight: 600; margin: 1.6rem 0 0.6rem; }
+    h3 { font-size: 0.95rem; font-weight: 600; margin: 1.2rem 0 0.5rem; }
+    h3 small { font-weight: 400; color: var(--ink-2); }
+    .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.6rem 1.2rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+    .top__brand { display: flex; align-items: center; gap: 0.7rem; font-weight: 600; }
+    .top__brand img { height: 40px; width: auto; }
+    .top__status { color: var(--ink-2); flex: 1; min-width: 14rem; }
+    .warn { color: var(--rust); }
+    .top__save { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .top__save input { width: 18rem; max-width: 100%; }
+    input, select { font: inherit; padding: 0.4rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); min-width: 0; }
+    input[type="number"] { width: 6.2rem; }
+    input:focus, select:focus { outline: 2px solid var(--gold); outline-offset: 0; }
+    .btn { font: inherit; font-weight: 600; border-radius: 999px; padding: 0.5rem 1.1rem; border: 2px solid var(--gold); cursor: pointer; background: transparent; color: var(--ink); }
+    .btn--gold { background: var(--gold); color: var(--dark); }
+    .btn[disabled] { opacity: 0.45; cursor: default; }
+    .btn--ghost { margin-top: 0.6rem; }
+    .btn.sm { padding: 0.2rem 0.7rem; margin: 0; }
+    .tabs { display: flex; gap: 0.2rem; padding: 0 1.2rem; border-bottom: 1px solid var(--line); background: var(--surface); overflow-x: auto; }
+    .tabs button { font: inherit; font-weight: 600; background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.8rem 0.9rem; cursor: pointer; color: var(--ink-2); white-space: nowrap; }
+    .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
+    .issues { margin: 1rem 1.2rem 0; padding: 0.8rem 1rem; border-radius: 8px; background: #fbeae6; color: var(--red); }
+    .issues ul { margin: 0.3rem 0 0; }
+    .panes { padding: 0.5rem 1.2rem 4rem; }
+    .hint { color: var(--ink-2); max-width: 60rem; }
+    .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    thead th { background: var(--ivory); font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+    th.grp { text-align: center; border-left: 1px solid var(--line); }
+    td.ro { color: var(--ink-2); font-size: 0.8rem; }
+    td.c { text-align: center; }
+    td input[type="text"] { width: 100%; min-width: 11rem; }
+    .empty { color: var(--ink-2); text-align: center; padding: 1rem; }
+    .del, .mv button { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 0.2rem 0.45rem; color: var(--ink-2); }
+    .del:hover { color: var(--red); border-color: var(--red); }
+    .mv { white-space: nowrap; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.7rem; }
+    .card { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-weight: 500; }
+    .card input { width: 100%; }
+    .filters { display: flex; gap: 1rem; margin: 0.5rem 0 0.8rem; }
+    .filters label { display: flex; gap: 0.4rem; align-items: center; }
+    .test { display: grid; grid-template-columns: minmax(20rem, 26rem) 1fr; gap: 2rem; align-items: start; }
+    .test__form { position: sticky; top: 7.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.4rem 1rem 1rem; }
+    .test__form label { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.6rem; font-weight: 500; }
+    .test__form label.check { flex-direction: row; align-items: center; font-weight: 400; color: var(--ink-2); }
+    .test__form input[type="number"], .test__form input[type="date"], .test__form input[type="text"], .test__form select { width: 100%; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.7rem; }
+    .stop { display: grid; grid-template-columns: 1fr 4rem 1.4fr auto; gap: 0.35rem; margin-bottom: 0.4rem; }
+    .stop input[type="number"] { width: 100%; }
+    .who { padding: 0.7rem 0.9rem; background: var(--ivory); border-radius: 8px; font-weight: 500; }
+    .err { padding: 0.7rem 0.9rem; background: #fbeae6; color: var(--red); border-radius: 8px; margin-bottom: 0.8rem; }
+    .err ul { margin: 0.3rem 0 0; }
+    .calc-t td { font-size: 0.86rem; }
+    td.calc { color: var(--ink-2); font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; }
+    .n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    tr.gh th { background: #faf6ee; font-size: 0.86rem; }
+    table.sum { max-width: 46rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+    table.sum tr.line td { border-top: 2px solid var(--ink-2); }
+    table.sum tr.total td { font-weight: 700; font-size: 1.05rem; background: var(--ivory); }
+    @media (max-width: 980px) { .test { grid-template-columns: 1fr; } .test__form { position: static; } }
+  </style>
+</body>
+</html>

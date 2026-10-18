@@ -1,0 +1,23 @@
+{
+  // Golden Dust Safaris website: static Astro site (dist) + Worker for the itinerary planner.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "goldendust-website",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/admin", "/admin.*", "/admin/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "goldendust-planner",
+      // Filled in when the database is created in Cloudflare (not yet).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true }
+}
