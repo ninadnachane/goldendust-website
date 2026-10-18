@@ -7,5 +7,5 @@ export default defineConfig({
   build: { format: "file" },
   // keep scripts in separate files so the admin pages can use a strict Content-Security-Policy
   vite: { build: { assetsInlineLimit: 0 } },
-  integrations: [sitemap({ filter: (p) => !/\/(admin|planner)(\.html)?$/.test(p) })],
+  integrations: [sitemap({ filter: (p) => !/\/(admin|planner|itinerary)(\.html)?$/.test(p) })],
 });

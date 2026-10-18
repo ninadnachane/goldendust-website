@@ -244,6 +244,10 @@ export function publicOptions(cfg: Config) {
     },
     categories: CATEGORIES,
     arrivalName: cfg.arrival.name,
+    arrivalLodges: Object.fromEntries(CATEGORIES.map((c) => {
+      const l = cfg.lodges.find((x) => x.id === cfg.arrival.lodges[c.id]);
+      return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
+    })),
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights })),
     lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };

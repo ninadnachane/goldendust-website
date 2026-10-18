@@ -1,0 +1,216 @@
+---
+// Printable itinerary (save as PDF from the browser).
+//   /itinerary#lead=12      admin, from the Leads tab (needs to be signed in)
+//   /itinerary#t=<data>     guest, from the planner (trip stays in the URL hash, never sent to a server log)
+import { site } from "../lib/site";
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Your Tanzania safari | Golden Dust Safaris</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body data-wa={site.whatsapp} data-phone={site.phoneDisplay}>
+  <div class="bar no-print">
+    <a href="/planner" class="bar__back" data-back>← Back</a>
+    <span class="bar__tip" data-tip>Tip: in the print window choose "Save as PDF".</span>
+    <button type="button" class="bar__btn" data-print disabled>Save as PDF</button>
+  </div>
+  <main class="doc" data-doc><p class="loading">Preparing your itinerary…</p></main>
+
+  <script>
+    type Opt = {
+      categories: { id: string; name: string; blurb: string }[];
+      arrivalName: string;
+      arrivalLodges: Record<string, { name: string; description: string; images: string[] } | null>;
+      areas: { id: string; name: string }[];
+      lodges: { id: string; name: string; areaId: string; description: string; images: string[] }[];
+    };
+    type Trip = { startDate: string; adults: number; childAges: number[]; category: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[] };
+    type Priced = { park: number; transport: number; accommodation: number; meals: number; margin: number; total: number };
+
+    const body = document.body;
+    const docEl = document.querySelector<HTMLElement>("[data-doc]")!;
+    const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+    const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+    const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
+    const fmt = (iso: string, o: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
+    const long = (iso: string) => fmt(iso, { day: "numeric", month: "long", year: "numeric" });
+
+    function lodgeBlock(l: { name: string; description: string; images: string[] } | null | undefined) {
+      if (!l) return "";
+      const imgs = l.images.slice(0, 3);
+      return `<div class="lodge">
+        ${imgs.length ? `<div class="lodge__imgs n${imgs.length}">${imgs.map((id) => `<img src="/media/${esc(id)}" alt="">`).join("")}</div>` : ""}
+        <p class="lodge__name">Overnight: ${esc(l.name)}</p>
+        ${l.description ? `<p class="lodge__desc">${esc(l.description)}</p>` : ""}
+      </div>`;
+    }
+
+    function render(o: Opt, t: Trip, priced: Priced | null, perPerson: number, guest: { name?: string; ref?: string }) {
+      const cat = o.categories.find((c) => c.id === t.category);
+      const end = addDays(t.startDate, t.totalNights);
+      const kids = t.childAges.length ? `, ${t.childAges.length} child${t.childAges.length > 1 ? "ren" : ""} (age ${t.childAges.join(", ")})` : "";
+      const days: string[] = [];
+      days.push(`<section class="day"><div class="day__when"><span class="day__n">Day 1</span><span>${fmt(t.startDate)}</span></div>
+        <div class="day__what"><h3>Arrive in ${esc(o.arrivalName)}</h3><p>Arrive and settle into your hotel, ready for the safari.</p>${lodgeBlock(o.arrivalLodges[t.category])}</div></section>`);
+      let d = 1;
+      for (const s of t.stops) {
+        const a = o.areas.find((x) => x.id === s.areaId);
+        const l = o.lodges.find((x) => x.id === s.lodgeId);
+        const from = d + 1, to = d + s.nights;
+        const label = s.nights > 1 ? `Days ${from}–${to}` : `Day ${from}`;
+        const when = s.nights > 1 ? `${fmt(addDays(t.startDate, d))} – ${fmt(addDays(t.startDate, d + s.nights - 1))}` : fmt(addDays(t.startDate, d));
+        days.push(`<section class="day"><div class="day__when"><span class="day__n">${label}</span><span>${when}</span></div>
+          <div class="day__what"><h3>${esc(a?.name ?? s.areaId)} <small>${s.nights} night${s.nights > 1 ? "s" : ""}</small></h3><p>Game drives with your private guide.</p>${lodgeBlock(l)}</div></section>`);
+        d += s.nights;
+      }
+      days.push(`<section class="day"><div class="day__when"><span class="day__n">Day ${t.totalNights + 1}</span><span>${fmt(end)}</span></div>
+        <div class="day__what"><h3>Back to Arusha</h3><p>Drive back to Arusha or to the airport for your flight.</p></div></section>`);
+
+      const price = priced ? `<table class="price">
+          <tr><td>Park fees</td><td>${usd(priced.park)}</td></tr>
+          <tr><td>Vehicle &amp; private guide</td><td>${usd(priced.transport)}</td></tr>
+          <tr><td>Accommodation</td><td>${usd(priced.accommodation)}</td></tr>
+          <tr><td>Meals</td><td>${usd(priced.meals)}</td></tr>
+          <tr><td>Our margin</td><td>${usd(priced.margin)}</td></tr>
+          <tr class="tot"><td>Total for your group</td><td>${usd(priced.total)}</td></tr>
+          <tr class="pp"><td></td><td>about ${usd(perPerson)} per person</td></tr>
+        </table>` : `<p>We'll confirm the price with you on WhatsApp.</p>`;
+
+      docEl.innerHTML = `
+        <header class="top">
+          <img src="/images/logo-header.webp" alt="Golden Dust Safaris" class="top__logo">
+          <div class="top__co">TALA-registered safari operator<br>Arusha, Tanzania<br>WhatsApp ${esc(body.dataset.phone)}</div>
+        </header>
+        <h1>Your Tanzania safari</h1>
+        <p class="sub">${guest.name ? `Prepared for ${esc(guest.name)} · ` : ""}${guest.ref ? `Ref ${esc(guest.ref)} · ` : ""}${long(new Date().toISOString().slice(0, 10))}</p>
+        <div class="facts">
+          <div><span>Dates</span><strong>${fmt(t.startDate, { day: "numeric", month: "short" })} – ${long(end)}</strong></div>
+          <div><span>Length</span><strong>${t.totalNights} nights, ${t.totalNights + 1} days</strong></div>
+          <div><span>Travellers</span><strong>${t.adults} adult${t.adults > 1 ? "s" : ""}${kids}</strong></div>
+          <div><span>Style</span><strong>${esc(cat?.name ?? t.category)}</strong></div>
+        </div>
+        <h2>Day by day</h2>
+        ${days.join("")}
+        <div class="two">
+          <section class="box"><h2>Price</h2>${price}</section>
+          <section class="box"><h2>What's included</h2>
+            <ul class="inc">
+              <li>Private safari vehicle and your own guide</li>
+              <li>All park and conservation fees</li><li>Accommodation as listed, incl. your first night in Arusha</li>
+              <li>Lunch on your first safari day</li>
+            </ul>
+            <h3>Not included</h3>
+            <ul class="exc"><li>International flights and visa</li><li>Travel insurance</li><li>Tips for guide and staff</li><li>Drinks and personal expenses</li><li>Optional extras (e.g. balloon safari)</li></ul>
+          </section>
+        </div>
+        <p class="fine">Prices are in US dollars and are an estimate until we've confirmed availability with each lodge. Dates and lodges can be changed: just tell us on WhatsApp.</p>
+        <footer class="foot">Golden Dust Safaris · Arusha, Tanzania · WhatsApp ${esc(body.dataset.phone)} · goldendustsafaris.com</footer>`;
+      document.title = `${guest.name ? guest.name + " – " : ""}Tanzania safari ${t.startDate}${guest.ref ? " " + guest.ref : ""} | Golden Dust Safaris`;
+      const btn = document.querySelector<HTMLButtonElement>("[data-print]")!;
+      btn.disabled = false;
+      btn.addEventListener("click", async () => {
+        btn.disabled = true; btn.textContent = "Preparing…";
+        await Promise.all([...docEl.querySelectorAll("img")].map((im) => (im.complete ? null : new Promise((r) => { im.onload = im.onerror = r; }))));
+        btn.disabled = false; btn.textContent = "Save as PDF";
+        window.print();
+      });
+    }
+
+    function fail(msg: string) { docEl.innerHTML = `<p class="loading">${esc(msg)}</p>`; }
+
+    async function start() {
+      const h = new URLSearchParams(location.hash.slice(1));
+      if (h.get("lead")) {
+        document.querySelector<HTMLAnchorElement>("[data-back]")!.href = "/admin";
+        const r = await fetch(`/api/admin/leads/${encodeURIComponent(h.get("lead")!)}/doc`);
+        if (r.status === 401) return fail("Sign in to the admin first, then open the PDF again from the Leads tab.");
+        if (!r.ok) return fail("This lead wasn't found.");
+        const d = await r.json();
+        return render(d.options, d.trip, d.ok ? d.priced : null, d.perPerson, { name: d.guest.name, ref: d.guest.ref });
+      }
+      const raw = h.get("t");
+      if (!raw) return fail("No itinerary to show. Build one in the planner first.");
+      let data: { trip: Trip; name?: string; ref?: string };
+      try { data = JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g, "+").replace(/_/g, "/"))))); } catch { return fail("This itinerary link is damaged. Build it again in the planner."); }
+      const [o, q] = await Promise.all([
+        fetch("/api/planner/options").then((x) => x.json()),
+        fetch("/api/planner/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.trip) }).then((x) => x.json()).catch(() => null),
+      ]);
+      render(o, data.trip, q && q.ok ? q.priced : null, q?.perPerson || 0, { name: data.name, ref: data.ref });
+    }
+    start().catch(() => fail("Something went wrong. Please try again."));
+    if (/iPhone|iPad|Android/.test(navigator.userAgent)) document.querySelector("[data-tip]")!.textContent = 'Tip: tap Save as PDF, then share or "Save to Files".';
+  </script>
+
+  <style is:global>
+    :root { --gold: #c89a4b; --rust: #8a4b2e; --ivory: #f4ede0; --tint: #f8f3ea; --dark: #2e241b; --ink: #2b2118; --ink-2: #6b5d4f; --line: #e6dccb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #ece6dc; font-family: Montserrat, system-ui, sans-serif; color: var(--ink); font-size: 14px; line-height: 1.5; }
+    .bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; padding: 0.7rem 1rem; background: var(--dark); color: var(--ivory); }
+    .bar__back { color: var(--ivory); text-decoration: none; font-weight: 600; }
+    .bar__tip { margin-right: auto; font-size: 0.85rem; opacity: 0.8; }
+    .bar__btn { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 0.6rem 1.2rem; background: var(--gold); color: var(--dark); cursor: pointer; }
+    .bar__btn:disabled { opacity: 0.5; }
+    .doc { width: min(210mm, 100%); margin: 1.5rem auto; background: #fff; padding: 16mm 15mm; box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.35); }
+    .loading { color: var(--ink-2); text-align: center; padding: 4rem 0; }
+    .top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--gold); padding-bottom: 0.8rem; }
+    .top__logo { height: 64px; width: auto; }
+    .top__co { text-align: right; font-size: 0.8rem; color: var(--ink-2); }
+    h1 { font-size: 1.9rem; margin: 1.1rem 0 0.1rem; font-weight: 700; }
+    .sub { color: var(--ink-2); margin: 0 0 1rem; }
+    h2 { font-size: 1.1rem; margin: 1.4rem 0 0.6rem; color: var(--rust); }
+    h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+    h3 small { font-weight: 500; color: var(--ink-2); font-size: 0.85rem; }
+    .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; background: var(--tint); border-radius: 10px; padding: 0.8rem 1rem; }
+    .facts span { display: block; font-size: 0.75rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .facts strong { font-size: 0.92rem; }
+    .day { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; padding: 0.8rem 0; border-top: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; }
+    .day__when { display: flex; flex-direction: column; font-size: 0.82rem; color: var(--ink-2); }
+    .day__n { font-weight: 700; color: var(--ink); font-size: 0.95rem; }
+    .day__what p { margin: 0 0 0.4rem; }
+    .lodge__imgs { display: grid; gap: 4px; margin: 0.4rem 0; border-radius: 8px; overflow: hidden; }
+    .lodge__imgs.n2 { grid-template-columns: 1fr 1fr; }
+    .lodge__imgs.n3 { grid-template-columns: 2fr 1fr 1fr; }
+    .lodge__imgs img { width: 100%; height: 34mm; object-fit: cover; display: block; }
+    .lodge__imgs.n1 img { height: 45mm; }
+    .lodge__name { font-weight: 600; margin: 0.2rem 0 0 !important; }
+    .lodge__desc { color: var(--ink-2); font-size: 0.88rem; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; break-inside: avoid; page-break-inside: avoid; margin-top: 0.6rem; }
+    .box { border: 1px solid var(--line); border-radius: 10px; padding: 0 1rem 0.8rem; }
+    .price { width: 100%; border-collapse: collapse; }
+    .price td { padding: 0.25rem 0; }
+    .price td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .price tr.tot td { border-top: 2px solid var(--ink); padding-top: 0.5rem; font-weight: 700; font-size: 1.1rem; }
+    .price tr.pp td { color: var(--ink-2); font-size: 0.85rem; padding-top: 0; }
+    .inc, .exc { margin: 0 0 0.6rem; padding-left: 1.1rem; font-size: 0.88rem; }
+    .exc { color: var(--ink-2); }
+    .fine { font-size: 0.8rem; color: var(--ink-2); margin-top: 1rem; }
+    .foot { margin-top: 1rem; padding-top: 0.6rem; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--ink-2); text-align: center; }
+    @media (max-width: 640px) {
+      .doc { margin: 0; padding: 1.2rem 1rem; box-shadow: none; }
+      .facts { grid-template-columns: 1fr 1fr; }
+      .day { grid-template-columns: 1fr; gap: 0.3rem; }
+      .day__when { flex-direction: row; gap: 0.6rem; align-items: baseline; }
+      .two { grid-template-columns: 1fr; }
+      .bar__tip { display: none; }
+      .bar__back { margin-right: auto; }
+    }
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      html { font-size: 11.5px; }
+      body { background: #fff; font-size: 1rem; }
+      .no-print { display: none !important; }
+      .doc { width: auto; margin: 0; padding: 0; box-shadow: none; }
+      .facts { grid-template-columns: repeat(4, 1fr); }
+      .day { grid-template-columns: 7.5rem 1fr; }
+      .two { grid-template-columns: 1fr 1fr; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</body>
+</html>

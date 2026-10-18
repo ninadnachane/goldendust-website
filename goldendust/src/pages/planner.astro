@@ -75,6 +75,7 @@ import { site } from "../lib/site";
               <div data-price></div>
             </div>
             <button type="button" class="btn sum__wa" data-send aria-disabled="true">Send my itinerary on WhatsApp</button>
+            <a class="sum__pdf" data-pdf href="/itinerary" target="_blank" rel="noopener" aria-disabled="true">Download as PDF</a>
             <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation and your first night in Arusha. International flights, visas, tips and drinks are extra.</p>
           </div>
         </aside>
@@ -317,6 +318,11 @@ import { site } from "../lib/site";
 
   // ---- send on WhatsApp: collect name + number, save the lead, then open WhatsApp
   const store = { get: (k: string) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
+  function pdfLink(name?: string, ref?: string) {
+    const trip = { startDate: st.date, adults: st.adults, childAges: st.ages, category: st.category, totalNights: st.nights, stops: st.stops };
+    const raw = btoa(unescape(encodeURIComponent(JSON.stringify({ trip, name, ref })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return `/itinerary#t=${raw}`;
+  }
   function openContact() {
     const send = $("[data-send]");
     if (send.getAttribute("aria-disabled") === "true") { flash("Finish your itinerary first: dates, style and where to go."); return; }
@@ -358,6 +364,7 @@ import { site } from "../lib/site";
     const price = $("[data-price]");
     const ready = st.date && st.category && st.stops.length;
     lastTotal = 0;
+    $("[data-pdf]").setAttribute("aria-disabled", "true");
     if (!ready) {
       const w = !st.date ? "Choose your arrival date" : !st.category ? "Choose your safari style" : "Choose where you'd like to go";
       price.innerHTML = `<p class="sum__wait">${w} to see your price.</p>`;
@@ -395,6 +402,7 @@ import { site } from "../lib/site";
         <p class="sum__pp">about ${usd(r.perPerson)} per person${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</p>`;
       lastTotal = p.total;
       send.removeAttribute("aria-disabled");
+      const pdf = $<HTMLAnchorElement>("[data-pdf]"); pdf.href = pdfLink(store.get("gd_name") || undefined); pdf.removeAttribute("aria-disabled");
     }, 250);
   }
 
@@ -561,6 +569,8 @@ import { site } from "../lib/site";
   .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
   .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
   .pl .sum__wa { width: 100%; justify-content: center; margin-top: 1.1rem; }
+  .pl .sum__pdf { display: block; text-align: center; margin-top: 0.6rem; font-weight: 600; font-size: 0.9rem; color: var(--rust); }
+  .pl .sum__pdf[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
   .pl .sum__wa { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
   .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; }
   .pl .ct { border: 0; padding: 0; border-radius: 16px; width: min(26rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
@@ -604,6 +614,8 @@ import { site } from "../lib/site";
     .pl .sum__h { display: none; }
     .pl .sum__wa { margin-top: 0.3rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
     .pl .sum__fine { display: none; }
+    .pl .sum__pdf { display: none; }
+    .pl .sum.is-open .sum__pdf { display: block; }
     .pl .sum.is-open .sum__fine { display: block; margin-top: 0.5rem; }
     /* lodge photo cards: swipe sideways instead of stacking */
     .pl .lodges { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-right: -1rem; padding-right: 1rem; }

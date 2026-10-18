@@ -446,7 +446,7 @@
           <td class="sm">${esc(l.summary)}</td><td class="n">${l.total != null ? money(l.total) : "–"}</td>
           <td><select data-ls>${statuses.map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
           <td><input type="text" data-ln value="${esc(l.notes)}" placeholder="Add a note"></td>
-          <td><button type="button" class="del" data-ld aria-label="Delete lead">✕</button></td></tr>`).join("") || '<tr><td colspan="8" class="empty">No leads yet.</td></tr>'
+          <td class="nw"><a class="btn btn--ghost sm" href="/itinerary#lead=${l.id}" target="_blank" rel="noopener">PDF</a> <button type="button" class="del" data-ld aria-label="Delete lead">✕</button></td></tr>`).join("") || '<tr><td colspan="8" class="empty">No leads yet.</td></tr>'
       }</tbody></table></div>`;
       const patch = (id: number, body: object) => fetch(`/api/admin/leads/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       document.querySelectorAll<HTMLElement>("[data-lead]").forEach((tr) => {

@@ -201,6 +201,15 @@ async function adminApi(req: Request, env: Env, p: string, email: string): Promi
     if (typeof b?.notes === "string") await env.DB.prepare("UPDATE leads SET notes = ? WHERE id = ?").bind(b.notes.slice(0, 2000), Number(lm[1])).run();
     return json({ ok: true });
   }
+  const ld = p.match(/^\/api\/admin\/leads\/(\d+)\/doc$/);
+  if (ld && req.method === "GET") {
+    const row = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, total, request FROM leads WHERE id = ?").bind(Number(ld[1])).first<any>();
+    if (!row) return json({ error: "Not found" }, 404);
+    const { config } = await loadConfig(env);
+    const trip = toRequest(JSON.parse(row.request));
+    const q = quote(config, trip, "1970-01-01");
+    return json({ guest: { name: row.name, phone: row.phone, email: row.email, ref: row.ref, created_at: row.created_at, total: row.total }, trip, options: publicOptions(config), ok: q.ok, errors: q.errors, priced: q.priced, perPerson: q.totals.perPerson, people: q.people });
+  }
   if (lm && req.method === "DELETE") {
     await env.DB.prepare("DELETE FROM leads WHERE id = ?").bind(Number(lm[1])).run();
     return json({ ok: true });
