@@ -55,10 +55,6 @@ import { site } from "../lib/site";
       const wd = (iso: string) => fmt(iso, { weekday: "short" });
 
       // ---- page 1: cover
-      const seen = new Set<string>();
-      const stays: { name: string; img: string; area: string }[] = [];
-      for (const s of t.stops) { const l = o.lodges.find((x) => x.id === s.lodgeId); if (l && l.images.length && !seen.has(l.name)) { seen.add(l.name); stays.push({ name: l.name, img: l.images[0], area: areaName(s.areaId) }); } }
-      const stayStrip = stays.length ? `<p class="eyebrow sec">Where you'll stay</p><div class="ws ws--${Math.min(3, stays.length)}">${stays.slice(0, 3).map((x) => `<figure><img src="/media/${esc(x.img)}" alt=""><figcaption><b>${esc(x.name)}</b><span>${esc(x.area)}</span></figcaption></figure>`).join("")}</div>` : "";
       const stopsLine = [`<li><span class="rt__dot"></span><b>${esc(o.arrivalName)}</b><small>Arrival</small></li>`,
         ...t.stops.map((s) => `<li><span class="rt__dot"></span><b>${esc(areaName(s.areaId))}</b><small>${s.nights} night${s.nights > 1 ? "s" : ""}</small></li>`),
         `<li><span class="rt__dot rt__dot--end"></span><b>${esc(o.arrivalName)}</b><small>Departure</small></li>`].join("");
@@ -80,7 +76,6 @@ import { site } from "../lib/site";
             </div>
             <p class="eyebrow sec">Your route</p>
             <ol class="rt">${stopsLine}</ol>
-            ${stayStrip}
             ${priced ? `<div class="tot">
                 <div><span class="eyebrow">Total for your group</span><strong>$${usd(priced.total)}</strong></div>
                 <div class="tot__pp"><span class="eyebrow">Per person</span><strong>$${usd(perPerson)}</strong></div>
@@ -90,38 +85,53 @@ import { site } from "../lib/site";
           </div>
         </div>`;
 
-      // ---- page 2: day by day
-      const photos = (imgs: string[] | undefined, n: number) => imgs && imgs.length
-        ? `<div class="ph ph--${Math.min(n, imgs.length)}">${imgs.slice(0, n).map((im) => `<img src="/media/${esc(im)}" alt="">`).join("")}</div>`
-        : "";
-      const date = (from: string, to?: string) => `<div class="dt"><span class="dt__d">${dd(from)}${to ? `<i>–</i>${dd(to)}` : ""}</span><span class="dt__m">${to && mon(from) !== mon(to) ? `${mon(from)}–${mon(to)}` : mon(from)}</span><span class="dt__w">${wd(from)}${to ? `–${wd(to)}` : ""}</span></div>`;
+      // ---- page 2: day by day (compact) + where you'll stay
+      const date = (from: string, to?: string) => `<div class="dt"><span class="dt__d">${dd(from)}${to ? `<i>–</i>${dd(to)}` : ""}</span><span class="dt__m">${to && mon(from) !== mon(to) ? `${mon(from)}–${mon(to)}` : mon(from)}</span></div>`;
+      const stay = (name?: string) => name ? `<div class="st__stay"><span>Overnight</span><b>${esc(name)}</b></div>` : `<div></div>`;
       const rows: string[] = [];
-      rows.push(`<section class="st st--slim">${date(t.startDate)}<div class="st__body"><p class="eyebrow">Day 1 · Arrival</p><h3>${esc(o.arrivalName)}</h3><p>Welcome to Tanzania. Transfer to your hotel and a safari briefing with your guide in the evening.</p><p class="st__stay"><span>Overnight</span>${esc(arrival?.name ?? o.arrivalName)}</p></div></section>`);
+      rows.push(`<section class="st">${date(t.startDate)}<div class="st__body"><p class="eyebrow">Day 1 · Arrival</p><h3>${esc(o.arrivalName)}</h3><p>Welcome to Tanzania. Transfer to your hotel and an evening safari briefing with your guide.</p></div>${stay(arrival?.name ?? o.arrivalName)}</section>`);
       let d = 1;
       for (const s of t.stops) {
         const a = o.areas.find((x) => x.id === s.areaId);
         const l = o.lodges.find((x) => x.id === s.lodgeId);
         const from = addDays(t.startDate, d), to = s.nights > 1 ? addDays(t.startDate, d + s.nights - 1) : undefined;
         const label = s.nights > 1 ? `Days ${d + 1}–${d + s.nights}` : `Day ${d + 1}`;
-        const ph = photos(l?.images, 2);
-        rows.push(`<section class="st${ph ? "" : " st--slim"}">${date(from, to)}<div class="st__body"><p class="eyebrow">${label} · ${s.nights} night${s.nights > 1 ? "s" : ""}</p><h3>${esc(areaName(s.areaId))}</h3>
-            <p>${esc(a?.blurb || `Game drives in ${areaName(s.areaId)} with your private guide.`)}</p>
-            <p class="st__stay"><span>Overnight</span>${esc(l?.name ?? "")}</p>${l?.description ? `<p class="st__desc">${esc(l.description)}</p>` : ""}</div>
-          ${ph}</section>`);
+        rows.push(`<section class="st">${date(from, to)}<div class="st__body"><p class="eyebrow">${label} · ${s.nights} night${s.nights > 1 ? "s" : ""}</p><h3>${esc(areaName(s.areaId))}</h3>
+            <p>${esc(a?.blurb || `Game drives in ${areaName(s.areaId)} with your private guide.`)}</p></div>${stay(l?.name)}</section>`);
         d += s.nights;
       }
-      rows.push(`<section class="st st--slim">${date(end)}<div class="st__body"><p class="eyebrow">Day ${t.totalNights + 1} · Departure</p><h3>Back to ${esc(o.arrivalName)}</h3><p>After breakfast we drive you back to Arusha or to the airport for your flight.</p></div></section>`);
-      const days = `<div class="sheet${t.stops.length > 4 ? " compact" : ""}"><header class="ph-h"><p class="eyebrow">Day by day</p><h2>Your journey</h2></header>${rows.join("")}</div>`;
+      rows.push(`<section class="st">${date(end)}<div class="st__body"><p class="eyebrow">Day ${t.totalNights + 1} · Departure</p><h3>Back to ${esc(o.arrivalName)}</h3><p>After breakfast we drive you back to Arusha or to the airport for your flight.</p></div><div></div></section>`);
 
-      // ---- page 3: price + fine print
+      const seen = new Set<string>();
+      const stays: { l: L; area: string; nights: number }[] = [];
+      for (const s of t.stops) {
+        const l = o.lodges.find((x) => x.id === s.lodgeId);
+        if (!l) continue;
+        const prev = stays.find((x) => x.l.name === l.name);
+        if (prev) { prev.nights += s.nights; continue; }
+        if (!seen.has(l.name)) { seen.add(l.name); stays.push({ l, area: areaName(s.areaId), nights: s.nights }); }
+      }
+      const withPics = stays.filter((x) => x.l.images.length);
+      const wide = withPics.length <= 2 && t.stops.length <= 4;
+      const three = withPics.length > 4;
+      const per = wide ? 3 : three ? 1 : 2;
+      const staysHtml = withPics.length ? `<section class="ws-sec"><header class="ph-h ph-h--sub"><p class="eyebrow">Your camps &amp; lodges</p><h2>Where you'll stay</h2></header>
+          <div class="ws ${wide ? "ws--wide" : three ? "ws--three" : ""}">${withPics.map((x) => `<figure class="lc">
+            <div class="lc__imgs n${Math.min(per, x.l.images.length)}">${x.l.images.slice(0, per).map((im) => `<img src="/media/${esc(im)}" alt="">`).join("")}</div>
+            <figcaption><b>${esc(x.l.name)}</b><span>${esc(x.area)} · ${x.nights} night${x.nights > 1 ? "s" : ""}</span>${x.l.description ? `<p>${esc(x.l.description)}</p>` : ""}</figcaption>
+          </figure>`).join("")}</div></section>` : "";
+      const days = `<div class="sheet"><header class="ph-h"><p class="eyebrow">Day by day</p><h2>Your journey</h2></header><div class="jr">${rows.join("")}</div>${staysHtml}</div>`;
+
+      // ---- page 3: investment + fine print
       const doc = o.doc ?? { included: [], excluded: [], payment: "", notes: [] };
-      const lines: [string, number][] = priced ? [["Vehicle & private guide", priced.transport], ["Park & conservation fees", priced.park], ["Accommodation", priced.accommodation], ["Food", priced.meals], ["Our margin", priced.margin]] : [];
+      const lines: [string, number][] = priced ? [["Park fees", priced.park], ["Vehicle & guide", priced.transport], ["Accommodation", priced.accommodation], ["Meals", priced.meals], ["Our margin", priced.margin]] : [];
       const details = `<div class="sheet">
           <header class="ph-h"><p class="eyebrow">The details</p><h2>Investment</h2></header>
-          ${priced ? `<div class="inv">
-              <dl>${lines.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>$${usd(v)}</dd></div>`).join("")}</dl>
-              <div class="inv__tot"><div><span>Total</span><strong>$${usd(priced.total)}</strong></div><div><span>Per person</span><strong>$${usd(perPerson)}</strong></div></div>
-            </div>` : `<p>We'll confirm the price with you on WhatsApp.</p>`}
+          ${priced ? `<table class="price">
+              ${lines.map(([k, v]) => `<tr><td>${esc(k)}</td><td>$${usd(v)}</td></tr>`).join("")}
+              <tr class="price__tot"><td>Total for your group</td><td>$${usd(priced.total)}</td></tr>
+              <tr class="price__pp"><td></td><td>about $${usd(perPerson)} per person</td></tr>
+            </table>` : `<p>We'll confirm the price with you on WhatsApp.</p>`}
           ${doc.payment ? `<p class="pay">${esc(doc.payment)}</p>` : ""}
           <div class="ie">
             <div><p class="eyebrow sec">Included</p><ul class="ok">${doc.included.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
@@ -191,7 +201,7 @@ import { site } from "../lib/site";
 
     /* cover */
     .sheet--cover { padding: 0; display: flex; flex-direction: column; height: 297mm; }
-    .cv { position: relative; height: 126mm; flex: none; background-size: cover; background-position: center 60%; display: flex; flex-direction: column; justify-content: space-between; padding: 12mm 16mm 13mm; color: #fff; }
+    .cv { position: relative; height: 150mm; flex: none; background-size: cover; background-position: center 60%; display: flex; flex-direction: column; justify-content: space-between; padding: 12mm 16mm 13mm; color: #fff; }
     .cv::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20, 14, 9, 0.35), rgba(20, 14, 9, 0) 35%, rgba(20, 14, 9, 0.15) 55%, rgba(20, 14, 9, 0.78)); }
     .cv > * { position: relative; }
     .cv__logo { height: 17mm; width: auto; align-self: flex-start; background: rgba(255, 255, 255, 0.92); padding: 2mm 3.5mm; border-radius: 3mm; }
@@ -212,14 +222,6 @@ import { site } from "../lib/site";
     .rt__dot--end { background: var(--dark); }
     .rt b { font-size: 1.02rem; font-weight: 600; line-height: 1.25; }
     .rt small { color: var(--ink-2); font-size: 0.9rem; }
-    .ws { display: grid; gap: 4mm; }
-    .ws--2 { grid-template-columns: 1fr 1fr; } .ws--3 { grid-template-columns: 1fr 1fr 1fr; }
-    .ws figure { margin: 0; }
-    .ws img { width: 100%; height: 25mm; object-fit: cover; border-radius: 2.5mm; display: block; }
-    .ws--1 img { height: 34mm; }
-    .ws figcaption { display: grid; margin-top: 1.5mm; line-height: 1.3; }
-    .ws figcaption b { font-weight: 600; font-size: 0.95rem; }
-    .ws figcaption span { color: var(--ink-2); font-size: 0.85rem; }
     .tot { margin-top: auto; flex: none; display: grid; grid-template-columns: auto auto 1fr; align-items: end; gap: 3mm 9mm; background: var(--sand); border-radius: 4mm; padding: 5mm 7mm; }
     .tot strong { display: block; font-size: 2.5rem; font-weight: 600; line-height: 1.1; margin-top: 1mm; }
     .tot__pp strong { font-size: 1.6rem; color: var(--ink-2); }
@@ -230,39 +232,46 @@ import { site } from "../lib/site";
     .ph-h { margin-bottom: 5mm; display: grid; gap: 1.2mm; }
     .ph-h h2 { font-size: 2.3rem; }
 
-    /* day by day */
-    .st { display: grid; grid-template-columns: 19mm 1fr 66mm; gap: 6mm; padding: 4.5mm 0; border-top: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; }
-    .st--slim { grid-template-columns: 19mm 1fr; padding: 3.5mm 0; }
-    .dt { display: grid; align-content: start; line-height: 1.1; }
-    .dt__d { font-size: 2rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
-    .dt__d i { font-style: normal; color: var(--gold); font-weight: 400; margin: 0 0.4mm; }
-    .dt__m { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-d); margin-top: 0.8mm; }
-    .dt__w { font-size: 0.85rem; color: var(--ink-2); margin-top: 0.6mm; }
-    .st__body { display: grid; gap: 1.2mm; align-content: start; }
-    .st__body h3 { font-size: 1.45rem; }
+    /* day by day: compact rows, overnight on the right */
+    .jr { border-bottom: 1px solid var(--line); }
+    .st { display: grid; grid-template-columns: 17mm 1fr 58mm; gap: 5mm; padding: 2.6mm 0; border-top: 1px solid var(--line); break-inside: avoid; page-break-inside: avoid; align-items: start; }
+    .dt { display: grid; line-height: 1.1; }
+    .dt__d { font-size: 1.6rem; font-weight: 600; white-space: nowrap; }
+    .dt__d i { font-style: normal; color: var(--gold); font-weight: 400; margin: 0 0.3mm; }
+    .dt__m { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-d); margin-top: 0.6mm; }
+    .st__body { display: grid; gap: 0.6mm; }
+    .st__body h3 { font-size: 1.25rem; }
     .st__body p { margin: 0; }
-    .st__stay { font-weight: 600; }
-    .st__stay span { display: inline-block; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; margin-right: 2mm; }
-    .st__desc { color: var(--ink-2); font-size: 0.95rem; }
-    .ph { display: grid; gap: 1.5mm; border-radius: 3mm; overflow: hidden; height: 34mm; align-self: start; }
-    .ph--2 { grid-template-columns: 1.5fr 1fr; }
-    .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .compact .st { padding: 3mm 0; grid-template-columns: 19mm 1fr 58mm; }
-    .compact .st--slim { grid-template-columns: 19mm 1fr; }
-    .compact .ph { height: 27mm; }
-    .compact .st__desc { display: none; }
-
+    .st__body p:not(.eyebrow) { color: var(--ink-2); font-size: 0.98rem; }
+    .st__stay { display: grid; gap: 0.6mm; padding-left: 4mm; border-left: 2px solid var(--gold); margin-top: 3.4mm; }
+    .st__stay span { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+    .st__stay b { font-weight: 600; font-size: 1.02rem; line-height: 1.3; }
+    /* where you'll stay */
+    .ws-sec { margin-top: 7mm; }
+    .ph-h--sub { break-after: avoid; page-break-after: avoid; }
+    .ph-h--sub h2 { font-size: 1.8rem; }
+    .ws { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm 6mm; }
+    .ws--wide { grid-template-columns: 1fr; }
+    .ws--three { grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+    .ws--three .lc__imgs img { height: 24mm; }
+    .ws--three .lc figcaption p { display: none; }
+    .lc { margin: 0; break-inside: avoid; }
+    .lc__imgs { display: grid; gap: 1.5mm; border-radius: 3mm; overflow: hidden; }
+    .lc__imgs.n2 { grid-template-columns: 1.4fr 1fr; }
+    .lc__imgs.n3 { grid-template-columns: 2fr 1fr 1fr; }
+    .lc__imgs img { width: 100%; height: 28mm; object-fit: cover; display: block; }
+    .ws--wide .lc__imgs img { height: 36mm; }
+    .lc figcaption { display: grid; gap: 0.4mm; margin-top: 2mm; }
+    .lc figcaption b { font-weight: 600; font-size: 1.05rem; }
+    .lc figcaption span { color: var(--gold-d); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; }
+    .lc figcaption p { margin: 0.6mm 0 0; color: var(--ink-2); font-size: 0.92rem; }
     /* details */
-    .inv { border: 1px solid var(--line); border-radius: 4mm; overflow: hidden; }
-    .inv dl { margin: 0; padding: 2mm 6mm; }
-    .inv dl div { display: flex; justify-content: space-between; padding: 2.3mm 0; border-bottom: 1px solid var(--line); }
-    .inv dl div:last-child { border-bottom: 0; }
-    .inv dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
-    .inv__tot { display: flex; justify-content: space-between; background: var(--dark); color: #fff; padding: 4.5mm 6mm; }
-    .inv__tot span { display: block; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: #e9cf9c; font-weight: 600; }
-    .inv__tot strong { font-size: 1.9rem; font-weight: 600; }
-    .inv__tot div:last-child { text-align: right; }
-    .inv__tot div:last-child strong { font-size: 1.4rem; }
+    .price { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 4mm; font-size: 1.1rem; }
+    .price td { padding: 2.2mm 6mm; }
+    .price tr:first-child td { padding-top: 5mm; }
+    .price td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .price__tot td { border-top: 2px solid var(--ink); padding-top: 3.5mm !important; font-weight: 700; font-size: 1.55rem; }
+    .price__pp td { color: var(--ink-2); font-size: 1rem; padding-top: 0 !important; padding-bottom: 5mm; }
     .pay { color: var(--ink-2); font-size: 0.92rem; margin: 2.5mm 0 0; }
     .ie { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
     .ie ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.6mm; }
@@ -296,9 +305,9 @@ import { site } from "../lib/site";
       .rt li:last-child .rt__dot { margin-left: 0; }
       .tot { grid-template-columns: 1fr 1fr; margin-top: 6vw; }
       .tot p { grid-column: 1 / -1; }
-      .st, .st--slim { grid-template-columns: 15mm 1fr; }
-      .ph { grid-column: 1 / -1; height: 42vw; }
-      .ws--3 { grid-template-columns: 1fr 1fr; }
+      .st { grid-template-columns: 15mm 1fr; }
+      .st__stay { grid-column: 2; margin-top: 1vw; }
+      .ws { grid-template-columns: 1fr; }
       .ie { grid-template-columns: 1fr; gap: 5vw; }
       .cta { flex-direction: column; align-items: flex-start; }
       .cta__c { text-align: left; }
