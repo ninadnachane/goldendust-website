@@ -11,8 +11,9 @@ interface Props {
   type?: "website" | "article" | "product";
   schema?: object[];
   noindex?: boolean;
+  hideTours?: boolean;
 }
-const { title, description, image, type = "website", schema = [], noindex = false } = Astro.props;
+const { title, description, image, type = "website", schema = [], noindex = false, hideTours = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/\/$/, "") || "/", site.url).href;
 const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcfbca9bc0~mv2.png", 1200);
 ---
@@ -48,6 +49,6 @@ const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcf
     <a class="skip" href="#main">Skip to content</a>
     <Header />
     <main id="main"><slot /></main>
-    <Footer />
+    <Footer hideTours={hideTours} />
   </body>
 </html>

@@ -2,6 +2,9 @@
 import { site, waLink } from "../lib/site";
 import { tours, tourUrl } from "../data/tours";
 const year = new Date().getFullYear();
+// hideTours: the fixed sample itineraries stay on their own pages (and in the sitemap) for SEO,
+// but aren't promoted where we want guests to build their own trip.
+const { hideTours = false } = Astro.props as { hideTours?: boolean };
 ---
 <footer class="ftr">
   <div class="wrap ftr__grid">
@@ -11,10 +14,10 @@ const year = new Date().getFullYear();
       <p><a href={waLink()} target="_blank" rel="noopener">WhatsApp {site.phoneDisplay}</a><br />
       <a href={site.instagram} target="_blank" rel="noopener">Instagram {site.instagramHandle}</a></p>
     </div>
-    <div>
+    {!hideTours && <div>
       <p class="ftr__h">Safaris</p>
       <ul>{tours.map((t) => <li><a href={tourUrl(t)}>{t.nights + 1}-day {t.shortName} ({t.tier})</a></li>)}</ul>
-    </div>
+    </div>}
     <div>
       <p class="ftr__h">Plan your trip</p>
       <ul>
@@ -25,6 +28,7 @@ const year = new Date().getFullYear();
         <li><a href="/planner">Planner</a></li>
         <li><a href="/blog">Blogs</a></li>
         <li><a href="/about">About us</a></li>
+        {hideTours && <li><a href="/tanzania-safari-packages" class="ftr__quiet">Sample itineraries</a></li>}
       </ul>
     </div>
   </div>
@@ -37,6 +41,7 @@ const year = new Date().getFullYear();
   .ftr a:hover { color: var(--gold); }
   .ftr__grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 2.5rem; }
   .ftr__name { font-family: var(--serif); font-weight: 600; font-size: 1.45rem; color: var(--gold); }
+  .ftr__quiet { opacity: 0.6; font-size: 0.88rem; }
   .ftr__h { font-family: var(--display); font-weight: 600; color: var(--gold); }
   ul { list-style: none; padding: 0; margin: 0; }
   li { margin-bottom: 0.45rem; }
