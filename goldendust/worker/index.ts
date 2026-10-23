@@ -5,7 +5,7 @@
 // Admin security: password + one-time email code, see worker/auth.ts.
 // Login page: /admin/login. Local development only: DEV_ADMIN_BYPASS="1" in .dev.vars.
 import { authApi, sessionEmail, logoutEverywhere, type AuthEnv } from "./auth";
-import { quote, publicOptions, checkConfig, upgradeConfig, tripCategories, CATEGORIES, type Config, type QuoteRequest } from "../src/planner/engine";
+import { quote, publicOptions, checkConfig, upgradeConfig, tripCategories, chosenAddons, CATEGORIES, type Config, type QuoteRequest } from "../src/planner/engine";
 import { defaultConfig } from "../src/planner/defaults";
 
 interface Env extends AuthEnv {
@@ -56,6 +56,7 @@ function toRequest(b: any): QuoteRequest {
     totalNights: Number(b?.totalNights) || 0,
     stops: Array.isArray(b?.stops) ? b.stops.slice(0, 20).map((s: any) => ({ areaId: String(s?.areaId || ""), nights: Number(s?.nights) || 0, lodgeId: String(s?.lodgeId || "") })) : [],
     crater: b?.crater === true,
+    addons: Array.isArray(b?.addons) ? b.addons.slice(0, 10).map((x: any) => String(x).slice(0, 40)) : [],
   };
 }
 
@@ -134,7 +135,7 @@ function tripSummary(cfg: Config, r: QuoteRequest) {
     return `${s.nights}n ${a}${l ? ` (${l})` : ""}`;
   });
   const kids = r.childAges.length ? `, kids ${r.childAges.join("/")}` : "";
-  return `${r.startDate} · ${r.totalNights} nights · ${r.adults} adult${r.adults === 1 ? "" : "s"}${kids} · ${cat} · ${stops.join(", ")}${r.crater ? " · + Ngorongoro Crater" : ""}`;
+  return `${r.startDate} · ${r.totalNights} nights · ${r.adults} adult${r.adults === 1 ? "" : "s"}${kids} · ${cat} · ${stops.join(", ")}${chosenAddons(cfg, r).map((a) => ` · + ${a.name}`).join("")}`;
 }
 
 async function saveLead(req: Request, env: Env) {

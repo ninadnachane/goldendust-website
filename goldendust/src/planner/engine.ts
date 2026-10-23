@@ -8,7 +8,8 @@
 //  2. Overnight: Budget camp → public campsite fee; other lodge inside the park → concession fee; outside → nothing.
 //  3. NCA transit: each drive between east (Arusha, Tarangire, Manyara) and west (Serengeti) without a night in
 //     the Ngorongoro Conservation Area = one NCA entry day (going and coming back on different days = 2).
-//  4. Ngorongoro Crater (separate choice): crater fee per vehicle, plus one NCA day if the trip isn't in the NCA anyway.
+//  4. Add-ons (crater drive, bush breakfast, balloon …): price per person / vehicle / booking from Costs & rules.
+//     The crater add-on also adds one NCA day if the trip isn't in the NCA anyway.
 //  5. Vehicle entry fee per vehicle for each park day.
 
 // Every lodge/camp carries one of these tags. Guests don't pick a style: they see all options with their tag.
@@ -101,7 +102,14 @@ export type Config = {
   lodges: Lodge[];
   arrival: { name: string; lodges: Record<Category, string> }; // Arusha arrival night, lodge per category
   doc?: DocText;
+  addons?: Addon[];
 };
+
+// Optional extras guests can tick (Costs & rules → Add-ons). Prices incl. VAT.
+// per: "person" (adults + children 5–15; under-5s free), "vehicle" or "booking".
+// parkFee: true → counted as a park fee (no admin fee), e.g. the crater descent; false → extra with the 10% admin fee.
+// id "crater" is special: it also adds one Ngorongoro area day if the trip isn't in the NCA anyway.
+export type Addon = { id: string; name: string; blurb: string; per: "person" | "vehicle" | "booking"; price: number; childPrice: number; parkFee: boolean; active: boolean };
 
 export type QuoteRequest = {
   startDate: string; // YYYY-MM-DD, arrival day in Arusha
@@ -110,10 +118,11 @@ export type QuoteRequest = {
   category?: Category; // old requests only; the style now comes from the chosen lodges
   totalNights: number; // incl. the Arusha arrival night
   stops: { areaId: string; nights: number; lodgeId: string }[];
-  crater?: boolean; // Ngorongoro Crater game drive, chosen separately
+  crater?: boolean; // old requests: Ngorongoro Crater as a yes/no (now the "crater" add-on)
+  addons?: string[]; // ids of chosen add-ons (Costs & rules → Add-ons)
 };
 
-export type Group = "park" | "transport" | "accommodation" | "meals";
+export type Group = "park" | "transport" | "accommodation" | "meals" | "extras";
 export type Line = { group: Group; label: string; calc: string; cost: number };
 export type Quote = {
   ok: boolean;
@@ -121,11 +130,11 @@ export type Quote = {
   lines: Line[];
   people: { adults: number; children: number; infants: number; total: number; vehicles: number; guides: number };
   totals: {
-    park: number; transport: number; accommodation: number; meals: number;
+    park: number; transport: number; accommodation: number; meals: number; extras: number;
     others: number; adminFee: number; subtotal: number; margin: number; total: number; perPerson: number;
   };
   // What a guest sees: each category with admin fees baked in, margin shown separately.
-  priced: { park: number; transport: number; accommodation: number; meals: number; margin: number; total: number };
+  priced: { park: number; transport: number; accommodation: number; meals: number; extras: number; margin: number; total: number };
 };
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
@@ -149,6 +158,9 @@ export function upgradeConfig(cfg: Config): Config {
   c.lodges = c.lodges.map((l) => ({ ...l, insidePark: l.insidePark ?? l.areaId !== "arusha" }));
   c.arrival = { ...c.arrival, lodges: { ...c.arrival.lodges, premium: c.arrival.lodges.premium ?? c.arrival.lodges.luxury ?? c.arrival.lodges.comfort } };
   const legacyCrater = Math.max(0, ...c.areas.map((a) => a.vehicleFee || 0));
+  c.addons = c.addons ?? [
+    { id: "crater", name: "Ngorongoro Crater game drive", blurb: "A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.", per: "vehicle", price: c.settings.craterFee || legacyCrater || 295, childPrice: 0, parkFee: true, active: true },
+  ];
   c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
   return c;
 }
@@ -189,6 +201,11 @@ export function roomPlan(n: number, rt: RoomRates) {
 const describeRooms = (rooms: Record<string, number>, rt: RoomRates) =>
   Object.entries(rooms).map(([k, v]) => `${v} ${k} × ${money(rt[k as keyof RoomRates])}`).join(" + ");
 
+export function chosenAddons(cfg: Config, q: QuoteRequest): Addon[] {
+  const ids = new Set([...(q.addons || []), ...(q.crater ? ["crater"] : [])]);
+  return (cfg.addons || []).filter((a) => a.active && ids.has(a.id));
+}
+
 export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOString().slice(0, 10)): string[] {
   const s = cfg.settings;
   const e: string[] = [];
@@ -220,7 +237,7 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
   else if (q.stops.length && used !== safariNights)
     e.push(`You have ${safariNights} safari night${safariNights === 1 ? "" : "s"} to share out (plus your first night in Arusha) and ${used} assigned.`);
   if (q.stops.length && !cfg.lodges.find((l) => l.id === cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)] && l.active)) e.push("The Arusha arrival hotel isn't set up for this style.");
-  if (q.crater && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro Crater isn't available right now.");
+  if (chosenAddons(cfg, q).some((a) => a.id === "crater") && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro Crater isn't available right now.");
   return e;
 }
 
@@ -234,8 +251,8 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   const vehicles = Math.max(1, Math.ceil(total / s.maxPerVehicle));
   const people = { adults, children, infants, total, vehicles, guides: vehicles };
   const lines: Line[] = [];
-  const blank = { park: 0, transport: 0, accommodation: 0, meals: 0, others: 0, adminFee: 0, subtotal: 0, margin: 0, total: 0, perPerson: 0 };
-  if (errors.length) return { ok: false, errors, lines, people, totals: blank, priced: { park: 0, transport: 0, accommodation: 0, meals: 0, margin: 0, total: 0 } };
+  const blank = { park: 0, transport: 0, accommodation: 0, meals: 0, extras: 0, others: 0, adminFee: 0, subtotal: 0, margin: 0, total: 0, perPerson: 0 };
+  if (errors.length) return { ok: false, errors, lines, people, totals: blank, priced: { park: 0, transport: 0, accommodation: 0, meals: 0, extras: 0, margin: 0, total: 0 } };
 
   // Accommodation, night by night
   const stayAt = (lodgeId: string, nightIndex: number, label: string) => {
@@ -287,11 +304,13 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     if (nca.vehicleDay > 0) lines.push({ group: "park", label: `${nca.name} vehicle entry (${label}), ${times(days, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(nca.vehicleDay)} × ${times(days, "day")}`, cost: r2(vehicles * nca.vehicleDay * days) });
   };
   ncaDay("transit", crossings);
-  // Rule 4: Ngorongoro Crater — chosen separately; crater fee per vehicle, plus an NCA day if the trip isn't already in the NCA
-  if (q.crater) {
-    const inNca = crossings > 0 || sides.includes("nca");
-    if (!inNca) ncaDay("entry for the crater day", 1);
-    lines.push({ group: "park", label: "Ngorongoro Crater descent", calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(s.craterFee)}`, cost: r2(vehicles * s.craterFee) });
+  // Rule 4: add-ons. The crater also needs an NCA day if the trip isn't in the NCA anyway.
+  for (const ad of chosenAddons(cfg, q)) {
+    if (ad.id === "crater" && !(crossings > 0 || sides.includes("nca"))) ncaDay("entry for the crater day", 1);
+    const group: Group = ad.parkFee ? "park" : "extras";
+    if (ad.per === "person") lines.push({ group, label: ad.name, calc: ppCalc(ad.price, ad.childPrice), cost: r2(pp(ad.price, ad.childPrice)) });
+    else if (ad.per === "vehicle") lines.push({ group, label: ad.name, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(ad.price)}`, cost: r2(vehicles * ad.price) });
+    else lines.push({ group, label: ad.name, calc: `${money(ad.price)} per booking`, cost: r2(ad.price) });
   }
 
   const safariNights = q.totalNights - 1;
@@ -302,19 +321,19 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   lines.push({ group: "meals", label: "First-day lunch", calc: `${adults} × ${money(s.firstLunchAdult)}${children ? ` + ${children} × ${money(s.firstLunchChild)}` : ""}`, cost: r2(adults * s.firstLunchAdult + children * s.firstLunchChild) });
 
   const sum = (g: Group) => r2(lines.filter((l) => l.group === g).reduce((a, l) => a + l.cost, 0));
-  const park = sum("park"), transport = sum("transport"), accommodation = sum("accommodation"), meals = sum("meals");
-  const others = r2(transport + accommodation + meals);
+  const park = sum("park"), transport = sum("transport"), accommodation = sum("accommodation"), meals = sum("meals"), extras = sum("extras");
+  const others = r2(transport + accommodation + meals + extras);
   const adminFee = r2(others * s.adminPct / 100);
   const subtotal = r2(park + others + adminFee);
   const margin = r2(subtotal * s.marginPct / 100);
   const grand = r2(subtotal + margin);
   const k = 1 + s.adminPct / 100;
-  const priced = { park, transport: r2(transport * k), accommodation: r2(accommodation * k), meals: r2(meals * k), margin, total: grand };
+  const priced = { park, transport: r2(transport * k), accommodation: r2(accommodation * k), meals: r2(meals * k), extras: r2(extras * k), margin, total: grand };
   // keep the guest categories adding up exactly to the total
-  priced.accommodation = r2(grand - priced.park - priced.transport - priced.meals - priced.margin);
+  priced.accommodation = r2(grand - priced.park - priced.transport - priced.meals - priced.extras - priced.margin);
   return {
     ok: errors.length === 0, errors, lines, people,
-    totals: { park, transport, accommodation, meals, others, adminFee, subtotal, margin, total: grand, perPerson: r2(grand / Math.max(1, adults + children)) },
+    totals: { park, transport, accommodation, meals, extras, others, adminFee, subtotal, margin, total: grand, perPerson: r2(grand / Math.max(1, adults + children)) },
     priced,
   };
 }
@@ -333,7 +352,7 @@ export function publicOptions(cfg: Config) {
       return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
     })),
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
-    crater: cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId),
+    addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => ({ id: a.id, name: a.name, blurb: a.blurb })),
     doc: cfg.doc ?? null,
     lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };

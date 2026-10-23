@@ -37,9 +37,9 @@ test("total = (park fees + others × 1.10) × 1.07, matches a hand calculation",
 });
 
 test("guest categories always add up exactly to the total", () => {
-  for (const t of [trip(), trip({ adults: 5, childAges: [3, 9, 15] }), trip({ category: "luxury", crater: true })]) {
+  for (const t of [trip(), trip({ adults: 5, childAges: [3, 9, 15] }), trip({ crater: true, addons: ["balloon"] })]) {
     const p = quote(cfg, t, TODAY).priced;
-    assert.equal(round(p.park + p.transport + p.accommodation + p.meals + p.margin), p.total);
+    assert.equal(round(p.park + p.transport + p.accommodation + p.meals + p.extras + p.margin), p.total);
   }
 });
 
@@ -83,14 +83,28 @@ test("NCA transit: one day per crossing between east and Serengeti without an NC
 });
 
 test("Ngorongoro Crater is a separate choice: crater fee per vehicle, plus an NCA day only if needed", () => {
-  assert.equal(line(quote(cfg, trip(), TODAY), /Crater descent/).length, 0);
-  assert.equal(sumOf(quote(cfg, trip({ crater: true }), TODAY), /Crater descent/), 295);
-  assert.equal(sumOf(quote(cfg, trip({ crater: true, adults: 8, childAges: [] }), TODAY), /Crater descent/), 590);
+  assert.equal(line(quote(cfg, trip(), TODAY), /Crater game drive/).length, 0);
+  assert.equal(sumOf(quote(cfg, trip({ crater: true }), TODAY), /Crater game drive/), 295);
+  assert.equal(sumOf(quote(cfg, trip({ crater: true, adults: 8, childAges: [] }), TODAY), /Crater game drive/), 590);
   // east-only trip + crater → one extra NCA entry day
   const east = trip({ totalNights: 3, crater: true, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-comfort" }, { areaId: "manyara", nights: 1, lodgeId: "manyara-comfort" }] });
   assert.equal(line(quote(cfg, east, TODAY), /entry for the crater day/).length, 1);
   // already crossing the NCA → no extra day
   assert.equal(line(quote(cfg, trip({ crater: true }), TODAY), /entry for the crater day/).length, 0);
+});
+
+test("add-ons: priced per person (children at child rate), per vehicle or per booking, with admin fee unless a park fee", () => {
+  const base = quote(cfg, trip(), TODAY);
+  const q = quote(cfg, trip({ addons: ["balloon", "bush-breakfast"] }), TODAY);
+  assert.equal(sumOf(q, /Balloon/), round(2 * 599 + 1 * 599));
+  assert.equal(sumOf(q, /Bush breakfast/), round(2 * 45 + 1 * 25));
+  assert.equal(q.totals.extras, round(3 * 599 + 115));
+  assert.equal(q.totals.park, base.totals.park, "extras are not park fees");
+  assert.equal(q.priced.extras, round(q.totals.extras * 1.1));
+  // crater chosen through the add-on list works like the old yes/no
+  assert.equal(quote(cfg, trip({ addons: ["crater"] }), TODAY).totals.total, quote(cfg, trip({ crater: true }), TODAY).totals.total);
+  // unknown or switched-off add-ons are ignored
+  assert.equal(quote(cfg, trip({ addons: ["made-up"] }), TODAY).totals.total, base.totals.total);
 });
 
 test("8 or more guests get a second vehicle and guide", () => {
@@ -182,5 +196,5 @@ test("older saved rates are upgraded to the new park fee fields", () => {
 
 test("public options never expose rates or fees", () => {
   const s = JSON.stringify(publicOptions(cfg));
-  for (const word of ["rates", "double", "adultDay", "concession", "vehicleDay", "guideDay", "marginPct", "adminPct", "craterFee"]) assert.equal(s.includes(word), false, word);
+  for (const word of ["rates", "double", "adultDay", "concession", "vehicleDay", "guideDay", "marginPct", "adminPct", "craterFee", "price", "childPrice"]) assert.equal(s.includes(word), false, word);
 });

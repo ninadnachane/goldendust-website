@@ -31,9 +31,10 @@ import { site } from "../lib/site";
       areas: { id: string; name: string; blurb: string }[];
       lodges: (L & { id: string; areaId: string; category: string })[];
       doc: { included: string[]; excluded: string[]; payment: string; notes: string[] } | null;
+      addons?: { id: string; name: string; blurb: string }[];
     };
-    type Trip = { startDate: string; adults: number; childAges: number[]; category?: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[]; crater?: boolean };
-    type Priced = { park: number; transport: number; accommodation: number; meals: number; margin: number; total: number };
+    type Trip = { startDate: string; adults: number; childAges: number[]; category?: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[]; crater?: boolean; addons?: string[] };
+    type Priced = { park: number; transport: number; accommodation: number; meals: number; extras?: number; margin: number; total: number };
 
     const docEl = document.querySelector<HTMLElement>("[data-doc]")!;
     const phone = document.body.dataset.phone || "";
@@ -45,13 +46,16 @@ import { site } from "../lib/site";
     const long = (iso: string) => fmt(iso, { day: "numeric", month: "long", year: "numeric" });
 
     function render(o: Opt, t: Trip, priced: Priced | null, perPerson: number, guest: { name?: string; ref?: string }) {
+      const picked = new Set([...(t.addons || []), ...(t.crater ? ["crater"] : [])]);
+      const crater = picked.has("crater") && (o.addons || []).some((a) => a.id === "crater");
+      const extras = (o.addons || []).filter((a) => a.id !== "crater" && picked.has(a.id));
       const cats = tripCategories(o.lodges as any, t.stops);
       const cat = cats.length ? cats.map((c) => o.categories.find((x) => x.id === c)?.name ?? c).join(" + ") : (o.categories.find((c) => c.id === t.category)?.name ?? "");
       const end = addDays(t.startDate, t.totalNights);
       const areaName = (id: string) => o.areas.find((a) => a.id === id)?.name ?? id;
       const guestsTxt = `${t.adults} adult${t.adults > 1 ? "s" : ""}${t.childAges.length ? ` + ${t.childAges.length} child${t.childAges.length > 1 ? "ren" : ""}` : ""}`;
       const arrival = o.arrivalLodges[tripCategory(o.lodges as any, t.stops)] ?? o.arrivalLodges[t.category ?? "comfort"];
-      const routeNames = [...new Set([...t.stops.map((s) => areaName(s.areaId).replace(/^(North|Central|South) /, "").replace(/ \(.*\)$/, "")), ...(t.crater ? ["Ngorongoro"] : [])])];
+      const routeNames = [...new Set([...t.stops.map((s) => areaName(s.areaId).replace(/^(North|Central|South) /, "").replace(/ \(.*\)$/, "")), ...(crater ? ["Ngorongoro"] : [])])];
       const dd = (iso: string) => fmt(iso, { day: "2-digit" });
       const mon = (iso: string) => fmt(iso, { month: "short" });
       const wd = (iso: string) => fmt(iso, { weekday: "short" });
@@ -59,7 +63,7 @@ import { site } from "../lib/site";
       // ---- page 1: cover
       const stopsLine = [`<li><span class="rt__dot"></span><b>${esc(o.arrivalName)}</b><small>Arrival</small></li>`,
         ...t.stops.map((s) => `<li><span class="rt__dot"></span><b>${esc(areaName(s.areaId))}</b><small>${s.nights} night${s.nights > 1 ? "s" : ""}</small></li>`),
-        ...(t.crater ? [`<li><span class="rt__dot"></span><b>Ngorongoro Crater</b><small>Game drive</small></li>`] : []),
+        ...(crater ? [`<li><span class="rt__dot"></span><b>Ngorongoro Crater</b><small>Game drive</small></li>`] : []),
         `<li><span class="rt__dot rt__dot--end"></span><b>${esc(o.arrivalName)}</b><small>Departure</small></li>`].join("");
       const cover = `<div class="sheet sheet--cover">
           <img class="cv__img" src="/images/gallery/zebras-walking-grassland.webp" alt="Zebras on the plains">
@@ -97,7 +101,8 @@ import { site } from "../lib/site";
             <p>${esc(a?.blurb || `Game drives in ${areaName(s.areaId)} with your private guide.`)}</p></div>${stay(l?.name)}</section>`);
         d += s.nights;
       }
-      rows.push(`<section class="st">${date(end)}<div class="st__body"><p class="eyebrow">Day ${t.totalNights + 1} · Departure</p><h3>${t.crater ? `Ngorongoro Crater, then ${esc(o.arrivalName)}` : `Back to ${esc(o.arrivalName)}`}</h3><p>${t.crater ? "Down into the Ngorongoro Crater for a game drive on the crater floor, then on to Arusha or the airport for your flight." : "After breakfast we drive you back to Arusha or to the airport for your flight."}</p></div><div></div></section>`);
+      rows.push(`<section class="st">${date(end)}<div class="st__body"><p class="eyebrow">Day ${t.totalNights + 1} · Departure</p><h3>${crater ? `Ngorongoro Crater, then ${esc(o.arrivalName)}` : `Back to ${esc(o.arrivalName)}`}</h3><p>${crater ? "Down into the Ngorongoro Crater for a game drive on the crater floor, then on to Arusha or the airport for your flight." : "After breakfast we drive you back to Arusha or to the airport for your flight."}</p></div><div></div></section>`);
+      if (extras.length) rows.push(`<section class="st"><div class="dt"><span class="dt__d">+</span><span class="dt__m">Extras</span></div><div class="st__body"><p class="eyebrow">Add-ons</p><h3>${extras.map((a) => esc(a.name)).join(" · ")}</h3><p>${extras.map((a) => esc(a.blurb)).filter(Boolean).join(" ")} We'll fit ${extras.length > 1 ? "these" : "this"} into the best day of your trip.</p></div><div></div></section>`);
 
       const seen = new Set<string>();
       const stays: { l: L; area: string; nights: number }[] = [];
@@ -129,7 +134,7 @@ import { site } from "../lib/site";
         </div>`;
 
       // ---- page 3: where you'll stay + investment
-      const lines: [string, number][] = priced ? [["Park fees", priced.park], ["Vehicle, guide & transfers", priced.transport], ["Accommodation", priced.accommodation], ["Meals", priced.meals], ["Our margin", priced.margin]] : [];
+      const lines: [string, number][] = priced ? [["Park fees", priced.park], ["Vehicle, guide & transfers", priced.transport], ["Accommodation", priced.accommodation], ["Meals", priced.meals], ...(priced.extras ? [["Add-ons", priced.extras] as [string, number]] : []), ["Our margin", priced.margin]] : [];
       const details = `<div class="sheet">
           ${staysHtml}
           <header class="ph-h ${n ? "ph-h--sub inv-h" : ""}"><p class="eyebrow">The details</p><h2>Investment</h2></header>

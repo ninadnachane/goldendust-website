@@ -55,7 +55,7 @@
             <label>Adults<input type="number" name="adults" min="1" value="2" /></label>
             <label>Children's ages<input type="text" name="childAges" placeholder="e.g. 8, 3" /></label>
           </div>
-          <label class="check"><input type="checkbox" name="crater" /> Add a Ngorongoro Crater game drive</label>
+          <div class="test__addons" data-test-addons></div>
           <label class="check"><input type="checkbox" name="ignoreLead" checked /> Ignore the minimum-notice rule while testing</label>
           <h3>Itinerary <small data-nights-left></small></h3>
           <div data-stops></div>
@@ -69,6 +69,9 @@
     <section class="pane" data-pane="costs" hidden>
       <h2>Daily costs, markup and rules</h2>
       <div class="cards" data-settings></div>
+      <h2>Add-ons</h2>
+      <p class="hint">Optional extras guests can tick in the planner. Prices include VAT. "Park fee" add-ons get no admin fee; the others get the admin fee like everything else. The crater drive also adds a Ngorongoro entry day when the trip doesn't already stay in the conservation area.</p>
+      <div data-addons-t></div>
       <h2>Arusha arrival night</h2>
       <p class="hint">Every trip starts with one night in Arusha, included. Pick the hotel used for each category (add Arusha hotels in "Lodges &amp; camps" with area "Arusha").</p>
       <div class="cards" data-arrival></div>
@@ -214,7 +217,6 @@
         ["maxPerVehicle", "Max guests per vehicle (adds a vehicle + guide above this)", "1"],
         ["vehicleDaysExtra", "Vehicle/guide days = safari nights + …", "1"],
         ["airportTransfer", "Airport pick-up and drop-off, per booking ($)", "0.01"],
-        ["craterFee", "Ngorongoro Crater descent, per vehicle, incl. VAT ($)", "0.01"],
         ["firstLunchAdult", "First-day lunch, per adult ($)", "0.01"],
         ["firstLunchChild", "First-day lunch, per child ($)", "0.01"],
         ["adminPct", "Admin fee % (on everything except park fees)", "0.1"],
@@ -250,6 +252,32 @@
       const arusha = cfg.lodges.filter((l) => l.areaId === "arusha");
       ar.innerHTML = CATEGORIES.map((c) => `<label class="card">${c.name}<select data-arr="${c.id}">${arusha.map((l) => `<option value="${esc(l.id)}" ${cfg.arrival.lodges[c.id] === l.id ? "selected" : ""}>${esc(l.name)}${l.active ? "" : " (inactive)"}</option>`).join("")}</select></label>`).join("");
       ar.querySelectorAll<HTMLSelectElement>("[data-arr]").forEach((el) => el.addEventListener("change", () => { (cfg.arrival.lodges as any)[el.dataset.arr!] = el.value; markDirty(); }));
+    }
+
+    function renderAddons() {
+      cfg.addons ??= [];
+      table($("[data-addons-t]"), cfg.addons, [
+        { key: "name", label: "Add-on", type: "text" },
+        { key: "blurb", label: "Short description (shown to guests)", type: "text" },
+        { key: "per", label: "Charged per", type: "select", options: () => [{ v: "person", t: "Person" }, { v: "vehicle", t: "Vehicle" }, { v: "booking", t: "Booking" }] },
+        { key: "price", label: "Price / adult ($)", type: "number", step: "0.01" },
+        { key: "childPrice", label: "Price / child ($)", type: "number", step: "0.01" },
+        { key: "parkFee", label: "Park fee (no admin fee)", type: "bool" },
+        { key: "active", label: "Offered", type: "bool" },
+        { key: "id", label: "ID", type: "readonly" },
+      ], {
+        rerender: () => { renderAddons(); renderTestAddons(); runTest(); },
+        add: () => cfg.addons!.push({ id: uid("new add-on", cfg.addons!), name: "New add-on", blurb: "", per: "person", price: 0, childPrice: 0, parkFee: false, active: false }),
+        remove: (r) => { if (r.id === "crater") return alert("The crater drive is built in. Untick \"Offered\" to hide it."); cfg.addons = cfg.addons!.filter((a) => a !== r); },
+      });
+      $("[data-addons-t]").onchange = () => { renderTestAddons(); runTest(); };
+    }
+
+    function renderTestAddons() {
+      const host = $("[data-test-addons]");
+      const was = new Set([...host.querySelectorAll<HTMLInputElement>("[data-ta]:checked")].map((x) => x.value));
+      const list = (cfg.addons || []).filter((a) => a.active);
+      host.innerHTML = list.length ? `<p class="lbl">Add-ons</p>${list.map((a) => `<label class="check"><input type="checkbox" data-ta value="${esc(a.id)}" ${was.has(a.id) ? "checked" : ""} /> ${esc(a.name)} <small>(${money(a.price)} per ${a.per})</small></label>`).join("")}` : "";
     }
 
     function renderSeasons() {
@@ -385,7 +413,7 @@
       host.querySelectorAll<HTMLButtonElement>("[data-rm]").forEach((b) => b.addEventListener("click", () => { stops.splice(Number(b.dataset.rm), 1); renderStops(); runTest(); }));
     }
 
-    const groupNames: Record<string, string> = { park: "Park fees (no admin fee)", transport: "Vehicle, guide & transfers", accommodation: "Accommodation", meals: "Meals" };
+    const groupNames: Record<string, string> = { park: "Park fees (no admin fee)", transport: "Vehicle, guide & transfers", accommodation: "Accommodation", meals: "Meals", extras: "Add-ons" };
     function runTest() {
       if (!cfg) return;
       const f = form();
@@ -394,15 +422,16 @@
       const totalNights = Number(v("totalNights")) || 0;
       const used = stops.reduce((a, s) => a + s.nights, 0);
       $("[data-nights-left]").textContent = `· ${used} of ${Math.max(0, totalNights - 1)} safari nights assigned`;
-      const req = { startDate: v("startDate"), adults: Number(v("adults")) || 0, childAges: ages, totalNights, stops, crater: (f.elements.namedItem("crater") as HTMLInputElement).checked };
+      const req = { startDate: v("startDate"), adults: Number(v("adults")) || 0, childAges: ages, totalNights, stops, addons: [...f.querySelectorAll<HTMLInputElement>("[data-ta]:checked")].map((x) => x.value) };
       const today = (f.elements.namedItem("ignoreLead") as HTMLInputElement).checked ? "1970-01-01" : undefined;
       const q = quote(cfg, req, today);
       const out = $("[data-test-out]");
       const p = q.people;
       const errs = q.errors.length ? `<div class="err"><strong>The guest would see:</strong><ul>${q.errors.map((e) => `<li>${esc(e)}</li>`).join("")}</ul></div>` : "";
       if (!q.lines.length) { out.innerHTML = errs || '<p class="hint">Fill in the trip to see the calculation.</p>'; return; }
-      const groups = ["park", "transport", "accommodation", "meals"].map((g) => {
+      const groups = ["park", "transport", "accommodation", "meals", "extras"].map((g) => {
         const ls = q.lines.filter((l: Line) => l.group === g);
+        if (g === "extras" && !ls.length) return "";
         const sub = ls.reduce((a, l) => a + l.cost, 0);
         return `<tbody><tr class="gh"><th colspan="2">${groupNames[g]}</th><th class="n">${money(sub)}</th></tr>${ls.map((l) => `<tr><td>${esc(l.label)}</td><td class="calc">${esc(l.calc)}</td><td class="n">${money(l.cost)}</td></tr>`).join("")}</tbody>`;
       }).join("");
@@ -414,7 +443,7 @@
         <h2>2. From cost to price</h2>
         <table class="sum">
           <tr><td>Park fees (no admin fee)</td><td class="calc"></td><td class="n">${money(t.park)}</td></tr>
-          <tr><td>Everything else</td><td class="calc">${money(t.transport)} vehicle &amp; guide + ${money(t.accommodation)} accommodation + ${money(t.meals)} meals</td><td class="n">${money(t.others)}</td></tr>
+          <tr><td>Everything else</td><td class="calc">${money(t.transport)} vehicle &amp; guide + ${money(t.accommodation)} accommodation + ${money(t.meals)} meals${t.extras ? ` + ${money(t.extras)} add-ons` : ""}</td><td class="n">${money(t.others)}</td></tr>
           <tr><td>Admin fee ${s.adminPct}%</td><td class="calc">${money(t.others)} × ${s.adminPct}%</td><td class="n">${money(t.adminFee)}</td></tr>
           <tr class="line"><td>Subtotal</td><td class="calc">${money(t.park)} + ${money(t.others)} + ${money(t.adminFee)}</td><td class="n">${money(t.subtotal)}</td></tr>
           <tr><td>Margin ${s.marginPct}%</td><td class="calc">${money(t.subtotal)} × ${s.marginPct}%</td><td class="n">${money(t.margin)}</td></tr>
@@ -426,10 +455,11 @@
           <tr><td>Vehicle, guide &amp; transfers</td><td class="n">${money(q.priced.transport)}</td></tr>
           <tr><td>Accommodation</td><td class="n">${money(q.priced.accommodation)}</td></tr>
           <tr><td>Meals</td><td class="n">${money(q.priced.meals)}</td></tr>
+          ${q.priced.extras ? `<tr><td>Add-ons</td><td class="n">${money(q.priced.extras)}</td></tr>` : ""}
           <tr><td>Margin</td><td class="n">${money(q.priced.margin)}</td></tr>
           <tr class="total"><td>Total</td><td class="n">${money(q.priced.total)}</td></tr>
         </table>
-        <p class="hint">Admin fees are included in vehicle &amp; guide, accommodation and meals. Accommodation absorbs any 1-cent rounding so the guest's total always adds up.</p>`;
+        <p class="hint">Admin fees are included in vehicle &amp; guide, accommodation, meals and add-ons (except park-fee add-ons). Accommodation absorbs any 1-cent rounding so the guest's total always adds up.</p>`;
     }
 
     function initTest() {
@@ -550,7 +580,7 @@
     });
 
     function renderAll() {
-      renderStatus(); renderIssues(); renderSettings(); renderSeasons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
+      renderStatus(); renderIssues(); renderSettings(); renderAddons(); renderTestAddons(); renderSeasons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
     }
 
     // tabs

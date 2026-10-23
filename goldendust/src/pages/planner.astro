@@ -39,7 +39,10 @@ import { site } from "../lib/site";
             <button type="button" class="step__head" data-open="2"><span class="step__n">2</span><span class="step__t">When?</span><span class="step__sum" data-sum="2"></span><span class="step__edit">Change</span></button>
             <div class="step__body">
               <div class="row">
-                <label class="fld">Arrival in Arusha<input type="date" data-date required /></label>
+                <div class="fld fld--date"><span id="arr-l">Arrival in Arusha / Kilimanjaro</span>
+                  <button type="button" class="datebtn" data-date-btn aria-labelledby="arr-l" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-date-text>Choose a date</span></button>
+                  <div class="cal" data-cal hidden role="dialog" aria-label="Choose your arrival date"></div>
+                </div>
                 <label class="fld">Nights in Tanzania<select data-nights></select></label>
               </div>
               <p class="note" data-date-note></p>
@@ -53,7 +56,7 @@ import { site } from "../lib/site";
               <p class="note">Night 1 is in <strong data-arrival-name>Arusha</strong>, included. Choose areas for your <strong data-safari-nights></strong> (we'll put them in the best order), then pick a camp or lodge in each. Every option is tagged <span class="tagkey">Budget · Comfort · Premium · Luxury</span>, and you can mix them.</p>
               <div class="chips" data-areas></div>
               <div class="stops" data-stops></div>
-              <label class="crater" data-crater-box hidden><input type="checkbox" data-crater><span><strong>Add a Ngorongoro Crater game drive</strong><small>A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.</small></span></label>
+              <div class="addons" data-addons hidden><p class="addons__h">Add-ons <small>(optional)</small></p><div class="addons__list" data-addon-list></div></div>
             </div>
           </section>
         </div>
@@ -106,7 +109,7 @@ import { site } from "../lib/site";
     arrivalName: string;
     areas: { id: string; name: string; minNights: number }[];
     lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[] }[];
-    crater?: boolean;
+    addons?: { id: string; name: string; blurb: string }[];
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
@@ -116,7 +119,8 @@ import { site } from "../lib/site";
   const nice = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
   let O: Opt;
-  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[], crater: false, open: 1, reached: 1 };
+  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[], addons: [] as string[], open: 1, reached: 1 };
+  const addonName = (id: string) => O.addons?.find((a) => a.id === id)?.name ?? id;
   const rank = (c: string) => O.categories.findIndex((x) => x.id === c);
   const catName = (c: string) => O.categories.find((x) => x.id === c)?.name ?? c;
   const styleNames = () => tripCategories(O.lodges as { id: string; category: Category }[], st.stops).map(catName).join(" + ");
@@ -139,7 +143,7 @@ import { site } from "../lib/site";
     const sums: Record<number, string> = {
       1: `${st.adults} adult${st.adults > 1 ? "s" : ""}${kids}`,
       2: st.date ? `${nice(st.date)} · ${st.nights} nights` : "",
-      3: st.stops.length ? O.areas.filter((a) => st.stops.some((s) => s.areaId === a.id)).map((a) => a.name).join(", ") + (st.crater ? " + Crater" : "") : "",
+      3: st.stops.length ? O.areas.filter((a) => st.stops.some((s) => s.areaId === a.id)).map((a) => a.name).join(", ") + (st.addons.length ? ` + ${st.addons.length} add-on${st.addons.length > 1 ? "s" : ""}` : "") : "",
     };
     root.querySelectorAll<HTMLElement>("[data-step]").forEach((el) => {
       const n = Number(el.dataset.step);
@@ -198,14 +202,14 @@ import { site } from "../lib/site";
       return `<div class="stop">
         <div class="stop__top"><strong>${esc(a.name)}</strong>
           <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="One night less in ${esc(a.name)}">−</button><output>${s.nights} night${s.nights > 1 ? "s" : ""}</output><button type="button" data-sinc="${i}" aria-label="One more night in ${esc(a.name)}">+</button></div></div>
-        <div class="lodges">${lodges.map((l) => `<label class="lodge">
+        <div class="lodges-wrap"><button type="button" class="lodges__arrow lodges__arrow--l" data-lscroll="-1" aria-label="Scroll left" hidden>‹</button><div class="lodges" data-lrow>${lodges.map((l) => `<label class="lodge">
           <input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}">
-          <span class="lodge__img">${l.images.length
-            ? `<button type="button" class="lodge__view" data-gal="${esc(l.id)}" data-gal-stop="${i}" aria-label="View photos of ${esc(l.name)}"><img src="/media/${esc(l.images[0])}" alt="" loading="lazy"><span class="lodge__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>${l.images.length > 1 ? `${l.images.length} photos` : "View"}</span></button>`
-            : `<span class="lodge__none">Photos coming soon</span>`}</span>
+          <span class="lodge__img"><button type="button" class="lodge__view" data-gal="${esc(l.id)}" data-gal-stop="${i}" aria-label="See photos and details of ${esc(l.name)}">${l.images.length
+            ? `<img src="/media/${esc(l.images[0])}" alt="" loading="lazy">`
+            : `<span class="lodge__none">Photos coming soon</span>`}<span class="lodge__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>${l.images.length > 1 ? `${l.images.length} photos` : "Details"}</span></button></span>
           <span class="lodge__txt"><span class="tag tag--${esc(l.category)}">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<span>${esc(l.description)}</span>` : ""}</span>
           <span class="lodge__tick" aria-hidden="true"></span>
-        </label>`).join("")}</div>
+        </label>`).join("")}</div><button type="button" class="lodges__arrow lodges__arrow--r" data-lscroll="1" aria-label="Scroll right" hidden>›</button></div>
       </div>`;
     }).join("");
     root.querySelectorAll<HTMLButtonElement>("[data-sinc]").forEach((b) => b.addEventListener("click", () => {
@@ -221,21 +225,32 @@ import { site } from "../lib/site";
     }));
     root.querySelectorAll<HTMLButtonElement>("[data-gal]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGallery(b.dataset.gal!, Number(b.dataset.galStop)); }));
     root.querySelectorAll<HTMLInputElement>("[data-lodge]").forEach((el) => el.addEventListener("change", () => { st.stops[Number(el.dataset.lodge)].lodgeId = el.value; update(); }));
+    // horizontal lodge rows: arrows on desktop, keep the chosen lodge in view
+    root.querySelectorAll<HTMLElement>(".lodges-wrap").forEach((w) => {
+      const row = w.querySelector<HTMLElement>("[data-lrow]")!;
+      const [l, r] = [w.querySelector<HTMLButtonElement>("[data-lscroll='-1']")!, w.querySelector<HTMLButtonElement>("[data-lscroll='1']")!];
+      const sync = () => { const can = row.scrollWidth > row.clientWidth + 4; l.hidden = !can || row.scrollLeft < 4; r.hidden = !can || row.scrollLeft + row.clientWidth > row.scrollWidth - 4; };
+      row.addEventListener("scroll", sync, { passive: true });
+      [l, r].forEach((b) => b.addEventListener("click", () => row.scrollBy({ left: Number(b.dataset.lscroll) * row.clientWidth * 0.8, behavior: "smooth" })));
+      const sel = row.querySelector<HTMLElement>(".lodge:has(input:checked)");
+      if (sel && sel.offsetLeft + sel.offsetWidth > row.clientWidth) row.scrollLeft = sel.offsetLeft - 8;
+      requestAnimationFrame(sync);
+    });
   }
 
   // photo viewer: enlarged, swipe or scroll through all photos, choose the lodge from here
   function openGallery(id: string, stopIndex: number) {
     const l = O.lodges.find((x) => x.id === id);
-    if (!l || !l.images.length) return;
-    const n = l.images.length;
+    if (!l) return;
+    const n = Math.max(1, l.images.length);
     const d = document.createElement("dialog");
     d.className = "gv";
     d.setAttribute("aria-label", `${l.name} photos`);
     d.innerHTML = `<div class="gv__in">
-        <div class="gv__top"><div><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
+        <div class="gv__top"><div><span class="gv__tag">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
           <button type="button" class="gv__x" data-gv-close aria-label="Close">✕</button></div>
         <div class="gv__stage">
-          <div class="gv__track" tabindex="0">${l.images.map((im, k) => `<figure><img src="/media/${esc(im)}" alt="${esc(l.name)}, photo ${k + 1} of ${n}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("")}</div>
+          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="/media/${esc(im)}" alt="${esc(l.name)}, photo ${k + 1} of ${n}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("") : `<figure class="gv__empty"><span>Photos of this ${l.category === "budget" ? "camp" : "lodge"} are coming soon. Ask us on WhatsApp and we'll send you pictures.</span></figure>`}</div>
           ${n > 1 ? `<button type="button" class="gv__nav gv__prev" data-gv="-1" aria-label="Previous photo">‹</button><button type="button" class="gv__nav gv__next" data-gv="1" aria-label="Next photo">›</button>` : ""}
         </div>
         <div class="gv__bottom">${n > 1 ? `<span class="gv__dots">${l.images.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</span><span class="gv__count" data-gv-count>1 / ${n}</span>` : "<span></span>"}
@@ -275,17 +290,15 @@ import { site } from "../lib/site";
 
   function renderTrip() {
     const items: string[] = [];
-    if (st.date) items.push(`<li><span>${nice(st.date)}</span>Arrive, night in ${esc(O.arrivalName)}</li>`);
-    let n = 1;
+    if (st.date || st.stops.length) items.push(`<li>Arrive in ${esc(O.arrivalName)}, first night included</li>`);
     for (const s of st.stops) {
       const a = O.areas.find((x) => x.id === s.areaId)!;
       const l = O.lodges.find((x) => x.id === s.lodgeId);
-      items.push(`<li><span>${st.date ? nice(addDays(st.date, n)) : `Night ${n + 1}`}</span>${s.nights} night${s.nights > 1 ? "s" : ""} ${esc(a.name)}${l ? ` · ${esc(l.name)}` : ""}</li>`);
-      n += s.nights;
+      items.push(`<li><b>${s.nights} night${s.nights > 1 ? "s" : ""} ${esc(a.name)}</b>${l ? `<span>${esc(l.name)}</span>` : ""}</li>`);
     }
-    if (st.crater) items.push(`<li><span>Day trip</span>Ngorongoro Crater game drive</li>`);
-    if (st.date) items.push(`<li><span>${nice(addDays(st.date, st.nights))}</span>Back to Arusha / airport</li>`);
-    $("[data-trip]").innerHTML = items.join("") || "<li>Start by choosing your dates.</li>";
+    for (const id of st.addons) items.push(`<li>${esc(addonName(id))}</li>`);
+    if (st.stops.length) items.push(`<li>Back to Arusha / the airport</li>`);
+    $("[data-trip]").innerHTML = items.join("") || `<li class="sum__empty">Your trip will appear here as you plan it.</li>`;
   }
 
   function waText(total?: number, name?: string, ref?: string) {
@@ -296,7 +309,7 @@ import { site } from "../lib/site";
       `• Style: ${styleNames() || "tbc"}`,
       `• Night 1: ${O.arrivalName}`,
       ...st.stops.map((s) => `• ${s.nights} night${s.nights > 1 ? "s" : ""} ${O.areas.find((a) => a.id === s.areaId)?.name}: ${O.lodges.find((l) => l.id === s.lodgeId)?.name ?? ""}`),
-      ...(st.crater ? ["• Ngorongoro Crater game drive"] : []),
+      ...st.addons.map((id) => `• Add-on: ${addonName(id)}`),
     ];
     if (total) lines.push(`• Planner price: ${usd(total)}`);
     lines.push("Could you check availability?");
@@ -310,7 +323,7 @@ import { site } from "../lib/site";
   // One lead per trip: if the guest already left their details for this exact trip, reuse it.
   let lastLead: { key: string; ref: string; token: string } | null = null;
   let mode: "whatsapp" | "pdf" = "whatsapp";
-  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, totalNights: st.nights, stops: st.stops, crater: st.crater });
+  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, totalNights: st.nights, stops: st.stops, addons: st.addons });
   const pdfUrl = (ref: string, token: string) => `/itinerary#ref=${encodeURIComponent(ref)}&k=${encodeURIComponent(token)}`;
   function openContact(m: "whatsapp" | "pdf") {
     const send = $("[data-send]");
@@ -396,6 +409,7 @@ import { site } from "../lib/site";
           <div><dt>Vehicle, guide &amp; transfers${r.people.vehicles > 1 ? ` (${r.people.vehicles} vehicles)` : ""}</dt><dd>${usd(p.transport)}</dd></div>
           <div><dt>Accommodation</dt><dd>${usd(p.accommodation)}</dd></div>
           <div><dt>Meals</dt><dd>${usd(p.meals)}</dd></div>
+          ${p.extras ? `<div><dt>Add-ons</dt><dd>${usd(p.extras)}</dd></div>` : ""}
           <div><dt>Our margin</dt><dd>${usd(p.margin)}</dd></div>
         </dl>
         <p class="sum__total"><span>Total</span><strong>${usd(p.total)}</strong></p>
@@ -410,13 +424,37 @@ import { site } from "../lib/site";
     O = o;
     const s = O.settings;
     const min = addDays(new Date().toISOString().slice(0, 10), s.leadDays + 1);
-    const d = $<HTMLInputElement>("[data-date]");
-    d.min = min;
     $("[data-date-note]").textContent = `We need ${s.leadDays} days to prepare, so the earliest arrival is ${nice(min)}.`;
-    d.addEventListener("change", () => {
-      if (d.value && d.value < min) { d.value = min; flash(`The earliest arrival is ${nice(min)}.`); }
-      st.date = d.value; update();
-    });
+    const btn = $<HTMLButtonElement>("[data-date-btn]"), cal = $("[data-cal]");
+    let view = min.slice(0, 7); // YYYY-MM shown in the calendar
+    const monthName = (ym: string) => new Date(ym + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+    const shiftMonth = (ym: string, k: number) => { const d = new Date(ym + "-01T00:00:00Z"); d.setUTCMonth(d.getUTCMonth() + k); return d.toISOString().slice(0, 7); };
+    const drawCal = () => {
+      const first = new Date(view + "-01T00:00:00Z");
+      const lead = (first.getUTCDay() + 6) % 7; // Monday first
+      const days = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+      const cells: string[] = Array.from({ length: lead }, () => "<span></span>");
+      for (let dd = 1; dd <= days; dd++) {
+        const iso = `${view}-${String(dd).padStart(2, "0")}`;
+        const off = iso < min;
+        cells.push(`<button type="button" data-day="${iso}" ${off ? "disabled" : ""} class="${iso === st.date ? "on" : ""}" aria-label="${nice(iso)}">${dd}</button>`);
+      }
+      cal.innerHTML = `<div class="cal__head"><button type="button" data-mon="-1" aria-label="Previous month" ${view <= min.slice(0, 7) ? "disabled" : ""}>‹</button><strong>${monthName(view)}</strong><button type="button" data-mon="1" aria-label="Next month">›</button></div>
+        <div class="cal__grid">${["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((w) => `<em>${w}</em>`).join("")}${cells.join("")}</div>
+        <p class="cal__note">Earliest arrival ${nice(min)}</p>`;
+      cal.querySelectorAll<HTMLButtonElement>("[data-mon]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); view = shiftMonth(view, Number(b.dataset.mon)); drawCal(); }));
+      cal.querySelectorAll<HTMLButtonElement>("[data-day]").forEach((b) => b.addEventListener("click", () => {
+        st.date = b.dataset.day!;
+        $("[data-date-text]").textContent = new Date(st.date + "T00:00:00Z").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+        btn.classList.add("is-set");
+        closeCal(); update();
+      }));
+    };
+    const openCal = () => { if (st.date) view = st.date.slice(0, 7); drawCal(); cal.hidden = false; btn.setAttribute("aria-expanded", "true"); cal.querySelector<HTMLButtonElement>("button.on, [data-day]:not([disabled])")?.focus(); };
+    const closeCal = () => { cal.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+    btn.addEventListener("click", () => (cal.hidden ? openCal() : closeCal()));
+    document.addEventListener("click", (e) => { if (!cal.hidden && !cal.contains(e.target as Node) && !btn.contains(e.target as Node)) closeCal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !cal.hidden) { closeCal(); btn.focus(); } });
     const n = $<HTMLSelectElement>("[data-nights]");
     st.nights = Math.min(Math.max(st.nights, s.minTotalNights), s.maxTotalNights);
     n.innerHTML = Array.from({ length: s.maxTotalNights - s.minTotalNights + 1 }, (_, i) => s.minTotalNights + i)
@@ -447,8 +485,14 @@ import { site } from "../lib/site";
     }));
     root.querySelectorAll<HTMLButtonElement>("[data-next]").forEach((b) => b.addEventListener("click", () => openStep(Number(b.dataset.next), true)));
     const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
-    if (O.crater) $("[data-crater-box]").hidden = false;
-    $<HTMLInputElement>("[data-crater]").addEventListener("change", (e) => { st.crater = (e.target as HTMLInputElement).checked; update(); });
+    if (O.addons?.length) {
+      $("[data-addons]").hidden = false;
+      $("[data-addon-list]").innerHTML = O.addons.map((a) => `<label class="addon"><input type="checkbox" value="${esc(a.id)}" data-addon><span><strong>${esc(a.name)}</strong>${a.blurb ? `<small>${esc(a.blurb)}</small>` : ""}</span></label>`).join("");
+      root.querySelectorAll<HTMLInputElement>("[data-addon]").forEach((el) => el.addEventListener("change", () => {
+        st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
+        update();
+      }));
+    }
     $("[data-send]").addEventListener("click", () => openContact("whatsapp"));
     $("[data-pdf]").addEventListener("click", () => openContact("pdf"));
     $("[data-contact-form]").addEventListener("submit", submitContact);
@@ -470,6 +514,7 @@ import { site } from "../lib/site";
   .pl .pl__grid[hidden] { display: none; }
   .pl .pl__grid > * { min-width: 0; }
   .pl .step { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); margin: 0 0 0.75rem; min-width: 0; overflow: hidden; }
+  .pl .step:has(.cal:not([hidden])) { overflow: visible; position: relative; z-index: 5; }
   .pl .step__head { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.95rem 1.2rem; border: 0; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
   .pl .step__head:disabled { cursor: default; }
   .pl .step.is-locked .step__head { opacity: 0.5; }
@@ -509,16 +554,47 @@ import { site } from "../lib/site";
   .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
   .pl .chip[aria-pressed="true"] small { color: var(--dark); }
   .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
-  .pl .crater { display: flex; gap: 0.7rem; align-items: flex-start; margin-top: 1rem; padding: 0.8rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; }
-  .pl .crater[hidden] { display: none; }
-  .pl .crater:has(input:checked) { border-color: var(--gold); background: var(--tint); }
-  .pl .crater input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; accent-color: var(--gold); flex: none; }
-  .pl .crater span { display: grid; gap: 0.2rem; }
-  .pl .crater small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.4; }
+  .pl .addons { margin-top: 1.2rem; }
+  .pl .addons[hidden] { display: none; }
+  .pl .addons__h { font-family: var(--display); font-weight: 600; margin: 0 0 0.5rem; }
+  .pl .addons__h small { font-weight: 400; color: var(--ink-2); }
+  .pl .addons__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.6rem; }
+  .pl .addon { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.8rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; }
+  .pl .addon:has(input:checked) { border-color: var(--gold); background: var(--tint); }
+  .pl .addon input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; accent-color: var(--gold); flex: none; }
+  .pl .addon span { display: grid; gap: 0.2rem; }
+  .pl .addon small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.4; }
   .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
   .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
   .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .pl .lodges { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.7rem; margin-top: 0.8rem; }
+  .pl .lodges-wrap { position: relative; margin-top: 0.8rem; }
+  .pl .lodges { display: grid; grid-auto-flow: column; grid-auto-columns: 14.5rem; gap: 0.7rem; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 0.2rem; padding: 0.2rem 0.2rem 0.6rem; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .pl .lodge { scroll-snap-align: start; }
+  .pl .lodges__arrow { position: absolute; top: 4.2rem; z-index: 2; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; box-shadow: 0 6px 16px -8px rgba(46, 36, 27, 0.5); font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--ink); }
+  .pl .lodges__arrow:hover { background: var(--gold); border-color: var(--gold); }
+  .pl .lodges__arrow--l { left: -0.6rem; } .pl .lodges__arrow--r { right: -0.6rem; }
+  .pl .lodges__arrow[hidden] { display: none; }
+  .pl .fld--date { position: relative; }
+  .pl .datebtn { display: inline-flex; align-items: center; gap: 0.55rem; font: inherit; font-weight: 400; padding: 0.6rem 0.9rem; min-width: 14rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink-2); cursor: pointer; text-align: left; }
+  .pl .datebtn.is-set { color: var(--ink); font-weight: 500; }
+  .pl .datebtn:hover, .pl .datebtn[aria-expanded="true"] { border-color: var(--gold); }
+  .pl .datebtn svg { width: 1.15rem; height: 1.15rem; fill: none; stroke: var(--gold-d, #a87c33); stroke-width: 1.8; stroke-linecap: round; flex: none; }
+  .pl .cal { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 30; width: 19rem; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 40px -20px rgba(46, 36, 27, 0.45); padding: 0.8rem; }
+  .pl .cal[hidden] { display: none; }
+  .pl .cal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+  .pl .cal__head strong { font-family: var(--display); font-weight: 600; }
+  .pl .cal__head button { width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 1.2rem; cursor: pointer; color: var(--ink); }
+  .pl .cal__head button:disabled { opacity: 0.3; cursor: default; }
+  .pl .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.15rem; text-align: center; }
+  .pl .cal__grid em { font-style: normal; font-size: 0.72rem; font-weight: 600; color: var(--ink-2); padding: 0.2rem 0; }
+  .pl .cal__grid button { aspect-ratio: 1; border: 0; border-radius: 50%; background: none; font: inherit; font-size: 0.9rem; cursor: pointer; color: var(--ink); }
+  .pl .cal__grid button:hover:not(:disabled) { background: var(--tint); }
+  .pl .cal__grid button.on { background: var(--gold); color: var(--dark); font-weight: 700; }
+  .pl .cal__grid button:disabled { color: #c9bfb1; cursor: default; text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.12); }
+  .pl .cal__note { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--ink-2); text-align: center; }
+  .pl .gv__tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e9cf9c; margin-right: 0.6rem; }
+  .pl .gv__empty { display: grid; place-items: center; padding: 2rem; text-align: center; color: #e9dfcf; }
+  .pl .gv__empty span { max-width: 26rem; line-height: 1.5; }
   .pl .lodge { position: relative; display: flex; flex-direction: column; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }
   .pl .lodge input { position: absolute; opacity: 0; pointer-events: none; }
   .pl .lodge:has(input:checked) { border-color: var(--gold); box-shadow: 0 10px 24px -16px rgba(46, 36, 27, 0.6); }
@@ -572,8 +648,12 @@ import { site } from "../lib/site";
   .pl .sum { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 48px -32px rgba(46, 36, 27, 0.5); padding: 1.3rem; }
   .pl .sum__h { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.6rem; }
   .pl .sum__trip { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.45rem; font-size: 0.9rem; }
-  .pl .sum__trip li { display: grid; grid-template-columns: 6.6rem 1fr; gap: 0.5rem; }
-  .pl .sum__trip span { color: var(--ink-2); }
+  .pl .sum__trip li { position: relative; padding-left: 1.1rem; display: grid; gap: 0.1rem; line-height: 1.4; }
+  .pl .sum__trip li::before { content: ""; position: absolute; left: 0.15rem; top: 0.5rem; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--gold); }
+  .pl .sum__trip li b { font-weight: 600; }
+  .pl .sum__trip li span { color: var(--ink-2); font-size: 0.86rem; }
+  .pl .sum__trip li.sum__empty { padding-left: 0; color: var(--ink-2); }
+  .pl .sum__trip li.sum__empty::before { display: none; }
   .pl .sum__rows { margin: 0; border-top: 1px solid var(--line); padding-top: 0.7rem; }
   .pl .sum__rows div { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.95rem; }
   .pl .sum__rows dd { margin: 0; font-variant-numeric: tabular-nums; }
@@ -633,10 +713,14 @@ import { site } from "../lib/site";
     .pl .sum.is-open .sum__pdf { display: block; }
     .pl .sum.is-open .sum__fine { display: block; margin-top: 0.5rem; }
     /* lodge photo cards: swipe sideways instead of stacking */
-    .pl .lodges { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-right: -1rem; padding-right: 1rem; }
+    .pl .lodges { grid-auto-columns: 78%; scrollbar-width: none; margin-right: -1rem; padding-right: 1rem; }
+    .pl .lodges__arrow { display: none !important; }
+    .pl .datebtn { width: 100%; min-width: 0; }
+    .pl .cal { width: 100%; }
     .pl .lodges::-webkit-scrollbar { display: none; }
     .pl .lodge { scroll-snap-align: start; }
     .pl .lodges:has(> .lodge:only-child) { grid-auto-columns: 100%; margin-right: 0; padding-right: 0; }
+    .pl .fld--date { flex: 1 1 100%; }
   }
   @media (max-width: 560px) {
     .pl .pl__head .lede { font-size: 1rem; }

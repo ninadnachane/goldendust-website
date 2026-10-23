@@ -57,6 +57,12 @@ export const defaultConfig: Config = {
   areas,
   lodges,
   arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", premium: "arusha-premium", luxury: "arusha-luxury" } },
+  // Add-ons guests can tick. Prices incl. VAT. Balloon and breakfast prices are SAMPLES: set yours in /admin → Costs & rules.
+  addons: [
+    { id: "crater", name: "Ngorongoro Crater game drive", blurb: "A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.", per: "vehicle", price: 295, childPrice: 0, parkFee: true, active: true },
+    { id: "bush-breakfast", name: "Bush breakfast", blurb: "Breakfast set up out on the plains after an early game drive.", per: "person", price: 45, childPrice: 25, parkFee: false, active: true },
+    { id: "balloon", name: "Balloon safari over the Serengeti", blurb: "A sunrise hot-air balloon flight over the plains, with a champagne breakfast after landing.", per: "person", price: 599, childPrice: 599, parkFee: false, active: true },
+  ],
   doc: {
     included: [
       "Airport pick-up & drop-off (ARK or JRO)", "All ground transfers as per itinerary", "Private 4×4 safari vehicle with pop-up roof",
