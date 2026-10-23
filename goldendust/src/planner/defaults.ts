@@ -5,6 +5,7 @@ import type { Config, Category, Lodge, RoomRates } from "./engine";
 const base: Record<Category, RoomRates> = {
   budget: { single: 60, double: 80, triple: 110, child: 25 },
   comfort: { single: 250, double: 320, triple: 430, child: 90 },
+  premium: { single: 450, double: 580, triple: 800, child: 160 },
   luxury: { single: 700, double: 900, triple: 1250, child: 250 },
 };
 const scale = (r: RoomRates, k: number): RoomRates => ({
@@ -22,11 +23,11 @@ const areas = [
   { id: "ngorongoro", side: "nca", blurb: "A night on the Ngorongoro Crater rim, high above the crater floor.", name: "Ngorongoro (crater rim)", feeZoneId: "ncaa", minNights: 1, active: true },
 ];
 
-const catName: Record<Category, string> = { budget: "camp", comfort: "comfort lodge", luxury: "luxury lodge" };
+const catName: Record<Category, string> = { budget: "camp", comfort: "comfort lodge", premium: "premium lodge", luxury: "luxury lodge" };
 const lodges: Lodge[] = [];
-for (const a of areas) for (const c of ["budget", "comfort", "luxury"] as Category[])
+for (const a of areas) for (const c of ["budget", "comfort", "premium", "luxury"] as Category[])
   lodges.push({ id: `${a.id}-${c}`, name: `Sample ${catName[c]} (${a.name})`, areaId: a.id, category: c, active: true, insidePark: c !== "budget", rates: rates(c) });
-for (const c of ["budget", "comfort", "luxury"] as Category[])
+for (const c of ["budget", "comfort", "premium", "luxury"] as Category[])
   lodges.push({ id: `arusha-${c}`, name: `Sample ${c} hotel (Arusha)`, areaId: "arusha", category: c, active: true,
     rates: { high: scale(base[c], 0.6), green: scale(base[c], 0.45) } });
 
@@ -55,7 +56,7 @@ export const defaultConfig: Config = {
   ],
   areas,
   lodges,
-  arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", luxury: "arusha-luxury" } },
+  arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", premium: "arusha-premium", luxury: "arusha-luxury" } },
   doc: {
     included: [
       "Airport pick-up & drop-off (ARK or JRO)", "All ground transfers as per itinerary", "Private 4×4 safari vehicle with pop-up roof",

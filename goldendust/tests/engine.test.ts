@@ -53,8 +53,8 @@ test("airport pick-up and drop-off is $80 per booking, whatever the group size",
   assert.equal(sumOf(quote(cfg, trip({ adults: 9, childAges: [] }), TODAY), /Airport/), 80);
 });
 
-test("Budget pays the public campsite fee, not the concession fee", () => {
-  const t = trip({ category: "budget" }); t.stops.forEach((s) => (s.lodgeId = s.lodgeId.replace("comfort", "budget")));
+test("Budget camps pay the public campsite fee, not the concession fee", () => {
+  const t = trip(); t.stops.forEach((s) => (s.lodgeId = s.lodgeId.replace("comfort", "budget")));
   const q = quote(cfg, t, TODAY);
   assert.equal(line(q, /concession/).length, 0);
   assert.equal(sumOf(q, /Serengeti.*campsite/), round((2 * 35.4 + 5.9) * 3));
@@ -146,9 +146,26 @@ test("nights must add up and respect minimum nights per area", () => {
   assert.match(quote(cfg, north, TODAY).errors.join(" "), /North Serengeti needs at least 2 nights/);
 });
 
-test("a lodge from another category or area is rejected", () => {
-  const t = trip(); t.stops[0].lodgeId = "tarangire-luxury";
-  assert.equal(quote(cfg, t, TODAY).ok, false);
+test("guests can mix lodge tags per area; a lodge from another area is rejected", () => {
+  const mixed = trip(); mixed.stops[0].lodgeId = "tarangire-budget"; mixed.stops[1].lodgeId = "central-serengeti-luxury";
+  assert.equal(quote(cfg, mixed, TODAY).ok, true);
+  const wrong = trip(); wrong.stops[0].lodgeId = "ngorongoro-comfort";
+  assert.equal(quote(cfg, wrong, TODAY).ok, false);
+});
+
+test("Budget camp pays campsite fee and other lodges pay concession, in the same trip", () => {
+  const t = trip(); t.stops[0].lodgeId = "tarangire-budget";
+  const q = quote(cfg, t, TODAY);
+  assert.equal(line(q, /Tarangire.*campsite/).length, 1);
+  assert.equal(line(q, /Tarangire.*concession/).length, 0);
+  assert.equal(line(q, /Serengeti.*concession/).length, 1);
+});
+
+test("Arusha arrival hotel follows the tag with the most safari nights", () => {
+  const t = trip(); t.stops[1].lodgeId = "central-serengeti-premium"; // 3 of 5 nights premium
+  assert.match(line(quote(cfg, t, TODAY), /Night 1/)[0].label, /premium hotel/);
+  const tie = trip({ totalNights: 3, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-budget" }, { areaId: "manyara", nights: 1, lodgeId: "manyara-luxury" }] });
+  assert.match(line(quote(cfg, tie, TODAY), /Night 1/)[0].label, /luxury hotel/);
 });
 
 test("older saved rates are upgraded to the new park fee fields", () => {

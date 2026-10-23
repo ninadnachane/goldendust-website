@@ -55,7 +55,6 @@
             <label>Adults<input type="number" name="adults" min="1" value="2" /></label>
             <label>Children's ages<input type="text" name="childAges" placeholder="e.g. 8, 3" /></label>
           </div>
-          <label>Category<select name="category"></select></label>
           <label class="check"><input type="checkbox" name="crater" /> Add a Ngorongoro Crater game drive</label>
           <label class="check"><input type="checkbox" name="ignoreLead" checked /> Ignore the minimum-notice rule while testing</label>
           <h3>Itinerary <small data-nights-left></small></h3>
@@ -364,17 +363,18 @@
     type Stop = { areaId: string; nights: number; lodgeId: string };
     let stops: Stop[] = [];
     const form = () => $<HTMLFormElement>("[data-test-form]");
-    function lodgesFor(areaId: string, cat: string) { return cfg.lodges.filter((l) => l.areaId === areaId && l.category === cat && l.active); }
+    const catRank = (c: string) => CATEGORIES.findIndex((x) => x.id === c);
+    const catLabel = (c: string) => CATEGORIES.find((x) => x.id === c)?.name ?? c;
+    function lodgesFor(areaId: string) { return cfg.lodges.filter((l) => l.areaId === areaId && l.active).sort((a, b) => catRank(a.category) - catRank(b.category)); }
     function renderStops() {
-      const cat = (form().elements.namedItem("category") as HTMLSelectElement).value;
       const host = $("[data-stops]");
       host.innerHTML = stops.map((s, i) => {
-        const lodges = lodgesFor(s.areaId, cat);
+        const lodges = lodgesFor(s.areaId);
         if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = lodges[0]?.id || "";
         return `<div class="stop">
           <select data-st="${i}" data-f="areaId">${cfg.areas.map((a) => `<option value="${esc(a.id)}" ${a.id === s.areaId ? "selected" : ""}>${esc(a.name)}${a.active ? "" : " (hidden)"}</option>`).join("")}</select>
           <input type="number" min="1" data-st="${i}" data-f="nights" value="${s.nights}" aria-label="Nights">
-          <select data-st="${i}" data-f="lodgeId">${lodges.map((l) => `<option value="${esc(l.id)}" ${l.id === s.lodgeId ? "selected" : ""}>${esc(l.name)}</option>`).join("") || '<option value="">No lodge in this category</option>'}</select>
+          <select data-st="${i}" data-f="lodgeId">${lodges.map((l) => `<option value="${esc(l.id)}" ${l.id === s.lodgeId ? "selected" : ""}>[${esc(catLabel(l.category))}] ${esc(l.name)}</option>`).join("") || '<option value="">No lodge in this area</option>'}</select>
           <button type="button" class="del" data-rm="${i}" aria-label="Remove">✕</button></div>`;
       }).join("");
       host.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-st]").forEach((el) => el.addEventListener("change", () => {
@@ -394,7 +394,7 @@
       const totalNights = Number(v("totalNights")) || 0;
       const used = stops.reduce((a, s) => a + s.nights, 0);
       $("[data-nights-left]").textContent = `· ${used} of ${Math.max(0, totalNights - 1)} safari nights assigned`;
-      const req = { startDate: v("startDate"), adults: Number(v("adults")) || 0, childAges: ages, category: v("category") as any, totalNights, stops, crater: (f.elements.namedItem("crater") as HTMLInputElement).checked };
+      const req = { startDate: v("startDate"), adults: Number(v("adults")) || 0, childAges: ages, totalNights, stops, crater: (f.elements.namedItem("crater") as HTMLInputElement).checked };
       const today = (f.elements.namedItem("ignoreLead") as HTMLInputElement).checked ? "1970-01-01" : undefined;
       const q = quote(cfg, req, today);
       const out = $("[data-test-out]");
@@ -434,8 +434,6 @@
 
     function initTest() {
       const f = form();
-      const sel = f.elements.namedItem("category") as HTMLSelectElement;
-      sel.innerHTML = CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === "comfort" ? "selected" : ""}>${c.name}</option>`).join("");
       (f.elements.namedItem("startDate") as HTMLInputElement).value = addDays(new Date().toISOString().slice(0, 10), cfg.settings.leadDays + 1);
       const pick = (id: string, n: number) => cfg.areas.some((a) => a.id === id) && stops.push({ areaId: id, nights: n, lodgeId: "" });
       pick("tarangire", 1); pick("central-serengeti", 2); pick("ngorongoro", 1);

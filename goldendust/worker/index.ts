@@ -5,7 +5,7 @@
 // Admin security: password + one-time email code, see worker/auth.ts.
 // Login page: /admin/login. Local development only: DEV_ADMIN_BYPASS="1" in .dev.vars.
 import { authApi, sessionEmail, logoutEverywhere, type AuthEnv } from "./auth";
-import { quote, publicOptions, checkConfig, upgradeConfig, type Config, type QuoteRequest } from "../src/planner/engine";
+import { quote, publicOptions, checkConfig, upgradeConfig, tripCategories, CATEGORIES, type Config, type QuoteRequest } from "../src/planner/engine";
 import { defaultConfig } from "../src/planner/defaults";
 
 interface Env extends AuthEnv {
@@ -127,7 +127,7 @@ export default {
 
 // ---------- leads (guests sending their itinerary on WhatsApp)
 function tripSummary(cfg: Config, r: QuoteRequest) {
-  const cat = r.category ? r.category[0].toUpperCase() + r.category.slice(1) : "";
+  const cat = tripCategories(cfg.lodges, r.stops).map((c) => CATEGORIES.find((x) => x.id === c)?.name ?? c).join(" + ");
   const stops = r.stops.map((s) => {
     const a = cfg.areas.find((x) => x.id === s.areaId)?.name || s.areaId;
     const l = cfg.lodges.find((x) => x.id === s.lodgeId)?.name || "";

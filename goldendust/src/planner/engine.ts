@@ -5,18 +5,35 @@
 //
 // Park fee rules (all fees entered incl. VAT, peak-season rates):
 //  1. Entry fee per person for each day (= night) in a park area.
-//  2. Overnight: Budget → public campsite fee; lodge inside the park → concession fee; lodge outside → nothing.
+//  2. Overnight: Budget camp → public campsite fee; other lodge inside the park → concession fee; outside → nothing.
 //  3. NCA transit: each drive between east (Arusha, Tarangire, Manyara) and west (Serengeti) without a night in
 //     the Ngorongoro Conservation Area = one NCA entry day (going and coming back on different days = 2).
 //  4. Ngorongoro Crater (separate choice): crater fee per vehicle, plus one NCA day if the trip isn't in the NCA anyway.
 //  5. Vehicle entry fee per vehicle for each park day.
 
-export type Category = "budget" | "comfort" | "luxury";
+// Every lodge/camp carries one of these tags. Guests don't pick a style: they see all options with their tag.
+export type Category = "budget" | "comfort" | "premium" | "luxury";
 export const CATEGORIES: { id: Category; name: string; blurb: string }[] = [
   { id: "budget", name: "Budget", blurb: "Tents in public campsites, shared washrooms" },
   { id: "comfort", name: "Comfort", blurb: "Comfortable lodges and tented camps" },
-  { id: "luxury", name: "Luxury", blurb: "Premium lodges and camps" },
+  { id: "premium", name: "Premium", blurb: "Upmarket lodges and camps in the best spots" },
+  { id: "luxury", name: "Luxury", blurb: "The finest lodges and camps" },
 ];
+const RANK: Record<Category, number> = { budget: 0, comfort: 1, premium: 2, luxury: 3 };
+
+// The trip's overall style = the tag with the most safari nights (a tie goes to the higher tag).
+// Used for the Arusha arrival hotel and the "Style" line on the PDF.
+export function tripCategory(lodges: { id: string; category: Category }[], stops: { lodgeId: string; nights: number }[]): Category {
+  const nights: Partial<Record<Category, number>> = {};
+  for (const st of stops) { const l = lodges.find((x) => x.id === st.lodgeId); if (l) nights[l.category] = (nights[l.category] || 0) + (st.nights || 0); }
+  const best = (Object.keys(nights) as Category[]).sort((a, b) => (nights[b]! - nights[a]!) || RANK[b] - RANK[a])[0];
+  return best ?? "comfort";
+}
+export function tripCategories(lodges: { id: string; category: Category }[], stops: { lodgeId: string }[]): Category[] {
+  const set = new Set<Category>();
+  for (const st of stops) { const l = lodges.find((x) => x.id === st.lodgeId); if (l) set.add(l.category); }
+  return [...set].sort((a, b) => RANK[a] - RANK[b]);
+}
 
 export type Settings = {
   guideDay: number; // per guide per day
@@ -90,7 +107,7 @@ export type QuoteRequest = {
   startDate: string; // YYYY-MM-DD, arrival day in Arusha
   adults: number;
   childAges: number[];
-  category: Category;
+  category?: Category; // old requests only; the style now comes from the chosen lodges
   totalNights: number; // incl. the Arusha arrival night
   stops: { areaId: string; nights: number; lodgeId: string }[];
   crater?: boolean; // Ngorongoro Crater game drive, chosen separately
@@ -130,6 +147,7 @@ export function upgradeConfig(cfg: Config): Config {
   }));
   c.areas = c.areas.map((a) => ({ ...a, side: a.side ?? (/seren/i.test(a.feeZoneId) ? "west" : /nca|ngoro/i.test(a.feeZoneId) ? "nca" : "east") }));
   c.lodges = c.lodges.map((l) => ({ ...l, insidePark: l.insidePark ?? l.areaId !== "arusha" }));
+  c.arrival = { ...c.arrival, lodges: { ...c.arrival.lodges, premium: c.arrival.lodges.premium ?? c.arrival.lodges.luxury ?? c.arrival.lodges.comfort } };
   const legacyCrater = Math.max(0, ...c.areas.map((a) => a.vehicleFee || 0));
   c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
   return c;
@@ -180,7 +198,6 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
   if (!(q.adults >= 1)) e.push("At least one adult must travel.");
   if (q.adults + q.childAges.length > s.maxGuests) e.push(`For more than ${s.maxGuests} guests, please message us directly.`);
   if (q.childAges.some((a) => !(a >= 0 && a <= s.childMaxAge))) e.push(`Children's ages must be between 0 and ${s.childMaxAge}.`);
-  if (!CATEGORIES.some((c) => c.id === q.category)) e.push("Choose Budget, Comfort or Luxury.");
   if (!(q.totalNights >= s.minTotalNights && q.totalNights <= s.maxTotalNights))
     e.push(`Choose between ${s.minTotalNights} and ${s.maxTotalNights} nights.`);
   if (!q.stops.length) e.push("Choose at least one area to visit.");
@@ -195,14 +212,14 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
     if (!(st.nights >= area.minNights)) e.push(`${area.name} needs at least ${area.minNights} night${area.minNights > 1 ? "s" : ""}.`);
     const lodge = cfg.lodges.find((l) => l.id === st.lodgeId && l.active);
     if (!lodge) e.push(`Choose where to stay in ${area.name}.`);
-    else if (lodge.areaId !== area.id || lodge.category !== q.category) e.push(`${lodge.name} isn't a ${q.category} option in ${area.name}.`);
+    else if (lodge.areaId !== area.id) e.push(`${lodge.name} isn't in ${area.name}.`);
   }
   const minNeeded = q.stops.reduce((a, st) => a + (cfg.areas.find((x) => x.id === st.areaId)?.minNights ?? 1), 0);
   if (q.stops.length && minNeeded > safariNights)
     e.push(`These areas need at least ${minNeeded + 1} nights in total (${minNeeded} on safari + 1 in Arusha). Add nights or remove an area.`);
   else if (q.stops.length && used !== safariNights)
     e.push(`You have ${safariNights} safari night${safariNights === 1 ? "" : "s"} to share out (plus your first night in Arusha) and ${used} assigned.`);
-  if (!cfg.lodges.find((l) => l.id === cfg.arrival.lodges[q.category] && l.active)) e.push("The Arusha arrival hotel isn't set up for this category.");
+  if (q.stops.length && !cfg.lodges.find((l) => l.id === cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)] && l.active)) e.push("The Arusha arrival hotel isn't set up for this style.");
   if (q.crater && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro Crater isn't available right now.");
   return e;
 }
@@ -234,7 +251,7 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     lines.push({ group: "accommodation", label: `${label}: ${lodge.name} (${date}, ${season.name})`, calc: parts.join(" + "), cost: r2(cost) });
     if (!(plan.cost > 0)) errors.push(`${lodge.name} has no ${season.name} room rates.`);
   };
-  stayAt(cfg.arrival.lodges[q.category], 0, `Night 1 ${cfg.arrival.name}`);
+  stayAt(cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)], 0, `Night 1 ${cfg.arrival.name}`);
 
   // ---- park fees (all incl. VAT, peak-season rates)
   const pp = (adult: number, child: number) => adults * adult + children * child;
@@ -252,7 +269,7 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     // Rule 1: entry fee for each day in the park
     lines.push({ group: "park", label: `${zone.name} entry: ${area.name}, ${times(n, "day")}`, calc: `(${ppCalc(zone.adultDay, zone.childDay)}) × ${times(n, "day")}`, cost: r2(pp(zone.adultDay, zone.childDay) * n) });
     // Rule 2: overnight fee — Budget → public campsite; lodge inside the park → concession; otherwise none
-    if (q.category === "budget") {
+    if (lodge?.category === "budget") {
       if (pp(zone.campAdult, zone.campChild) > 0) lines.push({ group: "park", label: `${zone.name} public campsite: ${area.name}, ${times(n, "night")}`, calc: `(${ppCalc(zone.campAdult, zone.campChild)}) × ${times(n, "night")}`, cost: r2(pp(zone.campAdult, zone.campChild) * n) });
     } else if (lodge?.insidePark) {
       if (pp(zone.concessionAdult, zone.concessionChild) > 0) lines.push({ group: "park", label: `${zone.name} concession (lodge inside the park): ${area.name}, ${times(n, "night")}`, calc: `(${ppCalc(zone.concessionAdult, zone.concessionChild)}) × ${times(n, "night")}`, cost: r2(pp(zone.concessionAdult, zone.concessionChild) * n) });

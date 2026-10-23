@@ -22,16 +22,17 @@ import { site } from "../lib/site";
   <main class="doc" data-doc><p class="loading">Preparing your itinerary…</p></main>
 
   <script>
+    import { tripCategory, tripCategories } from "../planner/engine";
     type L = { name: string; description: string; images: string[] };
     type Opt = {
       categories: { id: string; name: string }[];
       arrivalName: string;
       arrivalLodges: Record<string, L | null>;
       areas: { id: string; name: string; blurb: string }[];
-      lodges: (L & { id: string; areaId: string })[];
+      lodges: (L & { id: string; areaId: string; category: string })[];
       doc: { included: string[]; excluded: string[]; payment: string; notes: string[] } | null;
     };
-    type Trip = { startDate: string; adults: number; childAges: number[]; category: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[]; crater?: boolean };
+    type Trip = { startDate: string; adults: number; childAges: number[]; category?: string; totalNights: number; stops: { areaId: string; nights: number; lodgeId: string }[]; crater?: boolean };
     type Priced = { park: number; transport: number; accommodation: number; meals: number; margin: number; total: number };
 
     const docEl = document.querySelector<HTMLElement>("[data-doc]")!;
@@ -44,11 +45,12 @@ import { site } from "../lib/site";
     const long = (iso: string) => fmt(iso, { day: "numeric", month: "long", year: "numeric" });
 
     function render(o: Opt, t: Trip, priced: Priced | null, perPerson: number, guest: { name?: string; ref?: string }) {
-      const cat = o.categories.find((c) => c.id === t.category)?.name ?? t.category;
+      const cats = tripCategories(o.lodges as any, t.stops);
+      const cat = cats.length ? cats.map((c) => o.categories.find((x) => x.id === c)?.name ?? c).join(" + ") : (o.categories.find((c) => c.id === t.category)?.name ?? "");
       const end = addDays(t.startDate, t.totalNights);
       const areaName = (id: string) => o.areas.find((a) => a.id === id)?.name ?? id;
       const guestsTxt = `${t.adults} adult${t.adults > 1 ? "s" : ""}${t.childAges.length ? ` + ${t.childAges.length} child${t.childAges.length > 1 ? "ren" : ""}` : ""}`;
-      const arrival = o.arrivalLodges[t.category];
+      const arrival = o.arrivalLodges[tripCategory(o.lodges as any, t.stops)] ?? o.arrivalLodges[t.category ?? "comfort"];
       const routeNames = [...new Set([...t.stops.map((s) => areaName(s.areaId).replace(/^(North|Central|South) /, "").replace(/ \(.*\)$/, "")), ...(t.crater ? ["Ngorongoro"] : [])])];
       const dd = (iso: string) => fmt(iso, { day: "2-digit" });
       const mon = (iso: string) => fmt(iso, { month: "short" });
