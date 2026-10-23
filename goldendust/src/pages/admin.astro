@@ -127,7 +127,7 @@
   </dialog>
 
   <script>
-    import { quote, checkConfig, CATEGORIES, money, addDays, type Config, type Line, type Lodge } from "../planner/engine";
+    import { quote, checkConfig, CATEGORIES, money, addDays, lodgeImages, imageUrl, type Config, type Line, type Lodge } from "../planner/engine";
     import { importLodges } from "../planner/lodgeImport";
 
     const $ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
@@ -332,7 +332,7 @@
         { key: "insidePark", label: "Inside park", type: "bool" },
         { key: "minChildAge", label: "Min. child age", type: "number", step: "1" },
         { key: "periods", label: "Rates (per person per night)", type: "button", text: (r) => ratesSummary(r), onClick: openRates },
-        { key: "photos", label: "Photos & text", type: "button", text: (r) => `${(r.images || []).length} photo${(r.images || []).length === 1 ? "" : "s"}${r.description ? " · text" : ""}`, onClick: openPhotos },
+        { key: "photos", label: "Photos & text", type: "button", text: (r) => { const up = (r.images || []).length, n = lodgeImages(r).length; return `${up ? `${up} uploaded` : n ? `${n} from folder` : "0 photos"}${r.description ? " · text" : ""}`; }, onClick: openPhotos },
       ];
       table($("[data-lodges]"), cfg.lodges, cols, {
         rerender: () => { renderLodges(); renderSettings(); },
@@ -561,6 +561,12 @@
     }
     function renderThumbs() {
       const l = photoLodge;
+      const folder = l.images.length ? [] : lodgeImages(l);
+      if (folder.length) {
+        $("[data-pd-thumbs]").innerHTML = `<p class="hint" style="grid-column: 1 / -1; margin: 0">${folder.length} photos from your Google Drive Accommodations folder, shown in the planner. Photos you upload here replace them.</p>` +
+          folder.map((id: string, i: number) => `<figure class="thumb${i === 0 ? " is-main" : ""}"><img src="${esc(imageUrl(id))}" alt=""><figcaption>${i === 0 ? "<span>Main</span>" : ""}</figcaption></figure>`).join("");
+        return;
+      }
       $("[data-pd-thumbs]").innerHTML = l.images.map((id: string, i: number) => `<figure class="thumb${i === 0 ? " is-main" : ""}"><img src="/media/${esc(id)}" alt=""><figcaption>
         ${i === 0 ? "<span>Main</span>" : `<button type="button" data-main="${i}">Make main</button>`}
         <button type="button" data-left="${i}" aria-label="Move left">←</button><button type="button" data-right="${i}" aria-label="Move right">→</button>
