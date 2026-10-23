@@ -198,3 +198,12 @@ test("public options never expose rates or fees", () => {
   const s = JSON.stringify(publicOptions(cfg));
   for (const word of ["rates", "double", "adultDay", "concession", "vehicleDay", "guideDay", "marginPct", "adminPct", "craterFee", "price", "childPrice"]) assert.equal(s.includes(word), false, word);
 });
+
+test("public add-on rates include admin fee (unless park fee) and margin", () => {
+  const a = publicOptions(cfg).addons!;
+  const k = (1 + cfg.settings.adminPct / 100) * (1 + cfg.settings.marginPct / 100);
+  const crater = cfg.addons!.find((x) => x.id === "crater")!, bf = cfg.addons!.find((x) => x.id === "bush-breakfast")!;
+  assert.equal(a.find((x) => x.id === "crater")!.rate, Math.round(crater.price * (1 + cfg.settings.marginPct / 100)));
+  assert.equal(a.find((x) => x.id === "bush-breakfast")!.rate, Math.round(bf.price * k));
+  assert.equal(a.find((x) => x.id === "bush-breakfast")!.rateChild, Math.round(bf.childPrice * k));
+});

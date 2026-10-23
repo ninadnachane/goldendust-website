@@ -352,7 +352,11 @@ export function publicOptions(cfg: Config) {
       return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
     })),
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
-    addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => ({ id: a.id, name: a.name, blurb: a.blurb })),
+    addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => {
+      // guest-facing rate: incl. admin fee (unless a park fee) and margin, rounded to the dollar
+      const k = (a.parkFee ? 1 : 1 + cfg.settings.adminPct / 100) * (1 + cfg.settings.marginPct / 100);
+      return { id: a.id, name: a.name, blurb: a.blurb, per: a.per, rate: Math.round(a.price * k), rateChild: Math.round(a.childPrice * k) };
+    }),
     doc: cfg.doc ?? null,
     lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
   };

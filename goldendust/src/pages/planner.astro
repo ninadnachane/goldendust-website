@@ -109,7 +109,7 @@ import { site } from "../lib/site";
     arrivalName: string;
     areas: { id: string; name: string; minNights: number }[];
     lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[] }[];
-    addons?: { id: string; name: string; blurb: string }[];
+    addons?: { id: string; name: string; blurb: string; per: string; rate: number; rateChild: number }[];
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
@@ -487,7 +487,8 @@ import { site } from "../lib/site";
     const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
     if (O.addons?.length) {
       $("[data-addons]").hidden = false;
-      $("[data-addon-list]").innerHTML = O.addons.map((a) => `<label class="addon"><input type="checkbox" value="${esc(a.id)}" data-addon><span><strong>${esc(a.name)}</strong>${a.blurb ? `<small>${esc(a.blurb)}</small>` : ""}</span></label>`).join("");
+      const per = (a: NonNullable<Opt["addons"]>[number]) => a.per === "vehicle" ? "per vehicle" : a.per === "booking" ? "per group" : a.rateChild && a.rateChild !== a.rate ? `pp · child $${a.rateChild.toLocaleString("en-US")}` : "pp";
+      $("[data-addon-list]").innerHTML = O.addons.map((a) => `<label class="addon" ${a.blurb ? `title="${esc(a.blurb)}"` : ""}><input type="checkbox" value="${esc(a.id)}" data-addon><span class="addon__t"><strong>${esc(a.name)}</strong>${a.blurb ? `<small>${esc(a.blurb)}</small>` : ""}</span><span class="addon__r">+$${a.rate.toLocaleString("en-US")}<small>${per(a)}</small></span></label>`).join("");
       root.querySelectorAll<HTMLInputElement>("[data-addon]").forEach((el) => el.addEventListener("change", () => {
         st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
         update();
@@ -558,12 +559,17 @@ import { site } from "../lib/site";
   .pl .addons[hidden] { display: none; }
   .pl .addons__h { font-family: var(--display); font-weight: 600; margin: 0 0 0.5rem; }
   .pl .addons__h small { font-weight: 400; color: var(--ink-2); }
-  .pl .addons__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.6rem; }
-  .pl .addon { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.8rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; }
-  .pl .addon:has(input:checked) { border-color: var(--gold); background: var(--tint); }
-  .pl .addon input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; accent-color: var(--gold); flex: none; }
-  .pl .addon span { display: grid; gap: 0.2rem; }
-  .pl .addon small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.4; }
+  .pl .addons__list { display: grid; border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; }
+  .pl .addon { display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.85rem; cursor: pointer; min-width: 0; }
+  .pl .addon + .addon { border-top: 1px solid var(--line); }
+  .pl .addon:has(input:checked) { background: var(--tint); }
+  .pl .addon input { width: 1.1rem; height: 1.1rem; margin: 0; accent-color: var(--gold); flex: none; }
+  .pl .addon__t { flex: 1; min-width: 0; display: grid; }
+  .pl .addon__t strong { font-size: 0.95rem; font-weight: 600; }
+  .pl .addon__t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pl .addon__r { flex: none; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; display: grid; line-height: 1.2; }
+  .pl .addon__r small { font-weight: 400; font-size: 0.75rem !important; }
+  .pl .addon small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.35; }
   .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
   .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
   .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
