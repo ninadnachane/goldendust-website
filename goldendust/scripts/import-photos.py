@@ -18,8 +18,8 @@ OVERRIDE = {
   "Karatu Villas Lodge - Karatu": "Karatu Villa",
   "Kubu Kubu Tented Lodge - Central Serengeti": "Kubukubu Tented Lodge",
   "andBeyond Lake Manyara Tree Lodge - Manyara": "&Beyond Lake Manyara",
-  "Rhotia Valley Tented Lodge - Karatu": None,      # not sure it's the same as Rhotia Valley Simba Lodge
-  "Nasikia Mobile Migration Camp - Ndutu": None,    # not sure it's "Nasikia Ndutu"
+  "Rhotia Valley Tented Lodge - Karatu": "Rhotia Valley Simba Lodge",
+  "Nasikia Mobile Migration Camp - Ndutu": "Nasikia Ndutu",
 }
 def match(folder):
     if folder in OVERRIDE: return OVERRIDE[folder]
