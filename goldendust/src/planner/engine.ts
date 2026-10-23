@@ -53,6 +53,7 @@ export type Settings = {
   maxGuests: number;
   craterFee: number; // Ngorongoro Crater descent, per vehicle, incl. VAT
   airportTransfer: number; // airport pick-up and drop-off, per booking
+  addonAdminPct: number; // admin fee % on add-ons (park-fee add-ons excluded); add-ons get no margin
   ncaZoneId: string; // which park fee zone is the Ngorongoro Conservation Area (for transit days)
 };
 
@@ -130,7 +131,7 @@ export type Quote = {
   lines: Line[];
   people: { adults: number; children: number; infants: number; total: number; vehicles: number; guides: number };
   totals: {
-    park: number; transport: number; accommodation: number; meals: number; extras: number;
+    park: number; transport: number; accommodation: number; meals: number; extras: number; addonFee: number; extrasTotal: number;
     others: number; adminFee: number; subtotal: number; margin: number; total: number; perPerson: number;
   };
   // What a guest sees: each category with admin fees baked in, margin shown separately.
@@ -161,7 +162,7 @@ export function upgradeConfig(cfg: Config): Config {
   c.addons = c.addons ?? [
     { id: "crater", name: "Ngorongoro Crater game drive", blurb: "A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.", per: "vehicle", price: c.settings.craterFee || legacyCrater || 295, childPrice: 0, parkFee: true, active: true },
   ];
-  c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
+  c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, addonAdminPct: c.settings.addonAdminPct ?? 2, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
   return c;
 }
 
@@ -251,7 +252,7 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   const vehicles = Math.max(1, Math.ceil(total / s.maxPerVehicle));
   const people = { adults, children, infants, total, vehicles, guides: vehicles };
   const lines: Line[] = [];
-  const blank = { park: 0, transport: 0, accommodation: 0, meals: 0, extras: 0, others: 0, adminFee: 0, subtotal: 0, margin: 0, total: 0, perPerson: 0 };
+  const blank = { park: 0, transport: 0, accommodation: 0, meals: 0, extras: 0, addonFee: 0, extrasTotal: 0, others: 0, adminFee: 0, subtotal: 0, margin: 0, total: 0, perPerson: 0 };
   if (errors.length) return { ok: false, errors, lines, people, totals: blank, priced: { park: 0, transport: 0, accommodation: 0, meals: 0, extras: 0, margin: 0, total: 0 } };
 
   // Accommodation, night by night
@@ -298,19 +299,23 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   const sides: Side[] = ["east", ...q.stops.map((st) => cfg.areas.find((a) => a.id === st.areaId)?.side ?? "east"), "east"];
   let crossings = 0;
   for (let i = 1; i < sides.length; i++) if ((sides[i - 1] === "east" && sides[i] === "west") || (sides[i - 1] === "west" && sides[i] === "east")) crossings++;
-  const ncaDay = (label: string, days: number) => {
+  const ncaDay = (label: string, days: number, group: Group = "park") => {
     if (!nca || days < 1) return;
-    lines.push({ group: "park", label: `${nca.name} ${label}, ${times(days, "day")}`, calc: `(${ppCalc(nca.adultDay, nca.childDay)}) × ${times(days, "day")}`, cost: r2(pp(nca.adultDay, nca.childDay) * days) });
-    if (nca.vehicleDay > 0) lines.push({ group: "park", label: `${nca.name} vehicle entry (${label}), ${times(days, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(nca.vehicleDay)} × ${times(days, "day")}`, cost: r2(vehicles * nca.vehicleDay * days) });
+    lines.push({ group, label: `${nca.name} ${label}, ${times(days, "day")}`, calc: `(${ppCalc(nca.adultDay, nca.childDay)}) × ${times(days, "day")}`, cost: r2(pp(nca.adultDay, nca.childDay) * days) });
+    if (nca.vehicleDay > 0) lines.push({ group, label: `${nca.name} vehicle entry (${label}), ${times(days, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(nca.vehicleDay)} × ${times(days, "day")}`, cost: r2(vehicles * nca.vehicleDay * days) });
   };
   ncaDay("transit", crossings);
-  // Rule 4: add-ons. The crater also needs an NCA day if the trip isn't in the NCA anyway.
+  // Rule 4: add-ons. No margin; the add-on admin fee applies unless the add-on is a park fee.
+  // The crater also needs an NCA entry day if the trip isn't in the NCA anyway (counted with the add-on).
+  let addonFeeBase = 0;
   for (const ad of chosenAddons(cfg, q)) {
-    if (ad.id === "crater" && !(crossings > 0 || sides.includes("nca"))) ncaDay("entry for the crater day", 1);
-    const group: Group = ad.parkFee ? "park" : "extras";
+    if (ad.id === "crater" && !(crossings > 0 || sides.includes("nca"))) ncaDay("entry for the crater day", 1, "extras");
+    const group: Group = "extras";
+    const n0 = lines.length;
     if (ad.per === "person") lines.push({ group, label: ad.name, calc: ppCalc(ad.price, ad.childPrice), cost: r2(pp(ad.price, ad.childPrice)) });
     else if (ad.per === "vehicle") lines.push({ group, label: ad.name, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(ad.price)}`, cost: r2(vehicles * ad.price) });
     else lines.push({ group, label: ad.name, calc: `${money(ad.price)} per booking`, cost: r2(ad.price) });
+    if (!ad.parkFee) addonFeeBase += lines.slice(n0).reduce((a, l) => a + l.cost, 0);
   }
 
   const safariNights = q.totalNights - 1;
@@ -322,18 +327,20 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
 
   const sum = (g: Group) => r2(lines.filter((l) => l.group === g).reduce((a, l) => a + l.cost, 0));
   const park = sum("park"), transport = sum("transport"), accommodation = sum("accommodation"), meals = sum("meals"), extras = sum("extras");
-  const others = r2(transport + accommodation + meals + extras);
+  const others = r2(transport + accommodation + meals);
   const adminFee = r2(others * s.adminPct / 100);
   const subtotal = r2(park + others + adminFee);
   const margin = r2(subtotal * s.marginPct / 100);
-  const grand = r2(subtotal + margin);
+  const addonFee = r2(addonFeeBase * (s.addonAdminPct ?? 2) / 100);
+  const extrasTotal = r2(extras + addonFee);
+  const grand = r2(subtotal + margin + extrasTotal);
   const k = 1 + s.adminPct / 100;
-  const priced = { park, transport: r2(transport * k), accommodation: r2(accommodation * k), meals: r2(meals * k), extras: r2(extras * k), margin, total: grand };
+  const priced = { park, transport: r2(transport * k), accommodation: r2(accommodation * k), meals: r2(meals * k), extras: extrasTotal, margin, total: grand };
   // keep the guest categories adding up exactly to the total
   priced.accommodation = r2(grand - priced.park - priced.transport - priced.meals - priced.extras - priced.margin);
   return {
     ok: errors.length === 0, errors, lines, people,
-    totals: { park, transport, accommodation, meals, extras, others, adminFee, subtotal, margin, total: grand, perPerson: r2(grand / Math.max(1, adults + children)) },
+    totals: { park, transport, accommodation, meals, extras, addonFee, extrasTotal, others, adminFee, subtotal, margin, total: grand, perPerson: r2(grand / Math.max(1, adults + children)) },
     priced,
   };
 }
@@ -354,7 +361,7 @@ export function publicOptions(cfg: Config) {
     areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
     addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => {
       // guest-facing rate: incl. admin fee (unless a park fee) and margin, rounded to the dollar
-      const k = (a.parkFee ? 1 : 1 + cfg.settings.adminPct / 100) * (1 + cfg.settings.marginPct / 100);
+      const k = a.parkFee ? 1 : 1 + (cfg.settings.addonAdminPct ?? 2) / 100;
       return { id: a.id, name: a.name, blurb: a.blurb, per: a.per, rate: Math.round(a.price * k), rateChild: Math.round(a.childPrice * k) };
     }),
     doc: cfg.doc ?? null,

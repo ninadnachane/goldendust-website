@@ -38,7 +38,7 @@ export const defaultConfig: Config = {
     adminPct: 10, marginPct: 7, leadDays: 20,
     childMinAge: 5, childMaxAge: 15,
     minTotalNights: 2, maxTotalNights: 21, maxGuests: 21,
-    craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80,
+    craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80, addonAdminPct: 2,
   },
   seasons: [
     // Two lodge seasons: Green season (April–May), High season for every other date (the default).

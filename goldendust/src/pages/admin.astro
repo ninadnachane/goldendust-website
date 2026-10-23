@@ -70,7 +70,7 @@
       <h2>Daily costs, markup and rules</h2>
       <div class="cards" data-settings></div>
       <h2>Add-ons</h2>
-      <p class="hint">Optional extras guests can tick in the planner. Prices include VAT. "Park fee" add-ons get no admin fee; the others get the admin fee like everything else. The crater drive also adds a Ngorongoro entry day when the trip doesn't already stay in the conservation area.</p>
+      <p class="hint">Optional extras guests can tick in the planner. Prices include VAT. Add-ons get no margin. "Park fee" add-ons get no admin fee; the others get the add-on admin fee (Costs above). The crater drive also adds a Ngorongoro entry day when the trip doesn't already stay in the conservation area.</p>
       <div data-addons-t></div>
       <h2>Arusha arrival night</h2>
       <p class="hint">Every trip starts with one night in Arusha, included. Pick the hotel used for each category (add Arusha hotels in "Lodges &amp; camps" with area "Arusha").</p>
@@ -220,7 +220,8 @@
         ["firstLunchAdult", "First-day lunch, per adult ($)", "0.01"],
         ["firstLunchChild", "First-day lunch, per child ($)", "0.01"],
         ["adminPct", "Admin fee % (on everything except park fees)", "0.1"],
-        ["marginPct", "Margin % (on the total incl. admin fee)", "0.1"],
+        ["marginPct", "Margin % (on the total incl. admin fee, not on add-ons)", "0.1"],
+        ["addonAdminPct", "Add-on admin fee % (add-ons get no margin)", "0.1"],
         ["leadDays", "Guests can't arrive within this many days", "1"],
         ["childMinAge", "Children pay from age (younger = free)", "1"],
         ["childMaxAge", "Children pay child rate up to age", "1"],
@@ -443,10 +444,11 @@
         <h2>2. From cost to price</h2>
         <table class="sum">
           <tr><td>Park fees (no admin fee)</td><td class="calc"></td><td class="n">${money(t.park)}</td></tr>
-          <tr><td>Everything else</td><td class="calc">${money(t.transport)} vehicle &amp; guide + ${money(t.accommodation)} accommodation + ${money(t.meals)} meals${t.extras ? ` + ${money(t.extras)} add-ons` : ""}</td><td class="n">${money(t.others)}</td></tr>
+          <tr><td>Everything else</td><td class="calc">${money(t.transport)} vehicle &amp; guide + ${money(t.accommodation)} accommodation + ${money(t.meals)} meals</td><td class="n">${money(t.others)}</td></tr>
           <tr><td>Admin fee ${s.adminPct}%</td><td class="calc">${money(t.others)} × ${s.adminPct}%</td><td class="n">${money(t.adminFee)}</td></tr>
           <tr class="line"><td>Subtotal</td><td class="calc">${money(t.park)} + ${money(t.others)} + ${money(t.adminFee)}</td><td class="n">${money(t.subtotal)}</td></tr>
           <tr><td>Margin ${s.marginPct}%</td><td class="calc">${money(t.subtotal)} × ${s.marginPct}%</td><td class="n">${money(t.margin)}</td></tr>
+          ${t.extras ? `<tr><td>Add-ons (no margin)</td><td class="calc">${money(t.extras)} + admin fee ${s.addonAdminPct ?? 2}% ${money(t.addonFee)} (park-fee add-ons excluded)</td><td class="n">${money(t.extrasTotal)}</td></tr>` : ""}
           <tr class="total"><td>Price to guest</td><td class="calc">${money(t.perPerson)} per paying person (${p.adults + p.children})</td><td class="n">${money(t.total)}</td></tr>
         </table>
         <h2>3. What the guest sees</h2>
@@ -459,7 +461,7 @@
           <tr><td>Margin</td><td class="n">${money(q.priced.margin)}</td></tr>
           <tr class="total"><td>Total</td><td class="n">${money(q.priced.total)}</td></tr>
         </table>
-        <p class="hint">Admin fees are included in vehicle &amp; guide, accommodation, meals and add-ons (except park-fee add-ons). Accommodation absorbs any 1-cent rounding so the guest's total always adds up.</p>`;
+        <p class="hint">Admin fees are included in vehicle &amp; guide, accommodation, and meals. Add-ons carry only their own admin fee (none on park-fee add-ons) and no margin. Accommodation absorbs any 1-cent rounding so the guest's total always adds up.</p>`;
     }
 
     function initTest() {

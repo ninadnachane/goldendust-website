@@ -93,14 +93,14 @@ test("Ngorongoro Crater is a separate choice: crater fee per vehicle, plus an NC
   assert.equal(line(quote(cfg, trip({ crater: true }), TODAY), /entry for the crater day/).length, 0);
 });
 
-test("add-ons: priced per person (children at child rate), per vehicle or per booking, with admin fee unless a park fee", () => {
+test("add-ons: priced per person (children at child rate), per vehicle or per booking, with the add-on admin fee", () => {
   const base = quote(cfg, trip(), TODAY);
   const q = quote(cfg, trip({ addons: ["balloon", "bush-breakfast"] }), TODAY);
   assert.equal(sumOf(q, /Balloon/), round(2 * 599 + 1 * 599));
   assert.equal(sumOf(q, /Bush breakfast/), round(2 * 45 + 1 * 25));
   assert.equal(q.totals.extras, round(3 * 599 + 115));
   assert.equal(q.totals.park, base.totals.park, "extras are not park fees");
-  assert.equal(q.priced.extras, round(q.totals.extras * 1.1));
+  assert.equal(q.priced.extras, round(q.totals.extras * 1.02), "2% add-on admin fee, no margin");
   // crater chosen through the add-on list works like the old yes/no
   assert.equal(quote(cfg, trip({ addons: ["crater"] }), TODAY).totals.total, quote(cfg, trip({ crater: true }), TODAY).totals.total);
   // unknown or switched-off add-ons are ignored
@@ -199,11 +199,21 @@ test("public options never expose rates or fees", () => {
   for (const word of ["rates", "double", "adultDay", "concession", "vehicleDay", "guideDay", "marginPct", "adminPct", "craterFee", "price", "childPrice"]) assert.equal(s.includes(word), false, word);
 });
 
-test("public add-on rates include admin fee (unless park fee) and margin", () => {
+test("public add-on rates include only the add-on admin fee, no margin", () => {
   const a = publicOptions(cfg).addons!;
-  const k = (1 + cfg.settings.adminPct / 100) * (1 + cfg.settings.marginPct / 100);
+  const k = 1 + cfg.settings.addonAdminPct / 100;
   const crater = cfg.addons!.find((x) => x.id === "crater")!, bf = cfg.addons!.find((x) => x.id === "bush-breakfast")!;
-  assert.equal(a.find((x) => x.id === "crater")!.rate, Math.round(crater.price * (1 + cfg.settings.marginPct / 100)));
+  assert.equal(a.find((x) => x.id === "crater")!.rate, Math.round(crater.price));
   assert.equal(a.find((x) => x.id === "bush-breakfast")!.rate, Math.round(bf.price * k));
   assert.equal(a.find((x) => x.id === "bush-breakfast")!.rateChild, Math.round(bf.childPrice * k));
+});
+
+test("add-ons get no margin and only the add-on admin fee", () => {
+  const base = quote(cfg, trip(), TODAY);
+  const withBf = quote(cfg, { ...trip(), addons: ["bush-breakfast"] }, TODAY);
+  const cost = withBf.totals.extras;
+  assert.equal(withBf.totals.margin, base.totals.margin);
+  assert.equal(withBf.totals.addonFee, Math.round(cost * cfg.settings.addonAdminPct) / 100);
+  assert.equal(Math.round((withBf.totals.total - base.totals.total) * 100), Math.round(cost * (1 + cfg.settings.addonAdminPct / 100) * 100));
+  assert.equal(withBf.priced.extras, withBf.totals.extrasTotal);
 });

@@ -50,9 +50,10 @@ test("planner quote returns a priced total for a valid trip", async () => {
 });
 
 test("the crater choice is passed through and adds to the price", async () => {
-  const base = (await (await call(req("/api/planner/quote", { method: "POST", json: trip() }))).json() as any).priced.park;
-  const withCrater = (await (await call(req("/api/planner/quote", { method: "POST", json: { ...trip(), crater: true } }))).json() as any).priced.park;
-  assert.equal(Math.round((withCrater - base) * 100) / 100, 295);
+  const base = (await (await call(req("/api/planner/quote", { method: "POST", json: trip() }))).json() as any).priced.total;
+  const withCrater = (await (await call(req("/api/planner/quote", { method: "POST", json: { ...trip(), crater: true } }))).json() as any).priced;
+  assert.equal(Math.round((withCrater.total - base) * 100) / 100, 295, "crater: park fee, no admin fee, no margin");
+  assert.equal(withCrater.extras, 295);
 });
 
 test("admin page and API are locked when signed out", async () => {
