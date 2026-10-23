@@ -1,8 +1,8 @@
 export const site = {
   name: "Golden Dust Safaris",
   url: "https://www.goldendustsafaris.com",
-  whatsapp: "255799185811",
-  phoneDisplay: "+255 799 185 811",
+  whatsapp: "255695751445",
+  phoneDisplay: "+255 695 751 445",
   instagram: "https://www.instagram.com/goldendustsafaris/",
   instagramHandle: "@goldendustsafaris",
   city: "Arusha",

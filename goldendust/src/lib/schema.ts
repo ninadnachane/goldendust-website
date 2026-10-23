@@ -9,7 +9,7 @@ export const orgSchema = {
   logo: img(site.logo, 400),
   image: img("7df076_f9426230a0e84400a48f65dcfbca9bc0~mv2.png", 1200),
   description:
-    "TALA-registered Tanzania safari operator based in Arusha, with its own fleet of 4x4 safari vehicles and local guides.",
+    "TALA-registered Tanzania safari operator based in Arusha, with two local guides who plan and lead every trip.",
   telephone: "+" + site.whatsapp,
   address: { "@type": "PostalAddress", addressLocality: "Arusha", addressCountry: "TZ" },
   areaServed: "Tanzania",
