@@ -143,6 +143,15 @@ export type Quote = {
   priced: { park: number; transport: number; accommodation: number; meals: number; extras: number; margin: number; total: number };
 };
 
+// Lodge photos from the Accommodations folder (public/images/lodges, see scripts/import-photos.py),
+// keyed by normalised lodge name. Photos uploaded in /admin take priority.
+import lodgePhotos from "./lodgePhotos.json";
+export const nameKey = (s: string) => s.toLowerCase().normalize("NFKD").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+export const lodgeImages = (l: { name: string; images?: string[] }): string[] =>
+  l.images?.length ? l.images : ((lodgePhotos as Record<string, string[]>)[nameKey(l.name)] ?? []);
+// Image id → URL: uploaded photos live in /media, folder photos are static files under /images.
+export const imageUrl = (id: string) => (id.includes("/") ? `/images/${id}` : `/media/${id}`);
+
 const r2 = (n: number) => Math.round(n * 100) / 100;
 export const money = (n: number) => "$" + r2(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
 
@@ -392,7 +401,7 @@ export function publicOptions(cfg: Config) {
     arrivalName: cfg.arrival.name,
     arrivalLodges: Object.fromEntries(CATEGORIES.map((c) => {
       const l = cfg.lodges.find((x) => x.id === cfg.arrival.lodges[c.id]);
-      return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
+      return [c.id, l ? { name: l.name, description: l.description || "", images: lodgeImages(l).slice(0, 6) } : null];
     })),
     arrivalPriced: CATEGORIES.some((c) => cfg.lodges.some((l) => l.active && l.id === cfg.arrival.lodges[c.id])),
     areas: cfg.areas.filter((a) => a.active && cfg.lodges.some((l) => l.active && l.areaId === a.id)).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
@@ -402,7 +411,7 @@ export function publicOptions(cfg: Config) {
       return { id: a.id, name: a.name, blurb: a.blurb, per: a.per, rate: Math.round(a.price * k), rateChild: Math.round(a.childPrice * k) };
     }),
     doc: cfg.doc ?? null,
-    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 12), minChildAge: l.minChildAge || 0, open: (l.periods || []).map((p) => ({ from: p.from, to: p.to })) })),
+    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: lodgeImages(l).slice(0, 12), minChildAge: l.minChildAge || 0, open: (l.periods || []).map((p) => ({ from: p.from, to: p.to })) })),
   };
 }
 

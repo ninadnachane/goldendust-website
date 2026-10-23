@@ -102,7 +102,7 @@ import { site } from "../lib/site";
 </Base>
 
 <script>
-  import { tripCategories, stopNights, lodgeProblem, type Category } from "../planner/engine";
+  import { tripCategories, stopNights, lodgeProblem, imageUrl, type Category } from "../planner/engine";
   type Opt = {
     settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
     categories: { id: string; name: string; blurb: string }[];
@@ -221,7 +221,7 @@ import { site } from "../lib/site";
         <div class="lodges-wrap"><button type="button" class="lodges__arrow lodges__arrow--l" data-lscroll="-1" aria-label="Scroll left" hidden>‹</button><div class="lodges" data-lrow>${lodges.map((l) => `<label class="lodge">
           <input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}">
           <span class="lodge__img"><button type="button" class="lodge__view" data-gal="${esc(l.id)}" data-gal-stop="${i}" aria-label="See photos and details of ${esc(l.name)}">${l.images.length
-            ? `<img src="/media/${esc(l.images[0])}" alt="" loading="lazy">`
+            ? `<img src="${esc(imageUrl(l.images[0]))}" alt="" loading="lazy">`
             : `<span class="lodge__none">Photos coming soon</span>`}<span class="lodge__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>${l.images.length > 1 ? `${l.images.length} photos` : "Details"}</span></button></span>
           <span class="lodge__txt"><span class="tag tag--${esc(l.category)}">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<span>${esc(l.description)}</span>` : ""}</span>
           <span class="lodge__tick" aria-hidden="true"></span>
@@ -266,7 +266,7 @@ import { site } from "../lib/site";
         <div class="gv__top"><div><span class="gv__tag">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
           <button type="button" class="gv__x" data-gv-close aria-label="Close">✕</button></div>
         <div class="gv__stage">
-          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="/media/${esc(im)}" alt="${esc(l.name)}, photo ${k + 1} of ${n}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("") : `<figure class="gv__empty"><span>Photos of this ${l.category === "budget" ? "camp" : "lodge"} are coming soon. Ask us on WhatsApp and we'll send you pictures.</span></figure>`}</div>
+          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="${esc(imageUrl(im))}" alt="${esc(l.name)}, photo ${k + 1} of ${n}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("") : `<figure class="gv__empty"><span>Photos of this ${l.category === "budget" ? "camp" : "lodge"} are coming soon. Ask us on WhatsApp and we'll send you pictures.</span></figure>`}</div>
           ${n > 1 ? `<button type="button" class="gv__nav gv__prev" data-gv="-1" aria-label="Previous photo">‹</button><button type="button" class="gv__nav gv__next" data-gv="1" aria-label="Next photo">›</button>` : ""}
         </div>
         <div class="gv__bottom">${n > 1 ? `<span class="gv__dots">${l.images.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</span><span class="gv__count" data-gv-count>1 / ${n}</span>` : "<span></span>"}

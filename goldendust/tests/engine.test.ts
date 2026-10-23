@@ -255,3 +255,10 @@ test("add-ons get no margin and only the add-on admin fee", () => {
   assert.equal(Math.round((withBf.totals.total - base.totals.total) * 100), Math.round(cost * (1 + cfg.settings.addonAdminPct / 100) * 100));
   assert.equal(withBf.priced.extras, withBf.totals.extrasTotal);
 });
+
+test("lodge photos from the Accommodations folder are matched by name; admin photos win", async () => {
+  const { lodgeImages } = await import("../src/planner/engine");
+  for (const l of defaultConfig.lodges.filter((x) => x.category !== "budget")) assert.ok(lodgeImages(l).length > 0, l.name);
+  assert.deepEqual(lodgeImages({ name: "Ngorongoro Crater Camp (A&K Sanctuary)", images: ["abc"] }), ["abc"]);
+  assert.match(lodgeImages({ name: "Ang'ata Tarangire Camp" })[0], /^lodges\/ang-ata-tarangire-camp\/01\.webp$/);
+});
