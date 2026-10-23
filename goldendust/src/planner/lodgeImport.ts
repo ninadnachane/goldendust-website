@@ -91,7 +91,7 @@ export function importLodges(cfg: Config, rows: unknown[][]): { lodges: Lodge[];
     out.push({
       id, name: d.name, areaId: d.areaId, category: d.category, active: old?.active ?? true,
       periods: d.periods, ...(d.minChildAge ? { minChildAge: d.minChildAge } : {}),
-      insidePark: old?.insidePark ?? (side === "west" || side === "nca"),
+      insidePark: old?.insidePark ?? true, // agreed: assume inside the park unless ticked off in admin
       ...(old?.description ? { description: old.description } : {}), ...(old?.images?.length ? { images: old.images } : {}),
     });
     report.periods += d.periods.length;

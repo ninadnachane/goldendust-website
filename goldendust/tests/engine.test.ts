@@ -29,7 +29,7 @@ test("total = (park fees + others × 1.10) × 1.07, matches a hand calculation",
     (2 * 82.6 + 23.6) * 3 + (2 * 70.8 + 11.8) * 3 +    // Serengeti entry + concession, 3 nights
     (2 * 71.8 + 23.6) +                                 // Ngorongoro area entry, 1 night (rim stay)
     (2 * 71.8 + 23.6);                                  // NCA transit: Tarangire → Serengeti in one day
-  const acc = (192 + 54) + (416 + 117) * 5;            // high season: Arusha hotel + 5 lodge nights
+  const acc = (2 * 96 + 54) + (416 + 117) * 5;         // fixed Arusha rate + 5 lodge nights (high season)
   const transport = 180 * 6 + 40 * 6 + 80;             // vehicle + guide + airport transfer
   const meals = 2 * 15 + 10;
   assert.equal(q.totals.park, round(park));
@@ -164,7 +164,7 @@ test("lodges with a minimum child age aren't offered to younger children", () =>
   assert.equal(quote(c, trip({ childAges: [] }), TODAY).ok, true);
 });
 
-test("real lodge data: valid, Arusha night not priced yet, Karatu has no park fees", () => {
+test("real lodge data: valid, Arusha night at the fixed rate, Karatu has no park fees", () => {
   assert.deepEqual(checkConfig(defaultConfig), []);
   assert.ok(defaultConfig.lodges.length >= 10);
   assert.ok(defaultConfig.lodges.every((l) => l.areaId !== "arusha" && l.periods.length));
@@ -174,10 +174,10 @@ test("real lodge data: valid, Arusha night not priced yet, Karatu has no park fe
     { areaId: "karatu", nights: 1, lodgeId: "karatu-simba-lodge" },
   ] }), TODAY);
   assert.equal(q.ok, true, q.errors.join("; "));
-  assert.equal(line(q, /Night 1/).length, 0);
+  assert.equal(line(q, /Night 1/).length, 1, "the Arusha night is always a line, at the fixed rate");
   assert.equal(line(q, /Karatu/).filter((l) => l.group === "park").length, 0);
   const opts = publicOptions(defaultConfig);
-  assert.equal(opts.arrivalPriced, false);
+  assert.equal(opts.arrivalPriced, true);
   assert.ok(!opts.areas.some((a) => a.id === "north-serengeti"), "areas without lodges are hidden");
 });
 
@@ -213,7 +213,14 @@ test("Budget camp pays campsite fee and other lodges pay concession, in the same
   assert.equal(line(q, /Serengeti.*concession/).length, 1);
 });
 
-test("Arusha arrival hotel follows the tag with the most safari nights", () => {
+test("Arusha night is a fixed rate per person, whichever hotel", () => {
+  const n1 = (t: QuoteRequest) => line(quote(cfg, t, TODAY), /Night 1/)[0];
+  assert.equal(n1(trip()).cost, 2 * 96 + 54);
+  const lux = trip(); lux.stops.forEach((s) => (s.lodgeId = s.lodgeId.replace("comfort", "luxury")));
+  assert.equal(n1(lux).cost, 2 * 96 + 54);
+});
+
+test("Arusha arrival hotel (shown) follows the tag with the most safari nights", () => {
   const t = trip(); t.stops[1].lodgeId = "central-serengeti-premium"; // 3 of 5 nights premium
   assert.match(line(quote(cfg, t, TODAY), /Night 1/)[0].label, /premium hotel/);
   const tie = trip({ totalNights: 3, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-budget" }, { areaId: "manyara", nights: 1, lodgeId: "manyara-luxury" }] });

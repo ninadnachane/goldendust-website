@@ -43,7 +43,7 @@
     "child": 136.5
    }
   ],
-  "insidePark": false
+  "insidePark": true
  },
  {
   "id": "tarangire-simba-lodge",
@@ -72,7 +72,7 @@
    }
   ],
   "minChildAge": 6,
-  "insidePark": false
+  "insidePark": true
  },
  {
   "id": "olkambe-simba-lodge",
@@ -101,7 +101,7 @@
    }
   ],
   "minChildAge": 6,
-  "insidePark": false
+  "insidePark": true
  },
  {
   "id": "tarangire-public-campsite",
@@ -120,7 +120,7 @@
     "child": 15
    }
   ],
-  "insidePark": false
+  "insidePark": true
  },
  {
   "id": "karatu-simba-lodge",
@@ -149,7 +149,7 @@
    }
   ],
   "minChildAge": 6,
-  "insidePark": false
+  "insidePark": true
  },
  {
   "id": "embalakai-ngorongoro",

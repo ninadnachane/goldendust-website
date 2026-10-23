@@ -26,5 +26,6 @@ for (const c of cats)
 export const sampleConfig: Config = {
   ...JSON.parse(JSON.stringify(defaultConfig)),
   lodges,
+  settings: { ...defaultConfig.settings, arushaNightAdult: 96, arushaNightChild: 54 }, // = the old sample comfort hotel, high season
   arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", premium: "arusha-premium", luxury: "arusha-luxury" } },
 };

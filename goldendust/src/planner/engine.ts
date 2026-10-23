@@ -53,6 +53,8 @@ export type Settings = {
   maxGuests: number;
   craterFee: number; // Ngorongoro Crater descent, per vehicle, incl. VAT
   airportTransfer: number; // airport pick-up and drop-off, per booking
+  arushaNightAdult: number; // Arusha arrival night: fixed rate per adult (whatever the hotel)
+  arushaNightChild: number; // … and per child (5–15)
   addonAdminPct: number; // admin fee % on add-ons (park-fee add-ons excluded); add-ons get no margin
   ncaZoneId: string; // which park fee zone is the Ngorongoro Conservation Area (for transit days)
 };
@@ -194,7 +196,7 @@ export function upgradeConfig(cfg: Config): Config {
   c.addons = c.addons ?? [
     { id: "crater", name: "Ngorongoro Crater game drive", blurb: "A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.", per: "vehicle", price: c.settings.craterFee || legacyCrater || 295, childPrice: 0, parkFee: true, active: true },
   ];
-  c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, addonAdminPct: c.settings.addonAdminPct ?? 2, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
+  c.settings = { ...c.settings, craterFee: c.settings.craterFee ?? legacyCrater, airportTransfer: c.settings.airportTransfer ?? 80, addonAdminPct: c.settings.addonAdminPct ?? 2, arushaNightAdult: c.settings.arushaNightAdult ?? 0, arushaNightChild: c.settings.arushaNightChild ?? 0, ncaZoneId: c.settings.ncaZoneId ?? (c.feeZones.find((z) => /nca|ngoro/i.test(z.id))?.id || "") };
   return c;
 }
 
@@ -312,9 +314,10 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     lines.push({ group: "accommodation", label: `${label}: ${lodge.name} (${date}, ${p.season})`, calc: parts.join(" + "), cost: r2(cost) });
     if (!(plan.cost > 0)) errors.push(`${lodge.name} has no ${p.season} rate.`);
   };
-  // Arusha arrival night: only priced when an Arusha hotel is set up (for now it isn't).
+  // Arusha arrival night: a fixed rate per person (Costs & rules), whichever hotel is used.
   const arrivalLodge = cfg.lodges.find((l) => l.id === cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)] && l.active);
-  if (arrivalLodge) stayAt(arrivalLodge.id, 0, `Night 1 ${cfg.arrival.name}`);
+  const aA = s.arushaNightAdult ?? 0, aC = s.arushaNightChild ?? 0;
+  lines.push({ group: "accommodation", label: `Night 1 ${cfg.arrival.name}: ${arrivalLodge?.name ?? "hotel"} (fixed rate)`, calc: `${adults} × ${money(aA)}${children ? ` + ${children} × ${money(aC)}` : ""}`, cost: r2(adults * aA + children * aC) });
 
   // ---- park fees (all incl. VAT, peak-season rates)
   const pp = (adult: number, child: number) => adults * adult + children * child;
@@ -403,7 +406,7 @@ export function publicOptions(cfg: Config) {
       const l = cfg.lodges.find((x) => x.id === cfg.arrival.lodges[c.id]);
       return [c.id, l ? { name: l.name, description: l.description || "", images: lodgeImages(l).slice(0, 6) } : null];
     })),
-    arrivalPriced: CATEGORIES.some((c) => cfg.lodges.some((l) => l.active && l.id === cfg.arrival.lodges[c.id])),
+    arrivalPriced: true, // the arrival night is always in the price (fixed Arusha rate)
     areas: cfg.areas.filter((a) => a.active && cfg.lodges.some((l) => l.active && l.areaId === a.id)).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
     addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => {
       // guest-facing rate: incl. admin fee (unless a park fee) and margin, rounded to the dollar
