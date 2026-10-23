@@ -1,35 +1,24 @@
-// Starting data for the planner. EVERY NUMBER HERE IS A SAMPLE: replace them in /admin.
+// Starting data for the planner.
+// Lodges come from the Excel "List of Lodges and Camps" (verified rates only, Arusha left out for now):
+// regenerate with `node --import tsx scripts/import-lodges.mjs <file.xlsx>`, or upload it in /admin → Lodges & camps.
 // Park fees are taken from our 2025/26 blog figures and should be checked against TANAPA / NCAA.
-import type { Config, Category, Lodge, RoomRates } from "./engine";
+import type { Area, Config, Lodge } from "./engine";
+import lodgeData from "./lodges.data.json";
 
-const base: Record<Category, RoomRates> = {
-  budget: { single: 60, double: 80, triple: 110, child: 25 },
-  comfort: { single: 250, double: 320, triple: 430, child: 90 },
-  premium: { single: 450, double: 580, triple: 800, child: 160 },
-  luxury: { single: 700, double: 900, triple: 1250, child: 250 },
-};
-const scale = (r: RoomRates, k: number): RoomRates => ({
-  single: Math.round(r.single * k), double: Math.round(r.double * k), triple: Math.round(r.triple * k), child: Math.round(r.child * k),
-});
-const rates = (c: Category) => ({ high: scale(base[c], 1.3), green: scale(base[c], 0.75) });
-
-const areas = [
+// Route order: the planner puts the chosen areas in this order.
+export const areas: Area[] = [
   { id: "tarangire", side: "east", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, active: true },
   { id: "manyara", side: "east", blurb: "Game drives around Lake Manyara: groundwater forest, flamingos and tree-climbing lions if you're lucky.", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, active: true },
   { id: "ndutu", side: "west", blurb: "Game drives on the Ndutu plains, where the herds gather to calve from January to March.", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, active: true },
   { id: "south-serengeti", side: "west", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
   { id: "central-serengeti", side: "west", blurb: "Game drives in the central Serengeti around Seronera, home to many of the park's big cats.", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
+  { id: "west-serengeti", side: "west", blurb: "Game drives in the western Serengeti.", name: "Western Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
   { id: "north-serengeti", side: "west", blurb: "Game drives in the northern Serengeti, where the herds cross the Mara River from July.", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, active: true },
   { id: "ngorongoro", side: "nca", blurb: "A night on the Ngorongoro Crater rim, high above the crater floor.", name: "Ngorongoro (crater rim)", feeZoneId: "ncaa", minNights: 1, active: true },
+  { id: "karatu", side: "east", blurb: "A night in Karatu, in the highlands just outside the Ngorongoro Conservation Area.", name: "Karatu", feeZoneId: "", minNights: 1, active: true },
 ];
 
-const catName: Record<Category, string> = { budget: "camp", comfort: "comfort lodge", premium: "premium lodge", luxury: "luxury lodge" };
-const lodges: Lodge[] = [];
-for (const a of areas) for (const c of ["budget", "comfort", "premium", "luxury"] as Category[])
-  lodges.push({ id: `${a.id}-${c}`, name: `Sample ${catName[c]} (${a.name})`, areaId: a.id, category: c, active: true, insidePark: c !== "budget", rates: rates(c) });
-for (const c of ["budget", "comfort", "premium", "luxury"] as Category[])
-  lodges.push({ id: `arusha-${c}`, name: `Sample ${c} hotel (Arusha)`, areaId: "arusha", category: c, active: true,
-    rates: { high: scale(base[c], 0.6), green: scale(base[c], 0.45) } });
+const lodges = lodgeData as Lodge[];
 
 export const defaultConfig: Config = {
   settings: {
@@ -40,12 +29,6 @@ export const defaultConfig: Config = {
     minTotalNights: 2, maxTotalNights: 21, maxGuests: 21,
     craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80, addonAdminPct: 2,
   },
-  seasons: [
-    // Two lodge seasons: Green season (April–May), High season for every other date (the default).
-    { id: "green", name: "Green season", ranges: [{ from: "04-01", to: "05-31" }] },
-    { id: "high", name: "High season", ranges: [] },
-  ],
-  defaultSeasonId: "high",
   // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff.
   // NCA (Ngorongoro) transit/entry $71.80 per adult and crater descent $295 per vehicle confirmed by Golden Dust (18 Oct 2026).
   feeZones: [
@@ -56,7 +39,8 @@ export const defaultConfig: Config = {
   ],
   areas,
   lodges,
-  arrival: { name: "Arusha", lodges: { budget: "arusha-budget", comfort: "arusha-comfort", premium: "arusha-premium", luxury: "arusha-luxury" } },
+  // Arusha hotels aren't verified yet, so the arrival night isn't priced (pick hotels in /admin → Costs & rules once they are).
+  arrival: { name: "Arusha", lodges: { budget: "", comfort: "", premium: "", luxury: "" } },
   // Add-ons guests can tick. Prices incl. VAT. Balloon and breakfast prices are SAMPLES: set yours in /admin → Costs & rules.
   addons: [
     { id: "crater", name: "Ngorongoro Crater game drive", blurb: "A half day on the crater floor, usually on the way back to Arusha. One of the best places in Tanzania to see rhino.", per: "vehicle", price: 295, childPrice: 0, parkFee: true, active: true },

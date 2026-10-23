@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^5.18.2",
+    "read-excel-file": "9.3.10",
     "simple-icons": "^13.21.0"
   },
   "devDependencies": {

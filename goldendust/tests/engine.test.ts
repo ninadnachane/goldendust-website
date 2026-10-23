@@ -1,8 +1,9 @@
 // Pricing engine: the numbers guests see must always follow the agreed rules.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { quote, roomPlan, seasonFor, checkConfig, publicOptions, upgradeConfig, type QuoteRequest, type Config } from "../src/planner/engine";
-import { defaultConfig as cfg } from "../src/planner/defaults";
+import { quote, roomPlan, periodFor, checkConfig, publicOptions, upgradeConfig, type QuoteRequest, type Config } from "../src/planner/engine";
+import { sampleConfig as cfg } from "./fixture";
+import { defaultConfig } from "../src/planner/defaults";
 
 const TODAY = "2026-10-18";
 const trip = (over: Partial<QuoteRequest> = {}): QuoteRequest => ({
@@ -128,19 +129,56 @@ test("cheapest mix of rooms, a single traveller pays a room", () => {
   assert.equal(roomPlan(4, rt).cost, 240);
 });
 
-test("two lodge seasons: Green (April–May) and High for every other date", () => {
-  assert.deepEqual(cfg.seasons.map((x) => x.id).sort(), ["green", "high"]);
-  assert.equal(seasonFor(cfg, "2027-04-01").id, "green");
-  assert.equal(seasonFor(cfg, "2027-05-31").id, "green");
-  for (const d of ["2027-03-31", "2027-06-01", "2026-11-08", "2026-12-31", "2027-01-15"]) assert.equal(seasonFor(cfg, d).id, "high", d);
+test("lodge rates are per person per night: single alone, double/triple per person sharing", () => {
+  const c: Config = JSON.parse(JSON.stringify(cfg));
+  const l = c.lodges.find((x) => x.id === "tarangire-comfort")!;
+  l.periods = [{ season: "All year", from: "01-01", to: "12-31", single: 200, double: 150, triple: 120, child: 60 }];
+  const acc = (adults: number, childAges: number[] = []) => line(quote(c, trip({ adults, childAges }), TODAY), /Night 2 Tarangire/)[0].cost;
+  assert.equal(acc(1), 200);
+  assert.equal(acc(2), 300);
+  assert.equal(acc(3), 360);
+  assert.equal(acc(2, [8]), 360);
 });
 
-test("season ranges can cross the new year", () => {
+test("rate periods ignore the year and can cross the new year", () => {
+  const l = { periods: [{ season: "High", from: "12-10", to: "03-31", single: 1, double: 1, triple: 1, child: 1 }, { season: "Low", from: "04-01", to: "12-09", single: 1, double: 1, triple: 1, child: 1 }] };
+  assert.equal(periodFor(l, "2026-12-25")!.season, "High");
+  assert.equal(periodFor(l, "2031-01-15")!.season, "High");
+  assert.equal(periodFor(l, "2027-04-01")!.season, "Low");
+  assert.equal(periodFor({ periods: [] }, "2027-04-01"), undefined);
+});
+
+test("a lodge without a rate for a night isn't bookable for those dates", () => {
   const c: Config = JSON.parse(JSON.stringify(cfg));
-  c.seasons[0].ranges = [{ from: "12-20", to: "01-05" }];
-  assert.equal(seasonFor(c, "2026-12-25").id, "green");
-  assert.equal(seasonFor(c, "2027-01-03").id, "green");
-  assert.equal(seasonFor(c, "2027-01-10").id, "high");
+  c.lodges.find((x) => x.id === "tarangire-comfort")!.periods = [{ season: "High", from: "06-01", to: "10-31", single: 1, double: 1, triple: 1, child: 1 }];
+  const q = quote(c, trip(), TODAY); // Tarangire night is 9 Nov
+  assert.equal(q.ok, false);
+  assert.match(q.errors.join(" "), /Sample comfort lodge \(Tarangire\) has no rate for the night of 2026-11-09/);
+});
+
+test("lodges with a minimum child age aren't offered to younger children", () => {
+  const c: Config = JSON.parse(JSON.stringify(cfg));
+  c.lodges.find((x) => x.id === "tarangire-comfort")!.minChildAge = 6;
+  assert.match(quote(c, trip({ childAges: [4] }), TODAY).errors.join(" "), /only takes children aged 6 and over/);
+  assert.equal(quote(c, trip({ childAges: [6] }), TODAY).ok, true);
+  assert.equal(quote(c, trip({ childAges: [] }), TODAY).ok, true);
+});
+
+test("real lodge data: valid, Arusha night not priced yet, Karatu has no park fees", () => {
+  assert.deepEqual(checkConfig(defaultConfig), []);
+  assert.ok(defaultConfig.lodges.length >= 10);
+  assert.ok(defaultConfig.lodges.every((l) => l.areaId !== "arusha" && l.periods.length));
+  const q = quote(defaultConfig, trip({ childAges: [], stops: [
+    { areaId: "tarangire", nights: 1, lodgeId: "angata-tarangire-camp" },
+    { areaId: "central-serengeti", nights: 3, lodgeId: "out-in-africa-serengeti-camp" },
+    { areaId: "karatu", nights: 1, lodgeId: "karatu-simba-lodge" },
+  ] }), TODAY);
+  assert.equal(q.ok, true, q.errors.join("; "));
+  assert.equal(line(q, /Night 1/).length, 0);
+  assert.equal(line(q, /Karatu/).filter((l) => l.group === "park").length, 0);
+  const opts = publicOptions(defaultConfig);
+  assert.equal(opts.arrivalPriced, false);
+  assert.ok(!opts.areas.some((a) => a.id === "north-serengeti"), "areas without lodges are hidden");
 });
 
 test("park fees are the same in every season", () => {

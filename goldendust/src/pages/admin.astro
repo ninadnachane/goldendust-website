@@ -27,7 +27,6 @@
     <button role="tab" data-tab="leads" aria-selected="true">Leads</button>
     <button role="tab" data-tab="test" aria-selected="false">Test calculator</button>
     <button role="tab" data-tab="costs">Costs &amp; rules</button>
-    <button role="tab" data-tab="seasons">Seasons</button>
     <button role="tab" data-tab="parks">Park fees</button>
     <button role="tab" data-tab="areas">Areas</button>
     <button role="tab" data-tab="lodges">Lodges &amp; camps</button>
@@ -80,12 +79,6 @@
       <div class="doctext" data-doctext></div>
     </section>
 
-    <section class="pane" data-pane="seasons" hidden>
-      <h2>Season calendar</h2>
-      <p class="hint">All lodges follow this calendar. Ranges are MM-DD to MM-DD and can cross the new year (e.g. 12-20 to 01-05). Any date not in a range uses the default season.</p>
-      <div data-seasons></div>
-    </section>
-
     <section class="pane" data-pane="parks" hidden>
       <h2>Park fees</h2>
       <p class="hint">USD, <strong>including VAT</strong>, peak-season rates. Entry is charged for each day (= night) in a park. Overnight: Budget trips pay the public campsite fee; Comfort/Luxury pay the concession fee only for lodges marked "Inside park" (Lodges &amp; camps). Driving between the east (Arusha, Tarangire, Manyara) and the Serengeti without a night in the Ngorongoro area adds one NCA entry day per crossing. Children younger than the minimum age are free.</p>
@@ -100,7 +93,12 @@
 
     <section class="pane" data-pane="lodges" hidden>
       <h2>Lodges &amp; camps</h2>
-      <p class="hint">Rates are per room per night (single, double, triple) and per child per night (child ages are set in Costs &amp; rules), for each season. The planner picks the cheapest mix of rooms for the adults.</p>
+      <p class="hint">Rates come from your Excel ("List of Lodges and Camps", Rates tab): full board, USD per person per night, double/triple per person sharing. Only rows with "Rates Verified" = Yes are used, Arusha is left out for now, and the year in the dates is ignored (each period repeats every year). A lodge isn't offered for dates without a rate, or when a child is younger than its minimum age. Importing keeps the photos, text and "Inside park" ticks you set here.</p>
+      <div class="import">
+        <label class="btn">Import Excel…<input type="file" accept=".xlsx" data-import hidden /></label>
+        <span class="hint" data-import-msg></span>
+      </div>
+      <div class="import-out" data-import-out hidden></div>
       <div class="filters">
         <label>Area<select data-lf-area></select></label>
         <label>Category<select data-lf-cat></select></label>
@@ -129,7 +127,8 @@
   </dialog>
 
   <script>
-    import { quote, checkConfig, CATEGORIES, money, addDays, type Config, type Line } from "../planner/engine";
+    import { quote, checkConfig, CATEGORIES, money, addDays, type Config, type Line, type Lodge } from "../planner/engine";
+    import { importLodges } from "../planner/lodgeImport";
 
     const $ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
     let cfg: Config;
@@ -281,30 +280,6 @@
       host.innerHTML = list.length ? `<p class="lbl">Add-ons</p>${list.map((a) => `<label class="check"><input type="checkbox" data-ta value="${esc(a.id)}" ${was.has(a.id) ? "checked" : ""} /> ${esc(a.name)} <small>(${money(a.price)} per ${a.per})</small></label>`).join("")}` : "";
     }
 
-    function renderSeasons() {
-      const host = $("[data-seasons]");
-      const rows = cfg.seasons.map((s) => ({ ...s, rangesText: s.ranges.map((r) => `${r.from} to ${r.to}`).join(", "), isDefault: s.id === cfg.defaultSeasonId }));
-      table(host, rows, [
-        { key: "name", label: "Season", type: "text" },
-        { key: "rangesText", label: "Date ranges (MM-DD to MM-DD, comma separated)", type: "text" },
-        { key: "isDefault", label: "Default", type: "bool" },
-        { key: "id", label: "ID", type: "readonly" },
-      ], {
-        rerender: renderSeasons,
-        add: () => { const id = uid("new season", cfg.seasons); cfg.seasons.push({ id, name: "New season", ranges: [] }); },
-        remove: (r) => { if (cfg.seasons.length < 2) return alert("Keep at least one season."); cfg.seasons = cfg.seasons.filter((s) => s.id !== r.id); },
-      });
-      // write back edits from the derived rows
-      host.querySelectorAll<HTMLInputElement>("[data-k]").forEach((el) => el.addEventListener("change", () => {
-        const r = rows[Number(el.dataset.i)];
-        const s = cfg.seasons.find((x) => x.id === r.id)!;
-        s.name = r.name;
-        s.ranges = String(r.rangesText).split(",").map((t) => t.trim()).filter(Boolean).map((t) => { const [from, to] = t.split(/\s*(?:to|-{2}|–|\.\.)\s*/); return { from: (from || "").trim(), to: (to || from || "").trim() }; });
-        if (el.dataset.k === "isDefault" && r.isDefault) cfg.defaultSeasonId = r.id;
-        markDirty(); renderSeasons(); renderLodges();
-      }));
-    }
-
     function renderZones() {
       table($("[data-zones]"), cfg.feeZones, [
         { key: "name", label: "Park / fee zone", type: "text" },
@@ -326,7 +301,7 @@
     function renderAreas() {
       table($("[data-areas]"), cfg.areas, [
         { key: "name", label: "Area", type: "text" },
-        { key: "feeZoneId", label: "Park fees from", type: "select", options: () => cfg.feeZones.map((z) => ({ v: z.id, t: z.name })) },
+        { key: "feeZoneId", label: "Park fees from", type: "select", options: () => [...cfg.feeZones.map((z) => ({ v: z.id, t: z.name })), { v: "", t: "None (outside the parks)" }] },
         { key: "side", label: "Side of the map", type: "select", options: () => [{ v: "east", t: "East (Arusha side)" }, { v: "nca", t: "Ngorongoro area (NCA)" }, { v: "west", t: "West (Serengeti)" }] },
         { key: "minNights", label: "Min nights", type: "number", step: "1" },
         { key: "active", label: "Shown", type: "bool" },
@@ -353,21 +328,63 @@
         { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
         { key: "active", label: "Shown", type: "bool" },
         { key: "insidePark", label: "Inside park", type: "bool" },
+        { key: "minChildAge", label: "Min. child age", type: "number", step: "1" },
+        { key: "periods", label: "Rates (per person per night)", type: "button", text: (r) => ratesSummary(r), onClick: openRates },
         { key: "photos", label: "Photos & text", type: "button", text: (r) => `${(r.images || []).length} photo${(r.images || []).length === 1 ? "" : "s"}${r.description ? " · text" : ""}`, onClick: openPhotos },
       ];
-      for (const s of cfg.seasons) for (const [k, t] of [["single", "Single"], ["double", "Double"], ["triple", "Triple"], ["child", "Child"]] as const)
-        cols.push({ key: `rates.${s.id}.${k}`, label: t, type: "number", group: s.name });
       table($("[data-lodges]"), cfg.lodges, cols, {
         rerender: () => { renderLodges(); renderSettings(); },
         filter: (r) => (!fa.value || r.areaId === fa.value) && (!fc.value || r.category === fc.value),
         add: () => {
           const areaId = fa.value || cfg.areas[0]?.id || "arusha";
           const category = (fc.value || "comfort") as any;
-          cfg.lodges.push({ id: uid(`${areaId}-${category}-lodge`, cfg.lodges), name: "New lodge", areaId, category, active: true,
-            rates: Object.fromEntries(cfg.seasons.map((s) => [s.id, { single: 0, double: 0, triple: 0, child: 0 }])) });
+          cfg.lodges.push({ id: uid(`${areaId}-${category}-lodge`, cfg.lodges), name: "New lodge", areaId, category, active: true, periods: [] });
         },
         remove: (r) => { if (Object.values(cfg.arrival.lodges).includes(r.id)) return alert("This hotel is used for the Arusha arrival night. Pick another one first (Costs & rules)."); cfg.lodges = cfg.lodges.filter((l) => l !== r); },
       });
+    }
+
+    const ratesSummary = (l: Lodge) => {
+      const ps = l.periods || [];
+      if (!ps.length) return "No rates";
+      const low = Math.min(...ps.map((p) => p.double));
+      return `${ps.length} period${ps.length > 1 ? "s" : ""} · from ${money(Math.round(low))} pp`;
+    };
+    function openRates(l: Lodge) {
+      const d = document.createElement("dialog");
+      d.className = "dlg";
+      const ps = (l.periods || []).slice().sort((a, b) => a.from.localeCompare(b.from));
+      d.innerHTML = `<div class="dlg__in"><h3>${esc(l.name)}</h3><p class="hint">From the Excel import. USD per person per night, full board. Dates are MM-DD and repeat every year.</p>
+        <div class="tbl"><table><thead><tr><th>Season</th><th>From</th><th>To</th><th class="n">Single</th><th class="n">Double pp</th><th class="n">Triple pp</th><th class="n">Child</th></tr></thead><tbody>${
+          ps.map((p) => `<tr><td>${esc(p.season)}</td><td>${esc(p.from)}</td><td>${esc(p.to)}</td><td class="n">${money(p.single)}</td><td class="n">${money(p.double)}</td><td class="n">${p.triple ? money(p.triple) : "–"}</td><td class="n">${money(p.child)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">No rates. Add this lodge to the Excel and import it.</td></tr>'
+        }</tbody></table></div>${l.minChildAge ? `<p class="hint">Children from ${l.minChildAge} years only.</p>` : ""}<p><button type="button" class="btn" data-x>Close</button></p></div>`;
+      d.querySelector("[data-x]")!.addEventListener("click", () => d.close());
+      d.addEventListener("close", () => d.remove());
+      document.body.append(d); d.showModal();
+    }
+
+    async function importExcel(file: File) {
+      const msg = $("[data-import-msg]"), out = $("[data-import-out]");
+      msg.textContent = "Reading…"; out.hidden = true;
+      try {
+        const { readSheet } = await import("read-excel-file/browser");
+        const rows = await readSheet(file, "Rates");
+        const { lodges, report } = importLodges(cfg, rows as unknown[][]);
+        cfg.lodges = lodges; markDirty(); renderAll();
+        const li = (xs: string[]) => xs.map((x) => `<li>${esc(x)}</li>`).join("");
+        msg.textContent = "";
+        out.innerHTML = `<p><strong>Imported ${report.lodges} lodges with ${report.periods} rate periods.</strong> Check them below, then press "Save changes" to put them live.</p>
+          <p class="hint">Skipped ${report.skippedUnverified} unverified row${report.skippedUnverified === 1 ? "" : "s"}${report.skippedArusha ? ` and ${report.skippedArusha} Arusha row${report.skippedArusha === 1 ? "" : "s"}` : ""}.</p>
+          ${report.added.length ? `<p>New: ${report.added.map(esc).join(", ")}</p>` : ""}
+          ${report.unknownAreas.length ? `<div class="err">Areas not in the planner (rows skipped): ${report.unknownAreas.map(esc).join(", ")}. Add them in Areas first, then import again.</div>` : ""}
+          ${report.deactivated.length ? `<p>Switched off (no longer verified in the Excel, photos kept): ${report.deactivated.map(esc).join(", ")}</p>` : ""}
+          ${report.removed.length ? `<p>Removed (not in the Excel): ${report.removed.map(esc).join(", ")}</p>` : ""}
+          ${report.warnings.length ? `<ul class="warn">${li(report.warnings)}</ul>` : ""}`;
+        out.hidden = false;
+      } catch (e) {
+        msg.textContent = "";
+        out.innerHTML = `<div class="err">Couldn't read that file: ${esc((e as Error).message)}</div>`; out.hidden = false;
+      }
     }
 
     async function renderHistory() {
@@ -582,7 +599,7 @@
     });
 
     function renderAll() {
-      renderStatus(); renderIssues(); renderSettings(); renderAddons(); renderTestAddons(); renderSeasons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
+      renderStatus(); renderIssues(); renderSettings(); renderAddons(); renderTestAddons(); renderZones(); renderAreas(); renderLodges(); renderStops(); runTest();
     }
 
     // tabs
@@ -593,6 +610,7 @@
       if (b.dataset.tab === "leads") loadLeads();
     }));
     $("[data-lf-area]").addEventListener("change", renderLodges);
+    $<HTMLInputElement>("[data-import]").addEventListener("change", (e) => { const f = (e.target as HTMLInputElement).files?.[0]; if (f) importExcel(f); (e.target as HTMLInputElement).value = ""; });
     $("[data-lf-cat]").addEventListener("change", renderLodges);
 
     $("[data-save]").addEventListener("click", async () => {
@@ -704,6 +722,11 @@
     table.leads tr.st-booked td { background: #f3f7ec; }
     table.leads tr.st-lost td { color: var(--ink-2); }
     .linkbtn { font: inherit; background: none; border: 0; color: var(--rust); cursor: pointer; text-decoration: underline; padding: 0 0.2rem; }
+    .import { display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; }
+    .import .btn { cursor: pointer; }
+    .import-out { border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 0.8rem 1rem; margin: 0 0 1.2rem; }
+    .import-out p { margin: 0.3rem 0; }
+    .import-out .warn { margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--ink-2); font-size: 0.9rem; }
     .dlg { border: 0; border-radius: 14px; padding: 0; width: min(56rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45); }
     .dlg::backdrop { background: rgba(46, 36, 27, 0.5); }
     .dlg__in { padding: 1rem 1.3rem 1.3rem; }

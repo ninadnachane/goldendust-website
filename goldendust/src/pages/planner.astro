@@ -53,7 +53,7 @@ import { site } from "../lib/site";
           <section class="step" data-step="3" data-where>
             <button type="button" class="step__head" data-open="3"><span class="step__n">3</span><span class="step__t">Where to, and where to stay?</span><span class="step__sum" data-sum="3"></span><span class="step__edit">Change</span></button>
             <div class="step__body">
-              <p class="note">Night 1 is in <strong data-arrival-name>Arusha</strong>, included. Choose areas for your <strong data-safari-nights></strong> (we'll put them in the best order), then pick a camp or lodge in each. Every option is tagged <span class="tagkey">Budget · Comfort · Premium · Luxury</span>, and you can mix them.</p>
+              <p class="note">Night 1 is in <strong data-arrival-name>Arusha</strong><span data-arrival-inc>, included</span>. Choose areas for your <strong data-safari-nights></strong> (we'll put them in the best order), then pick a camp or lodge in each. Every option is tagged <span class="tagkey">Budget · Comfort · Premium · Luxury</span>, and you can mix them.</p>
               <div class="chips" data-areas></div>
               <div class="stops" data-stops></div>
               <div class="addons" data-addons hidden><p class="addons__h">Add-ons <small>(optional)</small></p><div class="addons__list" data-addon-list></div></div>
@@ -73,7 +73,7 @@ import { site } from "../lib/site";
             </div>
             <button type="button" class="btn sum__wa" data-send aria-disabled="true">Send my itinerary on WhatsApp</button>
             <button type="button" class="sum__pdf" data-pdf aria-disabled="true">Download as PDF</button>
-            <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation and your first night in Arusha. International flights, visas, tips and drinks are extra.</p>
+            <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation<span data-arrival-inc>, and your first night in Arusha</span>. International flights, visas, tips and drinks are extra.</p>
           </div>
         </aside>
       </div>
@@ -102,13 +102,14 @@ import { site } from "../lib/site";
 </Base>
 
 <script>
-  import { tripCategories, type Category } from "../planner/engine";
+  import { tripCategories, stopNights, lodgeProblem, type Category } from "../planner/engine";
   type Opt = {
     settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
     categories: { id: string; name: string; blurb: string }[];
     arrivalName: string;
+    arrivalPriced?: boolean;
     areas: { id: string; name: string; minNights: number }[];
-    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[] }[];
+    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[]; minChildAge?: number; open?: { from: string; to: string }[] }[];
     addons?: { id: string; name: string; blurb: string; per: string; rate: number; rateChild: number }[];
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
@@ -172,14 +173,23 @@ import { site } from "../lib/site";
     root.querySelectorAll<HTMLSelectElement>("[data-age]").forEach((el) => el.addEventListener("change", () => { st.ages[Number(el.dataset.age)] = Number(el.value); update(); }));
   }
 
+  // Lodges we can offer for each stop: a rate for every night (year ignored) and no child under the lodge's minimum age.
+  const offer = () => {
+    const nights = st.date ? stopNights(st.date, st.stops) : st.stops.map(() => []);
+    return st.stops.map((s, i) => O.lodges.filter((l) => l.areaId === s.areaId && !lodgeProblem(l, nights[i], st.ages)));
+  };
+  const kidsOk = (areaId: string) => O.lodges.some((l) => l.areaId === areaId && !lodgeProblem(l, [], st.ages));
+  let offerSig = "";
+  const sigOf = (o: ReturnType<typeof offer>) => JSON.stringify(o.map((ls) => ls.map((l) => l.id)));
+
   function renderWhere() {
     $("[data-safari-nights]").textContent = `${safariNights()} safari night${safariNights() === 1 ? "" : "s"}`;
     const left = safariNights() - used();
     $("[data-areas]").innerHTML = O.areas.map((a) => {
       const on = st.stops.some((s) => s.areaId === a.id);
-      const hasLodge = O.lodges.some((l) => l.areaId === a.id);
+      const hasLodge = kidsOk(a.id);
       const blocked = !on && (!hasLodge || a.minNights > left);
-      const why = !hasLodge ? "No options in this style yet" : a.minNights > left ? `Needs ${a.minNights} night${a.minNights > 1 ? "s" : ""}: add nights in step 2` : "";
+      const why = !hasLodge ? "None of the camps here take children this young" : a.minNights > left ? `Needs ${a.minNights} night${a.minNights > 1 ? "s" : ""}: add nights in step 2` : "";
       return `<button type="button" class="chip" data-area="${a.id}" aria-pressed="${on}" ${blocked ? 'aria-disabled="true"' : ""} title="${esc(why)}">${esc(a.name)}${a.minNights > 1 ? ` <small>min ${a.minNights}</small>` : ""}</button>`;
     }).join("");
     root.querySelectorAll<HTMLButtonElement>("[data-area]").forEach((b) => b.addEventListener("click", () => {
@@ -195,10 +205,16 @@ import { site } from "../lib/site";
       renderWhere(); update();
     }));
 
+    const avail = offer();
+    offerSig = sigOf(avail);
     $("[data-stops]").innerHTML = st.stops.map((s, i) => {
       const a = O.areas.find((x) => x.id === s.areaId)!;
-      const lodges = O.lodges.filter((l) => l.areaId === s.areaId).sort((x, y) => rank(x.category) - rank(y.category));
-      if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = (lodges.find((l) => l.category === "comfort") ?? lodges[0])?.id || "";
+      const lodges = avail[i].sort((x, y) => rank(x.category) - rank(y.category));
+      if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = (["comfort", "premium", "luxury", "budget"].map((c) => lodges.find((l) => l.category === c)).find(Boolean) ?? lodges[0])?.id || "";
+      if (!lodges.length) return `<div class="stop">
+        <div class="stop__top"><strong>${esc(a.name)}</strong>
+          <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="One night less in ${esc(a.name)}">−</button><output>${s.nights} night${s.nights > 1 ? "s" : ""}</output><button type="button" data-sinc="${i}" aria-label="One more night in ${esc(a.name)}">+</button></div></div>
+        <p class="stop__none">We don't have rates for a camp or lodge here on these dates${st.ages.some((x) => x < 18) ? " for your group" : ""} yet. Try other dates, or message us on WhatsApp and we'll find you a place.</p></div>`;
       return `<div class="stop">
         <div class="stop__top"><strong>${esc(a.name)}</strong>
           <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="One night less in ${esc(a.name)}">−</button><output>${s.nights} night${s.nights > 1 ? "s" : ""}</output><button type="button" data-sinc="${i}" aria-label="One more night in ${esc(a.name)}">+</button></div></div>
@@ -290,7 +306,7 @@ import { site } from "../lib/site";
 
   function renderTrip() {
     const items: string[] = [];
-    if (st.date || st.stops.length) items.push(`<li>Arrive in ${esc(O.arrivalName)}, first night included</li>`);
+    if (st.date || st.stops.length) items.push(`<li>Arrive in ${esc(O.arrivalName)}${O.arrivalPriced ? ", first night included" : ""}</li>`);
     for (const s of st.stops) {
       const a = O.areas.find((x) => x.id === s.areaId)!;
       const l = O.lodges.find((x) => x.id === s.lodgeId);
@@ -372,6 +388,7 @@ import { site } from "../lib/site";
   }
   const mini = (html: string) => { $("[data-mini]").innerHTML = html; };
   function update() {
+    if (O && st.stops.length && sigOf(offer()) !== offerSig) renderWhere();
     renderPeople(); renderTrip(); renderSteps();
     const send = $<HTMLButtonElement>("[data-send]");
     const price = $("[data-price]");
@@ -470,6 +487,7 @@ import { site } from "../lib/site";
       renderWhere(); update();
     });
     $("[data-arrival-name]").textContent = O.arrivalName;
+    root.querySelectorAll<HTMLElement>("[data-arrival-inc]").forEach((x) => (x.hidden = !O.arrivalPriced));
     root.querySelectorAll<HTMLButtonElement>("[data-inc],[data-dec]").forEach((b) => b.addEventListener("click", () => {
       const k = b.dataset.inc || b.dataset.dec;
       const up = !!b.dataset.inc;
@@ -554,6 +572,7 @@ import { site } from "../lib/site";
   .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
   .pl .chip[aria-pressed="true"] small { color: var(--dark); }
   .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+  .pl .stop__none { margin: 0.6rem 0 0; color: var(--ink-2); font-size: 0.92rem; }
   .pl .addons { margin-top: 1.2rem; }
   .pl .addons[hidden] { display: none; }
   .pl .addons__h { font-family: var(--display); font-weight: 600; margin: 0 0 0.5rem; }

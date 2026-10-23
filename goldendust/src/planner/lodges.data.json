@@ -1,0 +1,481 @@
+[
+ {
+  "id": "angata-tarangire-camp",
+  "name": "Ang'ata Tarangire Camp",
+  "areaId": "tarangire",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "12-10",
+    "to": "03-31",
+    "single": 355,
+    "double": 207.5,
+    "triple": 171.6667,
+    "child": 145.25
+   },
+   {
+    "season": "Low Season",
+    "from": "04-01",
+    "to": "06-14",
+    "single": 310,
+    "double": 195,
+    "triple": 163.3333,
+    "child": 136.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-15",
+    "to": "09-14",
+    "single": 355,
+    "double": 207.5,
+    "triple": 171.6667,
+    "child": 145.25
+   },
+   {
+    "season": "Low Season",
+    "from": "09-15",
+    "to": "12-09",
+    "single": 310,
+    "double": 195,
+    "triple": 163.3333,
+    "child": 136.5
+   }
+  ],
+  "insidePark": false
+ },
+ {
+  "id": "tarangire-simba-lodge",
+  "name": "Tarangire Simba Lodge",
+  "areaId": "tarangire",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 192,
+    "double": 140,
+    "triple": 140,
+    "child": 70
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "12-31",
+    "single": 218,
+    "double": 160,
+    "triple": 160,
+    "child": 80
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": false
+ },
+ {
+  "id": "olkambe-simba-lodge",
+  "name": "Olkambe Simba Lodge",
+  "areaId": "tarangire",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 350,
+    "double": 235,
+    "triple": 235,
+    "child": 117.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "12-31",
+    "single": 435,
+    "double": 290,
+    "triple": 290,
+    "child": 145
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": false
+ },
+ {
+  "id": "tarangire-public-campsite",
+  "name": "Tarangire Public Campsite",
+  "areaId": "tarangire",
+  "category": "budget",
+  "active": true,
+  "periods": [
+   {
+    "season": "All Year",
+    "from": "01-01",
+    "to": "12-31",
+    "single": 50,
+    "double": 50,
+    "triple": 50,
+    "child": 15
+   }
+  ],
+  "insidePark": false
+ },
+ {
+  "id": "karatu-simba-lodge",
+  "name": "Karatu Simba Lodge",
+  "areaId": "karatu",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 158,
+    "double": 125,
+    "triple": 125,
+    "child": 62.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "12-31",
+    "single": 158,
+    "double": 125,
+    "triple": 125,
+    "child": 62.5
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": false
+ },
+ {
+  "id": "embalakai-ngorongoro",
+  "name": "Embalakai Ngorongoro",
+  "areaId": "ngorongoro",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Peak Season",
+    "from": "01-01",
+    "to": "02-29",
+    "single": 290,
+    "double": 230,
+    "triple": 190,
+    "child": 115
+   },
+   {
+    "season": "High Season",
+    "from": "03-01",
+    "to": "03-31",
+    "single": 220,
+    "double": 220,
+    "triple": 208.6667,
+    "child": 110
+   },
+   {
+    "season": "Green Season",
+    "from": "04-01",
+    "to": "05-31",
+    "single": 195,
+    "double": 165,
+    "triple": 156.6667,
+    "child": 82.5
+   },
+   {
+    "season": "Peak Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 290,
+    "double": 230,
+    "triple": 190,
+    "child": 115
+   },
+   {
+    "season": "High Season",
+    "from": "11-01",
+    "to": "12-15",
+    "single": 220,
+    "double": 220,
+    "triple": 208.6667,
+    "child": 110
+   },
+   {
+    "season": "Peak Season",
+    "from": "12-16",
+    "to": "12-31",
+    "single": 290,
+    "double": 230,
+    "triple": 190,
+    "child": 115
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "ngorongoro-crater-camp-ak-sanctuary",
+  "name": "Ngorongoro Crater Camp (A&K Sanctuary)",
+  "areaId": "ngorongoro",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-03",
+    "to": "03-31",
+    "single": 392,
+    "double": 392,
+    "triple": 360,
+    "child": 200
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "01-02",
+    "single": 1016,
+    "double": 672,
+    "triple": 640,
+    "child": 344
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": true
+ },
+ {
+  "id": "simba-public-campsite-ngorongoro",
+  "name": "Simba Public Campsite (Ngorongoro)",
+  "areaId": "ngorongoro",
+  "category": "budget",
+  "active": true,
+  "periods": [
+   {
+    "season": "All Year",
+    "from": "01-01",
+    "to": "12-31",
+    "single": 50,
+    "double": 50,
+    "triple": 50,
+    "child": 15
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "out-in-africa-serengeti-camp",
+  "name": "Out in Africa Serengeti Camp",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 143.33,
+    "double": 110.25,
+    "triple": 110.25,
+    "child": 55.125
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "09-14",
+    "single": 161.07,
+    "double": 123.9,
+    "triple": 123.9,
+    "child": 61.95
+   },
+   {
+    "season": "Mid Season",
+    "from": "09-15",
+    "to": "12-14",
+    "single": 143.33,
+    "double": 110.25,
+    "triple": 110.25,
+    "child": 55.125
+   },
+   {
+    "season": "High Season",
+    "from": "12-15",
+    "to": "12-31",
+    "single": 161.07,
+    "double": 123.9,
+    "triple": 123.9,
+    "child": 61.95
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "arukore-simba-camp",
+  "name": "Arukore Simba Camp",
+  "areaId": "central-serengeti",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 354,
+    "double": 240,
+    "triple": 240,
+    "child": 120
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "12-31",
+    "single": 450,
+    "double": 300,
+    "triple": 300,
+    "child": 150
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": true
+ },
+ {
+  "id": "sound-of-silence-serengeti-tented-camp",
+  "name": "Sound of Silence Serengeti Tented Camp",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 191.1,
+    "double": 147,
+    "triple": 147,
+    "child": 73.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "09-14",
+    "single": 204.75,
+    "double": 157.5,
+    "triple": 157.5,
+    "child": 78.75
+   },
+   {
+    "season": "Mid Season",
+    "from": "09-15",
+    "to": "12-14",
+    "single": 191.1,
+    "double": 147,
+    "triple": 147,
+    "child": 73.5
+   },
+   {
+    "season": "High Season",
+    "from": "12-15",
+    "to": "12-31",
+    "single": 204.75,
+    "double": 157.5,
+    "triple": 157.5,
+    "child": 78.75
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "anga-ya-nyota-serengeti",
+  "name": "Anga ya Nyota Serengeti",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 143.33,
+    "double": 110.25,
+    "triple": 110.25,
+    "child": 55.125
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "09-14",
+    "single": 161.07,
+    "double": 123.9,
+    "triple": 123.9,
+    "child": 61.95
+   },
+   {
+    "season": "Mid Season",
+    "from": "09-15",
+    "to": "12-14",
+    "single": 143.33,
+    "double": 110.25,
+    "triple": 110.25,
+    "child": 55.125
+   },
+   {
+    "season": "High Season",
+    "from": "12-15",
+    "to": "12-31",
+    "single": 161.07,
+    "double": 123.9,
+    "triple": 123.9,
+    "child": 61.95
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "seronera-public-campsite-central-serengeti",
+  "name": "Seronera Public Campsite (Central Serengeti)",
+  "areaId": "central-serengeti",
+  "category": "budget",
+  "active": true,
+  "periods": [
+   {
+    "season": "All Year",
+    "from": "01-01",
+    "to": "12-31",
+    "single": 50,
+    "double": 50,
+    "triple": 50,
+    "child": 15
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "serengeti-simba-lodge",
+  "name": "Serengeti Simba Lodge",
+  "areaId": "west-serengeti",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 162,
+    "double": 157,
+    "triple": 143,
+    "child": 78.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "12-31",
+    "single": 210,
+    "double": 175,
+    "triple": 160.6667,
+    "child": 87.5
+   }
+  ],
+  "minChildAge": 6,
+  "insidePark": true
+ }
+]

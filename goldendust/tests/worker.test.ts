@@ -10,7 +10,7 @@ const call = (r: Request, e = env) => worker.fetch(r, e as any);
 
 const trip = () => ({
   startDate: daysFromNow(60), adults: 2, childAges: [], category: "comfort", totalNights: 4,
-  stops: [{ areaId: "central-serengeti", nights: 2, lodgeId: "central-serengeti-comfort" }, { areaId: "ngorongoro", nights: 1, lodgeId: "ngorongoro-comfort" }],
+  stops: [{ areaId: "central-serengeti", nights: 2, lodgeId: "out-in-africa-serengeti-camp" }, { areaId: "ngorongoro", nights: 1, lodgeId: "embalakai-ngorongoro" }],
 });
 
 // capture the emailed login code (DEV_EMAIL_LOG prints it instead of sending)

@@ -58,7 +58,7 @@ export type Settings = {
 };
 
 export type SeasonRange = { from: string; to: string }; // "MM-DD", inclusive; may wrap the year end
-export type Season = { id: string; name: string; ranges: SeasonRange[] };
+export type Season = { id: string; name: string; ranges: SeasonRange[] }; // old global seasons, upgraded into lodge periods
 
 // All park fees are entered INCLUDING VAT, at peak-season rates (no park-fee seasons).
 export type FeeZone = {
@@ -85,10 +85,15 @@ export type Area = {
 // Text printed on the itinerary PDF (edited in /admin → Costs & rules).
 export type DocText = { included: string[]; excluded: string[]; payment: string; notes: string[] };
 
-export type RoomRates = { single: number; double: number; triple: number; child: number }; // per room / per child, per night
+export type RoomRates = { single: number; double: number; triple: number; child: number }; // old shape: per room / per child, per night
+// A lodge's rate for a stretch of the year (from the Excel "Rates" tab). The year is ignored: "MM-DD" to "MM-DD",
+// inclusive, may wrap the year end. USD per person per night, full board; double/triple = per person sharing.
+export type RatePeriod = { season: string; from: string; to: string; single: number; double: number; triple: number; child: number };
 export type Lodge = {
   id: string; name: string; areaId: string; category: Category; active: boolean;
-  rates: Record<string, RoomRates>; // keyed by season id
+  periods: RatePeriod[]; // dates without a period → the lodge isn't offered for those dates
+  minChildAge?: number; // e.g. 6 → not offered when a child under 6 travels
+  rates?: Record<string, RoomRates>; // old shape (per room, keyed by season id), upgraded into periods
   insidePark?: boolean; // true → park concession fee per person per night (Comfort/Luxury)
   description?: string; // one or two lines shown to guests
   images?: string[]; // image ids uploaded in /admin, served from /media/<id>
@@ -96,12 +101,12 @@ export type Lodge = {
 
 export type Config = {
   settings: Settings;
-  seasons: Season[];
-  defaultSeasonId: string; // used for dates outside every range
+  seasons?: Season[]; // old, upgraded into lodge periods
+  defaultSeasonId?: string;
   feeZones: FeeZone[];
   areas: Area[]; // in route order
   lodges: Lodge[];
-  arrival: { name: string; lodges: Record<Category, string> }; // Arusha arrival night, lodge per category
+  arrival: { name: string; lodges: Record<Category, string> }; // Arusha arrival night, hotel per category ("" = not priced yet)
   doc?: DocText;
   addons?: Addon[];
 };
@@ -156,7 +161,25 @@ export function upgradeConfig(cfg: Config): Config {
     campAdult: z.campAdult ?? 0, campChild: z.campChild ?? 0, vehicleDay: z.vehicleDay ?? 0,
   }));
   c.areas = c.areas.map((a) => ({ ...a, side: a.side ?? (/seren/i.test(a.feeZoneId) ? "west" : /nca|ngoro/i.test(a.feeZoneId) ? "nca" : "east") }));
-  c.lodges = c.lodges.map((l) => ({ ...l, insidePark: l.insidePark ?? l.areaId !== "arusha" }));
+  // old global seasons + per-room rates → per-lodge periods, per person
+  const seasons = c.seasons ?? [];
+  c.lodges = c.lodges.map((l) => {
+    const periods = l.periods ?? seasons.flatMap((se) => {
+      const rt = l.rates?.[se.id];
+      if (!rt) return [];
+      const ranges = se.ranges.length ? se.ranges : se.id === c.defaultSeasonId ? [{ from: "01-01", to: "12-31" }] : [];
+      return ranges.map((r) => ({ season: se.name, from: r.from, to: r.to, single: rt.single, double: rt.double / 2, triple: rt.triple / 3, child: rt.child }));
+    });
+    const { rates: _old, ...rest } = l;
+    return { ...rest, periods, insidePark: l.insidePark ?? l.areaId !== "arusha" };
+  });
+  delete c.seasons; delete c.defaultSeasonId;
+  for (const [after, area] of [["ngorongoro", { id: "karatu", side: "east", blurb: "A night in Karatu, in the highlands just outside the Ngorongoro Conservation Area.", name: "Karatu", feeZoneId: "", minNights: 1, active: true }],
+    ["central-serengeti", { id: "west-serengeti", side: "west", blurb: "Game drives in the western Serengeti.", name: "Western Serengeti", feeZoneId: c.feeZones.find((z) => /seren/i.test(z.id))?.id ?? "", minNights: 1, active: true }]] as [string, Area][]) {
+    if (c.areas.some((a) => a.id === area.id)) continue;
+    const i = c.areas.findIndex((a) => a.id === after);
+    c.areas.splice(i < 0 ? c.areas.length : i + 1, 0, area);
+  }
   c.arrival = { ...c.arrival, lodges: { ...c.arrival.lodges, premium: c.arrival.lodges.premium ?? c.arrival.lodges.luxury ?? c.arrival.lodges.comfort } };
   const legacyCrater = Math.max(0, ...c.areas.map((a) => a.vehicleFee || 0));
   c.addons = c.addons ?? [
@@ -166,18 +189,27 @@ export function upgradeConfig(cfg: Config): Config {
   return c;
 }
 
-export function seasonFor(cfg: Config, iso: string): Season {
+// "MM-DD" inside an inclusive range that may wrap the year end (e.g. 12-10 to 03-31).
+export const inRange = (md: string, r: { from: string; to: string }) => (r.from <= r.to ? md >= r.from && md <= r.to : md >= r.from || md <= r.to);
+export function periodFor(lodge: { periods?: RatePeriod[] }, iso: string): RatePeriod | undefined {
   const md = iso.slice(5);
-  for (const s of cfg.seasons) {
-    for (const r of s.ranges) {
-      const hit = r.from <= r.to ? md >= r.from && md <= r.to : md >= r.from || md <= r.to;
-      if (hit) return s;
-    }
-  }
-  return cfg.seasons.find((s) => s.id === cfg.defaultSeasonId) ?? cfg.seasons[0];
+  return (lodge.periods || []).find((p) => inRange(md, p));
+}
+// Night dates of each stop (night 1 = arrival in Arusha, so the first stop starts on the second night).
+export function stopNights(startDate: string, stops: { nights: number }[]): string[][] {
+  let n = 1;
+  return stops.map((s) => Array.from({ length: Math.max(0, s.nights || 0) }, () => addDays(startDate, n++)));
+}
+// Why a lodge can't be offered for these nights and children ("" = fine). Shared with the planner page,
+// which only knows the open date ranges (no rates).
+export function lodgeProblem(lodge: { name: string; minChildAge?: number; periods?: { from: string; to: string }[]; open?: { from: string; to: string }[] }, nights: string[], childAges: number[]): string {
+  if (lodge.minChildAge && childAges.some((a) => a < lodge.minChildAge!)) return `${lodge.name} only takes children aged ${lodge.minChildAge} and over.`;
+  const ranges = lodge.periods ?? lodge.open ?? [];
+  const miss = nights.find((d) => !ranges.some((r) => inRange(d.slice(5), r)));
+  return miss ? `${lodge.name} has no rate for the night of ${miss}.` : "";
 }
 
-// Cheapest mix of single / double / triple rooms for n adults (rates are per room).
+// Cheapest mix of single / double / triple rooms for n adults (rates here are per room: see perRoom).
 export function roomPlan(n: number, rt: RoomRates) {
   const opts = [
     { size: 1, rate: rt.single, name: "single" },
@@ -199,8 +231,10 @@ export function roomPlan(n: number, rt: RoomRates) {
   return best[n];
 }
 
-const describeRooms = (rooms: Record<string, number>, rt: RoomRates) =>
-  Object.entries(rooms).map(([k, v]) => `${v} ${k} × ${money(rt[k as keyof RoomRates])}`).join(" + ");
+const perRoom = (p: RatePeriod): RoomRates => ({ single: p.single, double: p.double * 2, triple: p.triple * 3, child: p.child });
+const SIZE: Record<string, number> = { single: 1, double: 2, triple: 3 };
+const describeRooms = (rooms: Record<string, number>, p: RatePeriod) =>
+  Object.entries(rooms).map(([k, v]) => `${v} ${k} (${v * SIZE[k]} × ${money(p[k as "single" | "double" | "triple"])} pp)`).join(" + ");
 
 export function chosenAddons(cfg: Config, q: QuoteRequest): Addon[] {
   const ids = new Set([...(q.addons || []), ...(q.crater ? ["crater"] : [])]);
@@ -222,7 +256,8 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
   const safariNights = q.totalNights - 1;
   const used = q.stops.reduce((a, st) => a + (st.nights || 0), 0);
   const seen = new Set<string>();
-  for (const st of q.stops) {
+  const nightsOf = /^\d{4}-\d{2}-\d{2}$/.test(q.startDate || "") ? stopNights(q.startDate, q.stops) : q.stops.map(() => []);
+  for (const [si, st] of q.stops.entries()) {
     const area = cfg.areas.find((a) => a.id === st.areaId && a.active);
     if (!area) { e.push("One of the chosen areas is no longer available."); continue; }
     if (seen.has(area.id)) e.push(`${area.name} is listed twice.`);
@@ -231,13 +266,13 @@ export function validate(cfg: Config, q: QuoteRequest, today = new Date().toISOS
     const lodge = cfg.lodges.find((l) => l.id === st.lodgeId && l.active);
     if (!lodge) e.push(`Choose where to stay in ${area.name}.`);
     else if (lodge.areaId !== area.id) e.push(`${lodge.name} isn't in ${area.name}.`);
+    else { const why = lodgeProblem(lodge, nightsOf[si], q.childAges); if (why) e.push(`${why} Choose another place to stay in ${area.name}.`); }
   }
   const minNeeded = q.stops.reduce((a, st) => a + (cfg.areas.find((x) => x.id === st.areaId)?.minNights ?? 1), 0);
   if (q.stops.length && minNeeded > safariNights)
     e.push(`These areas need at least ${minNeeded + 1} nights in total (${minNeeded} on safari + 1 in Arusha). Add nights or remove an area.`);
   else if (q.stops.length && used !== safariNights)
     e.push(`You have ${safariNights} safari night${safariNights === 1 ? "" : "s"} to share out (plus your first night in Arusha) and ${used} assigned.`);
-  if (q.stops.length && !cfg.lodges.find((l) => l.id === cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)] && l.active)) e.push("The Arusha arrival hotel isn't set up for this style.");
   if (chosenAddons(cfg, q).some((a) => a.id === "crater") && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro Crater isn't available right now.");
   return e;
 }
@@ -259,17 +294,18 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   const stayAt = (lodgeId: string, nightIndex: number, label: string) => {
     const lodge = cfg.lodges.find((l) => l.id === lodgeId)!;
     const date = addDays(q.startDate, nightIndex);
-    const season = seasonFor(cfg, date);
-    const rt = lodge.rates[season.id] ?? { single: 0, double: 0, triple: 0, child: 0 };
-    const plan = roomPlan(adults, rt);
-    const childCost = children * rt.child;
-    const cost = plan.cost + childCost;
-    const parts = [describeRooms(plan.rooms, rt) || "no room rate set"];
-    if (children) parts.push(`${children} child × ${money(rt.child)}`);
-    lines.push({ group: "accommodation", label: `${label}: ${lodge.name} (${date}, ${season.name})`, calc: parts.join(" + "), cost: r2(cost) });
-    if (!(plan.cost > 0)) errors.push(`${lodge.name} has no ${season.name} room rates.`);
+    const p = periodFor(lodge, date);
+    if (!p) { errors.push(`${lodge.name} has no rate for the night of ${date}.`); return; }
+    const plan = roomPlan(adults, perRoom(p));
+    const cost = plan.cost + children * p.child;
+    const parts = [describeRooms(plan.rooms, p) || "no rate set"];
+    if (children) parts.push(`${children} child × ${money(p.child)}`);
+    lines.push({ group: "accommodation", label: `${label}: ${lodge.name} (${date}, ${p.season})`, calc: parts.join(" + "), cost: r2(cost) });
+    if (!(plan.cost > 0)) errors.push(`${lodge.name} has no ${p.season} rate.`);
   };
-  stayAt(cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)], 0, `Night 1 ${cfg.arrival.name}`);
+  // Arusha arrival night: only priced when an Arusha hotel is set up (for now it isn't).
+  const arrivalLodge = cfg.lodges.find((l) => l.id === cfg.arrival.lodges[tripCategory(cfg.lodges, q.stops)] && l.active);
+  if (arrivalLodge) stayAt(arrivalLodge.id, 0, `Night 1 ${cfg.arrival.name}`);
 
   // ---- park fees (all incl. VAT, peak-season rates)
   const pp = (adult: number, child: number) => adults * adult + children * child;
@@ -282,7 +318,7 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     const zone = cfg.feeZones.find((z) => z.id === area.feeZoneId);
     const lodge = cfg.lodges.find((l) => l.id === st.lodgeId);
     for (let k = 0; k < st.nights; k++) { stayAt(st.lodgeId, night, `Night ${night + 1} ${area.name}`); night++; }
-    if (!zone) { errors.push(`${area.name} has no park fee zone.`); continue; }
+    if (!zone) { if (area.feeZoneId) errors.push(`${area.name} has no park fee zone.`); continue; } // "" = outside the parks (e.g. Karatu)
     const n = st.nights;
     // Rule 1: entry fee for each day in the park
     lines.push({ group: "park", label: `${zone.name} entry: ${area.name}, ${times(n, "day")}`, calc: `(${ppCalc(zone.adultDay, zone.childDay)}) × ${times(n, "day")}`, cost: r2(pp(zone.adultDay, zone.childDay) * n) });
@@ -358,14 +394,15 @@ export function publicOptions(cfg: Config) {
       const l = cfg.lodges.find((x) => x.id === cfg.arrival.lodges[c.id]);
       return [c.id, l ? { name: l.name, description: l.description || "", images: (l.images || []).slice(0, 6) } : null];
     })),
-    areas: cfg.areas.filter((a) => a.active).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
+    arrivalPriced: CATEGORIES.some((c) => cfg.lodges.some((l) => l.active && l.id === cfg.arrival.lodges[c.id])),
+    areas: cfg.areas.filter((a) => a.active && cfg.lodges.some((l) => l.active && l.areaId === a.id)).map((a) => ({ id: a.id, name: a.name, minNights: a.minNights, blurb: a.blurb || "" })),
     addons: (cfg.addons || []).filter((a) => a.active && (a.id !== "crater" || cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId))).map((a) => {
       // guest-facing rate: incl. admin fee (unless a park fee) and margin, rounded to the dollar
       const k = a.parkFee ? 1 : 1 + (cfg.settings.addonAdminPct ?? 2) / 100;
       return { id: a.id, name: a.name, blurb: a.blurb, per: a.per, rate: Math.round(a.price * k), rateChild: Math.round(a.childPrice * k) };
     }),
     doc: cfg.doc ?? null,
-    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 6) })),
+    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: (l.images || []).slice(0, 12), minChildAge: l.minChildAge || 0, open: (l.periods || []).map((p) => ({ from: p.from, to: p.to })) })),
   };
 }
 
@@ -376,18 +413,16 @@ export function checkConfig(cfg: Config): string[] {
     xs.forEach((x) => { if (!x.id) e.push(`A ${what} has no id.`); if (seen.has(x.id)) e.push(`Duplicate ${what} id "${x.id}".`); seen.add(x.id); });
   };
   if (!cfg || !cfg.settings) return ["Config is missing settings."];
-  ids(cfg.seasons, "season"); ids(cfg.feeZones, "fee zone"); ids(cfg.areas, "area"); ids(cfg.lodges, "lodge");
-  if (!cfg.seasons.some((s) => s.id === cfg.defaultSeasonId)) e.push("Default season doesn't exist.");
-  cfg.seasons.forEach((s) => s.ranges.forEach((r) => { if (!/^\d{2}-\d{2}$/.test(r.from) || !/^\d{2}-\d{2}$/.test(r.to)) e.push(`Season "${s.name}" has a range that isn't MM-DD.`); }));
+  ids(cfg.feeZones, "fee zone"); ids(cfg.areas, "area"); ids(cfg.lodges, "lodge");
   cfg.areas.forEach((a) => {
-    if (!cfg.feeZones.some((z) => z.id === a.feeZoneId)) e.push(`Area "${a.name}" points to a missing fee zone.`);
+    if (a.feeZoneId && !cfg.feeZones.some((z) => z.id === a.feeZoneId)) e.push(`Area "${a.name}" points to a missing fee zone.`);
     if (!["east", "nca", "west"].includes(a.side)) e.push(`Area "${a.name}" needs a side (east, NCA or west).`);
   });
   if (cfg.settings.ncaZoneId && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro (NCA) fee zone in Costs & rules doesn't exist.");
   cfg.lodges.forEach((l) => {
     if (l.areaId !== "arusha" && !cfg.areas.some((a) => a.id === l.areaId)) e.push(`Lodge "${l.name}" points to a missing area.`);
     if (!CATEGORIES.some((c) => c.id === l.category)) e.push(`Lodge "${l.name}" has an unknown category.`);
+    (l.periods || []).forEach((p) => { if (!/^\d{2}-\d{2}$/.test(p.from) || !/^\d{2}-\d{2}$/.test(p.to)) e.push(`Lodge "${l.name}" has a rate period that isn't MM-DD.`); });
   });
-  CATEGORIES.forEach((c) => { if (!cfg.lodges.some((l) => l.id === cfg.arrival.lodges[c.id])) e.push(`No Arusha arrival hotel set for ${c.name}.`); });
   return e;
 }
