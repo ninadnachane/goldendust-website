@@ -42,7 +42,9 @@ import { site } from "../lib/site";
       // count clicks on any WhatsApp link
       document.addEventListener("click", function (e) {
         var a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
-        if (a) window.gdTrack("whatsapp_click", { link_url: location.pathname });
+        if (!a) return;
+        var where = a.closest("header") ? "header" : a.closest("footer") ? "footer" : a.closest(".hero") ? "hero" : "page";
+        window.gdTrack("whatsapp_click", { page_path: location.pathname, button_location: where, button_text: (a.textContent || "").trim().slice(0, 60) });
       });
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

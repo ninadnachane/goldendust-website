@@ -345,6 +345,7 @@ import { site } from "../lib/site";
     const send = $("[data-send]");
     if (send.getAttribute("aria-disabled") === "true") { flash("Finish your itinerary first: dates, style and where to go."); return; }
     mode = m;
+    (window as any).gdTrack?.(m === "pdf" ? "planner_pdf_click" : "planner_whatsapp_click", { value: lastTotal || undefined, currency: "USD" });
     const key = JSON.stringify(tripNow());
     if (m === "pdf" && lastLead && lastLead.key === key) { window.open(pdfUrl(lastLead.ref, lastLead.token), "_blank"); return; }
     const d = $<HTMLDialogElement>("[data-contact]");
