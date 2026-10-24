@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import Analytics from "../components/Analytics.astro";
 import { site, img } from "../lib/site";
 
 interface Props {
@@ -50,5 +51,6 @@ const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcf
     <Header />
     <main id="main"><slot /></main>
     <Footer hideTours={hideTours} />
+    <Analytics />
   </body>
 </html>

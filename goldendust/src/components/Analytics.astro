@@ -1,0 +1,57 @@
+---
+// Google Analytics 4 with a cookie banner. Nothing is loaded or stored by Google until the visitor accepts.
+// The choice is kept in localStorage ("gd_consent"); the footer link "Cookie settings" opens the banner again.
+// Other scripts can call window.gdTrack(eventName, params) — it does nothing without consent.
+import { site } from "../lib/site";
+---
+<div class="ck" data-ck hidden role="region" aria-label="Cookie choice">
+  <p>We use Google Analytics cookies to see how visitors use our website, so we can improve it. No ads, and we don't sell your data.</p>
+  <div class="ck__b">
+    <button type="button" class="btn" data-ck-yes>Accept</button>
+    <button type="button" class="btn btn--ghost" data-ck-no>Decline</button>
+  </div>
+</div>
+<script is:inline define:vars={{ id: site.gaId }}>
+  (function () {
+    var KEY = "gd_consent", loaded = false;
+    var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+    var set = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag("consent", "default", { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", analytics_storage: "denied" });
+    function load() {
+      if (loaded || !id) return; loaded = true;
+      gtag("consent", "update", { analytics_storage: "granted" });
+      var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
+      document.head.appendChild(s);
+      gtag("js", new Date()); gtag("config", id, { anonymize_ip: true });
+    }
+    window.gdTrack = function (name, params) { if (loaded) gtag("event", name, params || {}); };
+    var box, show = function () { box && (box.hidden = false); };
+    function init() {
+      box = document.querySelector("[data-ck]");
+      var c = get();
+      if (c === "granted") load(); else if (c !== "denied") show();
+      box.querySelector("[data-ck-yes]").addEventListener("click", function () { set("granted"); box.hidden = true; load(); });
+      box.querySelector("[data-ck-no]").addEventListener("click", function () {
+        set("denied"); box.hidden = true;
+        if (loaded) location.reload(); // stop tracking straight away if they change their mind
+      });
+      document.querySelectorAll("[data-ck-open]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(); }); });
+      // count clicks on any WhatsApp link
+      document.addEventListener("click", function (e) {
+        var a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
+        if (a) window.gdTrack("whatsapp_click", { link_url: location.pathname });
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+  })();
+</script>
+<style>
+  .ck { position: fixed; z-index: 90; left: 1rem; right: 1rem; bottom: 1rem; max-width: 34rem; margin-inline: auto; background: var(--surface, #fff); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 20px 40px -20px rgba(46, 36, 27, 0.45); padding: 1rem 1.1rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: 0.92rem; }
+  .ck[hidden] { display: none; }
+  .ck p { margin: 0; flex: 1 1 16rem; color: var(--ink-2); line-height: 1.45; }
+  .ck__b { display: flex; gap: 0.5rem; }
+  .ck .btn { padding: 0.55rem 1.1rem; font-size: 0.9rem; }
+</style>

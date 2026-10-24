@@ -384,6 +384,7 @@ import { site } from "../lib/site";
       ? pdfUrl(r.d.ref, r.d.token)
       : `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText(lastTotal || undefined, v("name"), r.d.ref))}`;
     $<HTMLDialogElement>("[data-contact]").close();
+    (window as any).gdTrack?.("generate_lead", { method: mode === "pdf" ? "pdf_download" : "whatsapp", value: lastTotal || undefined, currency: "USD" });
     if (win) win.location.href = url; else window.location.href = url;
   }
   const mini = (html: string) => { $("[data-mini]").innerHTML = html; };
