@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import WaButton from "../components/WaButton.astro";
-import { site } from "../lib/site";
+import { site, waLink } from "../lib/site";
 ---
 <Base
   title="Safari Itinerary Planner | Golden Dust Safaris"
@@ -12,7 +12,7 @@ import { site } from "../lib/site";
     <div class="wrap">
       <header class="pl__head">
         <h1>Plan your safari</h1>
-        <p class="lede">Pick your dates and the parks you'd love to see, then choose from every camp and lodge, from Budget to Luxury. The price updates as you go, with nothing hidden. When it looks right, send it to us and your guide takes it from there.</p>
+        <p class="lede">We encourage you to <a href={waLink()} target="_blank" rel="noopener">connect with us</a> to plan your safari: a conversation with your guide is the best way to get it right. But if you're sure about the details and want to plan it yourself, this tool can help. Pick your dates and parks, choose from every camp and lodge, and see the price update as you go, with nothing hidden. When it looks right, send it to us and your guide takes it from there.</p>
       </header>
 
       <div class="pl__grid">
