@@ -156,10 +156,10 @@ test("a lodge without a rate for a night isn't bookable for those dates", () => 
   assert.match(q.errors.join(" "), /Sample comfort lodge \(Tarangire\) has no rate for the night of 2026-11-09/);
 });
 
-test("lodges with a minimum child age aren't offered to younger children", () => {
+test("lodges with a minimum child age are still offered to everyone", () => {
   const c: Config = JSON.parse(JSON.stringify(cfg));
   c.lodges.find((x) => x.id === "tarangire-comfort")!.minChildAge = 6;
-  assert.match(quote(c, trip({ childAges: [4] }), TODAY).errors.join(" "), /only takes children aged 6 and over/);
+  assert.equal(quote(c, trip({ childAges: [4] }), TODAY).ok, true);
   assert.equal(quote(c, trip({ childAges: [6] }), TODAY).ok, true);
   assert.equal(quote(c, trip({ childAges: [] }), TODAY).ok, true);
 });

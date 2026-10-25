@@ -214,7 +214,7 @@ export function stopNights(startDate: string, stops: { nights: number }[]): stri
 // Why a lodge can't be offered for these nights and children ("" = fine). Shared with the planner page,
 // which only knows the open date ranges (no rates).
 export function lodgeProblem(lodge: { name: string; minChildAge?: number; periods?: { from: string; to: string }[]; open?: { from: string; to: string }[] }, nights: string[], childAges: number[]): string {
-  if (lodge.minChildAge && childAges.some((a) => a < lodge.minChildAge!)) return `${lodge.name} only takes children aged ${lodge.minChildAge} and over.`;
+  // minChildAge is kept from the Excel for reference only: every lodge is offered to every group (agreed 25 Oct 2026).
   const ranges = lodge.periods ?? lodge.open ?? [];
   const miss = nights.find((d) => !ranges.some((r) => inRange(d.slice(5), r)));
   return miss ? `${lodge.name} has no rate for the night of ${miss}.` : "";

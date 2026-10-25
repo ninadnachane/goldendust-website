@@ -5,7 +5,7 @@
 //  - only rows with "Rates Verified" = Yes are used;
 //  - Arusha is left out for now (the arrival night isn't priced until its hotels are verified);
 //  - the year in Start/End Date is ignored: a period is a stretch of the year that repeats every year;
-//  - "Min. Child Age" 6+ → the lodge isn't offered when a child under 6 travels.
+//  - "Min. Child Age" is kept for reference only (every lodge is offered to every group).
 import { CATEGORIES, inRange, type Category, type Config, type Lodge, type RatePeriod } from "./engine";
 
 export type ImportReport = {

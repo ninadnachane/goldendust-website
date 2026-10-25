@@ -189,7 +189,7 @@ import { site } from "../lib/site";
       const on = st.stops.some((s) => s.areaId === a.id);
       const hasLodge = kidsOk(a.id);
       const blocked = !on && (!hasLodge || a.minNights > left);
-      const why = !hasLodge ? "None of the camps here take children this young" : a.minNights > left ? `Needs ${a.minNights} night${a.minNights > 1 ? "s" : ""}: add nights in step 2` : "";
+      const why = !hasLodge ? "No camps or lodges here yet" : a.minNights > left ? `Needs ${a.minNights} night${a.minNights > 1 ? "s" : ""}: add nights in step 2` : "";
       return `<button type="button" class="chip" data-area="${a.id}" aria-pressed="${on}" ${blocked ? 'aria-disabled="true"' : ""} title="${esc(why)}">${esc(a.name)}${a.minNights > 1 ? ` <small>min ${a.minNights}</small>` : ""}</button>`;
     }).join("");
     root.querySelectorAll<HTMLButtonElement>("[data-area]").forEach((b) => b.addEventListener("click", () => {
