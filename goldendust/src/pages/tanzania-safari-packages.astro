@@ -2,7 +2,7 @@
 import Base from "../layouts/Base.astro";
 import TourRow from "../components/TourRow.astro";
 import WaButton from "../components/WaButton.astro";
-import { tours, fromPrice, usd, tourUrl } from "../data/tours";
+import { tours, fromPrice, usd, tourUrl, tierClass } from "../data/tours";
 import { site } from "../lib/site";
 import { breadcrumbs } from "../lib/schema";
 
@@ -14,34 +14,36 @@ const list = {
 };
 ---
 <Base
-  title="Tanzania Safari Packages from $800 | Golden Dust Safaris"
-  description="Private Tanzania safari packages from Arusha: Serengeti, Ngorongoro and Tarangire in 3, 4 and 5 days, budget and mid-range. Transparent prices per person by group size."
-  schema={[list, breadcrumbs([["Home", "/"], ["Safari packages", "/tanzania-safari-packages"]])]}
+  title={`Tanzania Safari Packages from ${usd(Math.min(...tours.map(fromPrice)))} | Golden Dust Safaris`}
+  description="Sample private Tanzania safaris from Arusha: Tarangire, the Serengeti and Ngorongoro Crater in 3 to 7 days, from Budget camping to Luxury lodges, with high and green season prices per person."
+  schema={[list, breadcrumbs([["Home", "/"], ["Sample safaris", "/tanzania-safari-packages"]])]}
 >
   <section class="section">
     <div class="wrap">
-      <h1>Tanzania safari packages</h1>
-      <p class="lede">Private safaris from Arusha to the Serengeti, Ngorongoro Crater and Tarangire. Every package includes your own vehicle and guide, and every one can be changed to suit you.</p>
+      <h1>Sample Tanzania safaris</h1>
+      <p class="lede">Popular routes from Arusha to Tarangire, the Serengeti and Ngorongoro Crater, priced with real camps and lodges. Every safari includes your own vehicle and guide, and every one can be changed to suit you, or <a href="/planner">plan your own</a>.</p>
 
       <div class="compare" role="region" aria-label="Package comparison" tabindex="0">
         <table>
           <thead>
-            <tr><th scope="col">Safari</th><th scope="col">Days</th><th scope="col">Style</th><th scope="col">Parks</th><th scope="col">From, per person</th></tr>
+            <tr><th scope="col">Safari</th><th scope="col">Days</th><th scope="col">Style</th><th scope="col">Parks</th><th scope="col">High season pp</th><th scope="col">Green season pp</th></tr>
           </thead>
           <tbody>
             {tours.map((t) => (
               <tr>
                 <td><a href={tourUrl(t)}>{t.shortName}</a></td>
                 <td>{t.nights + 1}</td>
-                <td>{t.tier}</td>
+                <td><span class={`tag tag--${tierClass(t)}`}>{t.tier}</span></td>
                 <td>{t.route.slice(1, -1).join(", ")}</td>
-                <td><strong>{usd(fromPrice(t))}</strong></td>
+                <td><strong>{usd(t.prices.high.pp)}</strong></td>
+                <td><strong>{usd(t.prices.green.pp)}</strong></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      <p class="note">Per person for 2 adults sharing (the family safari: 2 adults and 2 children), prices for 2027. High season e.g. arriving in August, green season e.g. arriving in May.</p>
       <div class="tours">{tours.map((t) => <TourRow tour={t} />)}</div>
     </div>
   </section>
@@ -62,6 +64,10 @@ const list = {
   th { font-family: var(--display); font-size: 0.85rem; color: var(--ink-2); }
   tr:last-child td { border-bottom: 0; }
   td a { font-family: var(--display); font-weight: 600; }
-  .tours { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-  @media (max-width: 900px) { .tours { grid-template-columns: 1fr; } }
+  .tours { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .tag { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+  .tag--budget { background: #6f7d3c; } .tag--comfort { background: #9a6a2f; } .tag--premium { background: #c89a4b; } .tag--luxury { background: #2e241b; }
+  .note { font-size: 0.88rem; color: var(--ink-2); margin: -1.5rem 0 2rem; }
+  @media (max-width: 1000px) { .tours { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .tours { grid-template-columns: 1fr; } }
 </style>

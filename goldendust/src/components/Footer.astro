@@ -15,8 +15,8 @@ const { hideTours = false } = Astro.props as { hideTours?: boolean };
       <a href={site.instagram} target="_blank" rel="noopener">Instagram {site.instagramHandle}</a></p>
     </div>
     {!hideTours && <div>
-      <p class="ftr__h">Safaris</p>
-      <ul>{tours.map((t) => <li><a href={tourUrl(t)}>{t.nights + 1}-day {t.shortName} ({t.tier})</a></li>)}</ul>
+      <p class="ftr__h">Sample safaris</p>
+      <ul><li><a href="/tanzania-safari-packages">All sample safaris</a></li>{tours.map((t) => <li><a href={tourUrl(t)}>{t.nights + 1}-day {t.shortName} ({t.tier})</a></li>)}</ul>
     </div>}
     <div>
       <p class="ftr__h">Plan your trip</p>

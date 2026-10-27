@@ -1,10 +1,9 @@
 ---
 import Base from "../../layouts/Base.astro";
-import Route from "../../components/Route.astro";
 import WaButton from "../../components/WaButton.astro";
 import TourRow from "../../components/TourRow.astro";
-import { tours, type Tour, fromPrice, usd, tourUrl } from "../../data/tours";
-import { img, site } from "../../lib/site";
+import { tours, type Tour, fromPrice, usd, tourUrl, mapUrl, tierClass } from "../../data/tours";
+import { site } from "../../lib/site";
 import { breadcrumbs } from "../../lib/schema";
 
 export function getStaticPaths() {
@@ -12,17 +11,16 @@ export function getStaticPaths() {
 }
 const { tour: t } = Astro.props as { tour: Tour };
 const days = t.nights + 1;
-const others = tours.filter((o) => o.slug !== t.slug);
-const groupSizes = Object.entries(t.prices);
+const others = tours.filter((o) => o.slug !== t.slug).sort((a, b) => Number(b.tier === t.tier) - Number(a.tier === t.tier)).slice(0, 3);
 
 const productSchema = {
   "@context": "https://schema.org",
   "@type": ["Product", "TouristTrip"],
   name: `${days}-Day ${t.shortName} Safari (${t.tier})`,
   description: t.description,
-  image: img(t.image, 1200),
+  image: site.url + mapUrl(t),
   brand: { "@type": "Brand", name: site.name },
-  touristType: t.tier === "Budget" ? "Budget travelers" : "Mid-range travelers",
+  touristType: `${t.tier} travelers`,
   itinerary: {
     "@type": "ItemList",
     itemListElement: t.days.map((d, i) => ({ "@type": "ListItem", position: i + 1, name: d.title, description: d.text })),
@@ -31,8 +29,8 @@ const productSchema = {
     "@type": "AggregateOffer",
     priceCurrency: "USD",
     lowPrice: fromPrice(t),
-    highPrice: Math.max(...Object.values(t.prices)),
-    offerCount: groupSizes.length,
+    highPrice: Math.max(t.prices.high.pp, t.prices.green.pp),
+    offerCount: 2,
     availability: "https://schema.org/InStock",
     url: site.url + tourUrl(t),
   },
@@ -42,23 +40,22 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
 <Base
   title={`${t.seoTitle} | Golden Dust Safaris`}
   description={t.description}
-  image={t.image}
   type="product"
-  schema={[productSchema, breadcrumbs([["Home", "/"], ["Safari packages", "/tanzania-safari-packages"], [t.shortName, tourUrl(t)]])]}
+  schema={[productSchema, breadcrumbs([["Home", "/"], ["Sample safaris", "/tanzania-safari-packages"], [t.shortName, tourUrl(t)]])]}
 >
   <div class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/tanzania-safari-packages">Safari packages</a> / <span>{days} days, {t.tier}</span>
+      <a href="/">Home</a> / <a href="/tanzania-safari-packages">Sample safaris</a> / <span>{days} days, {t.tier}</span>
     </nav>
   </div>
 
   <section class="top">
     <div class="wrap top__grid">
       <div>
-        <p class="tier">{t.tier} · private safari</p>
+        <p class="tier"><span class={`tag tag--${tierClass(t)}`}>{t.tier}</span> private safari</p>
         <h1>{days}-day {t.shortName} safari</h1>
         <p class="lede">{t.summary}</p>
-        <div class="route-box"><Route stops={t.route} size="lg" /></div>
+        <p class="from">From <strong>{usd(fromPrice(t))}</strong> per person</p>
         <dl class="facts">
           <div><dt>Length</dt><dd>{days} days, {t.nights} nights on safari</dd></div>
           <div><dt>Start and end</dt><dd>Arusha</dd></div>
@@ -69,12 +66,13 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
       <aside class="price" aria-labelledby="price-h">
         <h2 id="price-h">Price per person</h2>
         <table>
-          <thead><tr><th scope="col">Group size</th><th scope="col">Per person</th></tr></thead>
+          <thead><tr><th scope="col">Season</th><th scope="col">Per person</th></tr></thead>
           <tbody>
-            {groupSizes.map(([n, p]) => <tr><td>{n} travelers</td><td>{usd(p)}</td></tr>)}
+            <tr><td>High season<small>e.g. arriving in August</small></td><td>{usd(t.prices.high.pp)}</td></tr>
+            <tr><td>Green season<small>e.g. arriving in May</small></td><td>{usd(t.prices.green.pp)}</td></tr>
           </tbody>
         </table>
-        <p class="muted small">Bigger groups pay less each because the vehicle, guide and crater fee are shared. Other group sizes and dates on request.</p>
+        <p class="muted small">For {t.travellers}{t.paying !== 2 ? `, ${t.paying} paying guests` : ""}, sharing rooms. Includes park fees, your private vehicle and guide, accommodation, airport transfers and the crater game drive. Prices for 2027; bigger groups pay less each. Your first night in Arusha is covered by us.</p>
         <WaButton label="Ask about this safari" text={waText} />
       </aside>
     </div>
@@ -96,8 +94,8 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
         </ol>
       </div>
       <figure class="map">
-        <img src={img(t.image, 900)} alt={t.imageAlt} loading="lazy" width="700" height="600" />
-        <figcaption class="muted">Route map</figcaption>
+        <img src={mapUrl(t)} alt={`Route map: ${t.route.join(" to ")}`} loading="lazy" width="800" height="690" />
+        <figcaption class="muted">Route map (approximate)</figcaption>
       </figure>
     </div>
   </section>
@@ -106,7 +104,7 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
     <div class="wrap">
       <h2>Good to know</h2>
       <ul class="know">
-        <li>We pick you up at Kilimanjaro or Arusha airport, and your night in Arusha before the safari is on us.</li>
+        <li>We pick you up at Kilimanjaro or Arusha airport, and your first night in Arusha is covered by us.</li>
         <li>Your guide briefs you before you set off and picks you up from your hotel on the first morning.</li>
         <li>After the safari we drop you at the airport or your hotel.</li>
         <li>Every day can be changed: add a park, swap a camp or extend your trip.</li>
@@ -117,7 +115,8 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
 
   <section class="section section--white">
     <div class="wrap">
-      <h2>Other safaris</h2>
+      <h2>Other sample safaris</h2>
+      <p class="muted">Or <a href="/planner">plan your own</a> with every camp and lodge and live prices.</p>
       <div class="others">{others.map((o) => <TourRow tour={o} />)}</div>
     </div>
   </section>
@@ -128,8 +127,13 @@ const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${t.sh
   .crumbs a { color: var(--ink-2); }
   .top { padding: 1.5rem 0 3.5rem; }
   .top__grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: start; }
-  .tier { font-family: var(--display); font-weight: 600; color: var(--olive); margin-bottom: 0.4rem; }
+  .tier { font-family: var(--display); font-weight: 600; color: var(--ink-2); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .tag { padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+  .tag--budget { background: #6f7d3c; } .tag--comfort { background: #9a6a2f; } .tag--premium { background: #c89a4b; } .tag--luxury { background: #2e241b; }
+  td small { display: block; font-size: 0.8rem; color: var(--ink-2); font-family: inherit; font-weight: 400; }
   h1 { font-size: clamp(2rem, 4.4vw, 3rem); }
+  .from { font-size: 1.1rem; margin: 0 0 1.8rem; }
+  .from strong { font-family: var(--display); font-size: 1.5rem; }
   .route-box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.4rem 1.5rem 1.2rem; margin: 1.8rem 0; }
   .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 2rem; margin: 0; }
   .facts dt { font-family: var(--display); font-weight: 600; font-size: 0.85rem; color: var(--ink-2); }

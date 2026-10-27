@@ -1,6 +1,7 @@
 # Old Wix URLs -> new site (Cloudflare Pages / Netlify format)
-/product-page/luxury-serengeti-ngorongoro-safari-3d2n  /product-page/serengeti-ngorongoro-safari-3d2n-mid-range  301
-/product-page/copy-of-serengeti-ngorongoro-safari-3d2n-mid-range  /product-page/serengeti-ngorongoro-safari-3d2n-mid-range  301
+/product-page/luxury-serengeti-ngorongoro-safari-3d2n  /product-page/luxury-serengeti-ngorongoro-safari-5-days  301
+/product-page/serengeti-ngorongoro-safari-3d2n-mid-range  /product-page/tarangire-serengeti-ngorongoro-safari-5d4n-mid-range  301
+/product-page/copy-of-serengeti-ngorongoro-safari-3d2n-mid-range  /product-page/tarangire-serengeti-ngorongoro-safari-5d4n-mid-range  301
 /category/all-products  /tanzania-safari-packages  301
 /accessibility-statement  /about  301
 /profile/*  /  301
