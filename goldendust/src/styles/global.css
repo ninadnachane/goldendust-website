@@ -113,3 +113,24 @@ p { margin: 0 0 1em; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* tier pill used on park, lodge and theme pages */
+.tier { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: #9a6a2f; }
+.tier--budget { background: #6f7d3c; }
+.tier--comfort { background: #9a6a2f; }
+.tier--premium { background: #c89a4b; }
+.tier--luxury { background: #2e241b; }
+
+/* guide pages (parks, themes, migration, lodges) */
+.gp__hero { width: 100%; border-radius: 10px; aspect-ratio: 2 / 1; object-fit: cover; background: var(--line); margin: 1.5rem 0 2rem; }
+.gp__crumbs { font-size: 0.88rem; color: var(--ink-2); margin-bottom: 1rem; }
+.gp__crumbs a { color: var(--ink-2); }
+.gp__body { display: grid; grid-template-columns: minmax(0, 40rem) 1fr; gap: 3rem; align-items: start; }
+.gp__facts { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.3rem 1.4rem; font-size: 0.95rem; position: sticky; top: 1rem; }
+.gp__facts dl { margin: 0 0 1.2rem; display: grid; gap: 0.7rem; }
+.gp__facts dt { font-family: var(--display); font-weight: 600; font-size: 0.8rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.gp__facts dd { margin: 0; }
+.gp__facts .btn { width: 100%; justify-content: center; margin-top: 0.5rem; }
+.gp__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+@media (max-width: 960px) { .gp__body { grid-template-columns: 1fr; } .gp__facts { position: static; } .gp__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .gp__grid { grid-template-columns: 1fr; } }

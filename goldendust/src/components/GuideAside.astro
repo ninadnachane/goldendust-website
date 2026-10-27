@@ -1,0 +1,11 @@
+---
+import WaButton from "./WaButton.astro";
+interface Props { facts?: [string, string][]; title?: string }
+const { facts = [], title = "Planning a safari?" } = Astro.props;
+---
+<aside class="gp__facts">
+  {facts.length > 0 && <dl>{facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}
+  <p><strong>{title}</strong> Talk to our guides in Arusha, or price your own route in the planner.</p>
+  <WaButton label="Ask us on WhatsApp" />
+  <a class="btn btn--ghost" href="/planner">Open the itinerary planner</a>
+</aside>

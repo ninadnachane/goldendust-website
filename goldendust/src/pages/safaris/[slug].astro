@@ -1,0 +1,52 @@
+---
+import Base from "../../layouts/Base.astro";
+import TourRow from "../../components/TourRow.astro";
+import GuideAside from "../../components/GuideAside.astro";
+import Faq from "../../components/Faq.astro";
+import { themes, themeUrl, type Theme } from "../../data/themes";
+import { tours } from "../../data/tours";
+import { breadcrumbs, faqSchema } from "../../lib/schema";
+
+export function getStaticPaths() {
+  return themes.map((t) => ({ params: { slug: t.slug }, props: { theme: t } }));
+}
+const { theme: t } = Astro.props as { theme: Theme };
+const url = themeUrl(t);
+const related = tours.filter(t.tours).slice(0, 6);
+const others = themes.filter((x) => x.slug !== t.slug);
+const schema: object[] = [breadcrumbs([["Home", "/"], [t.name, url]])];
+if (t.faqs.length) schema.push(faqSchema(t.faqs));
+---
+<Base title={`${t.seoTitle} | Golden Dust Safaris`} description={t.description} schema={schema}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/tanzania-safari-packages">Safaris</a></nav>
+      <h1>{t.h1}</h1>
+      <p class="lede measure">{t.lede}</p>
+      <img class="gp__hero" src={t.hero} alt={t.heroAlt} width="1200" height="600" />
+      <div class="gp__body">
+        <div class="prose">{t.sections.map((s) => (<><h2>{s.h}</h2>{s.p.map((x) => <p set:html={x} />)}</>))}</div>
+        <GuideAside />
+      </div>
+    </div>
+  </article>
+  {related.length > 0 && (
+    <section class="section section--white">
+      <div class="wrap">
+        <h2>Sample safaris</h2>
+        <div class="gp__grid">{related.map((x) => <TourRow tour={x} />)}</div>
+        <p style="margin-top:1.5rem">Every sample can be changed, or <a href="/planner">plan your own</a>.</p>
+      </div>
+    </section>
+  )}
+  {t.faqs.length > 0 && <section class="section"><div class="wrap measure"><Faq items={t.faqs} /></div></section>}
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>More ways to travel</h2>
+      <ul class="others">{others.map((o) => <li><a href={themeUrl(o)}>{o.name}</a></li>)}<li><a href="/parks">Park guides</a></li></ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .others { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; }
+</style>

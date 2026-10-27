@@ -1,0 +1,302 @@
+[
+ {
+  "name": "African Safari",
+  "area": "lake-manyara",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Eileen's Trees Inn",
+  "area": "lake-manyara",
+  "tier": "Premium"
+ },
+ {
+  "name": "Kirurumu Manyara Lodge",
+  "area": "lake-manyara",
+  "tier": "Premium"
+ },
+ {
+  "name": "Mawe Mawe Manyara Lodge",
+  "area": "lake-manyara",
+  "tier": "Comfort"
+ },
+ {
+  "name": "&Beyond Lake Manyara",
+  "area": "lake-manyara",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Escarpment Luxury Lodge",
+  "area": "lake-manyara",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Lake Manyara Serena",
+  "area": "lake-manyara",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Ang'ata Tarangire Camp",
+  "area": "tarangire",
+  "tier": "Premium"
+ },
+ {
+  "name": "Tarangire Simba Lodge",
+  "area": "tarangire",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Olkambe Simba Lodge",
+  "area": "tarangire",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Zuri Kilima Siri",
+  "area": "tarangire",
+  "tier": "Premium"
+ },
+ {
+  "name": "Burunge Tented Lodge",
+  "area": "tarangire",
+  "tier": "Premium"
+ },
+ {
+  "name": "Baobab Tented Camp Tarangire",
+  "area": "tarangire",
+  "tier": "Premium"
+ },
+ {
+  "name": "Lemala Mpingo Lodge",
+  "area": "tarangire",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Whistling Thorn",
+  "area": "tarangire",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Sanctuary Swala",
+  "area": "tarangire",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Tarangire Public Campsite",
+  "area": "tarangire",
+  "tier": "Budget"
+ },
+ {
+  "name": "Karatu Villa",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Marera Valley",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Farm of Dreams Lodge",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Pillar Eco Lodge",
+  "area": "karatu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Karatu Simba Lodge",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Rhotia Valley Simba Lodge",
+  "area": "karatu",
+  "tier": "Premium"
+ },
+ {
+  "name": "The Manor",
+  "area": "karatu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Gibb's Farm",
+  "area": "karatu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Tloma Lodge",
+  "area": "karatu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Embalakai Ngorongoro",
+  "area": "ngorongoro",
+  "tier": "Premium"
+ },
+ {
+  "name": "Country Lodge Karatu",
+  "area": "ngorongoro",
+  "tier": "Premium"
+ },
+ {
+  "name": "Ang'ata Ngorongoro Camp",
+  "area": "ngorongoro",
+  "tier": "Premium"
+ },
+ {
+  "name": "Ngorongoro Sopa Lodge",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Ngorongoro Rhino Lodge",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Ngorongoro Wildlife Lodge",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Ngorongoro Crater Camp (A&K Sanctuary)",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Simba Public Campsite (Ngorongoro)",
+  "area": "ngorongoro",
+  "tier": "Budget"
+ },
+ {
+  "name": "Friends Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Engiterat Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Serengeti Safari Lodge",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Serengeti Classic View (Central)",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Tukaone Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Shuhudia Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Nyikani Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Out in Africa Serengeti Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Serengeti Central Lodge",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Arukore Simba Camp",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Sound of Silence Serengeti Tented Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Anga ya Nyota Serengeti",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Serengeti Serena",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "One Nature Hotel",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Kubukubu Tented Lodge",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Ole Serai Luxury",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Kati Kati Camp (Central)",
+  "area": "central-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Seronera Public Campsite (Central Serengeti)",
+  "area": "central-serengeti",
+  "tier": "Budget"
+ },
+ {
+  "name": "Serengeti Simba Lodge",
+  "area": "western-serengeti",
+  "tier": "Premium"
+ },
+ {
+  "name": "Serengeti Classic View (Ndutu)",
+  "area": "ndutu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Nasikia Ndutu",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Ang'ata Migration Camp",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Katikati Camp (Ndutu)",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Ndutu Safari Lodge",
+  "area": "ndutu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Lake Ndutu Luxury Tented",
+  "area": "ndutu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Lake Masek Tented Lodge",
+  "area": "ndutu",
+  "tier": "Luxury"
+ }
+]

@@ -1,0 +1,21 @@
+---
+import { type PartnerLodge, AREAS, lodgeUrl } from "../data/lodges";
+interface Props { lodge: PartnerLodge }
+const { lodge: l } = Astro.props;
+---
+<a class="lc" href={lodgeUrl(l)}>
+  <img src={l.photos[0]} alt={l.name} loading="lazy" width="600" height="400" />
+  <span class="lc__b">
+    <span class={`tier tier--${l.tier.toLowerCase()}`}>{l.tier}</span>
+    <span class="lc__n">{l.name}</span>
+    <span class="lc__a">{AREAS[l.area].name}</span>
+  </span>
+</a>
+<style>
+  .lc { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none; }
+  .lc:hover .lc__n { color: var(--green); text-decoration: underline; }
+  .lc img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: var(--line); }
+  .lc__b { display: grid; gap: 0.35rem; padding: 0.9rem 1.1rem 1.1rem; justify-items: start; }
+  .lc__n { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+  .lc__a { font-size: 0.9rem; color: var(--ink-2); }
+</style>

@@ -1,0 +1,92 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import LodgeCard from "../components/LodgeCard.astro";
+import GuideAside from "../components/GuideAside.astro";
+import Faq from "../components/Faq.astro";
+import { tours } from "../data/tours";
+import { lodgesWithPages } from "../data/lodges";
+import { breadcrumbs, faqSchema } from "../lib/schema";
+
+// Typical pattern only: the herds follow the rain, so timing shifts by weeks from year to year.
+const months = [
+  ["January", "Southern Serengeti and Ndutu", "The herds settle on the short-grass plains in the south. Calving starts."],
+  ["February", "Southern Serengeti and Ndutu", "The peak of the calving season. Lots of predator action around the herds."],
+  ["March", "Southern Serengeti and Ndutu", "Calving continues. The calves grow stronger and the herds start to gather."],
+  ["April", "Moving north-west through the central Serengeti", "The long rains. The herds leave the plains and spread out. Quiet and green."],
+  ["May", "Central and western Serengeti", "Long columns of wildebeest on the move. The rut begins."],
+  ["June", "Western corridor", "The herds reach the Grumeti River, and the first crossings can happen."],
+  ["July", "Western and northern Serengeti", "Most herds head north. The Mara River crossings can start late in the month."],
+  ["August", "Northern Serengeti", "Mara River crossing season. Some herds move into Kenya's Maasai Mara."],
+  ["September", "Northern Serengeti", "Crossings continue, back and forth across the Mara River."],
+  ["October", "Northern Serengeti", "The herds start drifting south as the short rains approach."],
+  ["November", "Eastern and central Serengeti", "The short rains bring fresh grass, and the herds move south."],
+  ["December", "Southern Serengeti and Ndutu", "The herds arrive back on the southern plains, ready to calve."],
+];
+const faqs = [
+  { q: "What is the best month to see the Great Migration?", a: "For river crossings, July to September in the northern Serengeti. For the calving season and predators, January to March in the south around Ndutu." },
+  { q: "Can you guarantee a river crossing?", a: "No. The herds can wait on the bank for hours or days, and they sometimes turn back. Two or three nights in the north gives you a good chance." },
+  { q: "Where does the Great Migration happen?", a: "In the Serengeti ecosystem, which includes the Serengeti National Park, the Ngorongoro Conservation Area around Ndutu, and Kenya's Maasai Mara." },
+];
+const south = lodgesWithPages.filter((l) => l.area === "ndutu");
+const central = lodgesWithPages.filter((l) => l.area === "central-serengeti").slice(0, 3);
+const related = tours.filter((t) => t.route.some((r) => /Serengeti/.test(r))).slice(0, 3);
+const facts: [string, string][] = [
+  ["Calving", "About January to March, south and Ndutu"],
+  ["Grumeti crossings", "Around June, western corridor"],
+  ["Mara crossings", "About July to October, north"],
+  ["Where we'd stay", "Close to wherever the herds are that month"],
+];
+---
+<Base title="Great Migration Serengeti: Month-by-Month Guide | Golden Dust Safaris"
+  description="Where the Great Migration usually is in each month, from calving at Ndutu to the Mara River crossings, and where to stay to see it. A guide from our Arusha safari team."
+  schema={[breadcrumbs([["Home", "/"], ["Parks", "/parks"], ["Great Migration", "/great-migration-serengeti"]]), faqSchema(faqs)]}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/parks">Parks</a> / <a href="/parks/serengeti-national-park">Serengeti</a></nav>
+      <h1>The Great Migration, month by month</h1>
+      <p class="lede measure">Well over a million wildebeest, with zebras and gazelles, circle the Serengeti every year following the rain. Here's where they usually are, so you can pick your month and your camps.</p>
+      <img class="gp__hero" src="/images/gallery/guide-view-gazelles-serengeti.webp" alt="Herds on the Serengeti plains, seen from the guide's seat" width="1200" height="600" />
+      <div class="gp__body">
+        <div class="prose">
+          <p>The migration isn't a single event. It's a loop that never stops, and the timing changes every year with the rain. Treat the months below as a guide, not a timetable. Before you book, we check where the herds are and suggest camps close to them.</p>
+          <div class="mt" role="region" aria-label="Migration by month" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">Month</th><th scope="col">Where the herds usually are</th><th scope="col">What's happening</th></tr></thead>
+              <tbody>{months.map(([m, w, t]) => <tr><th scope="row">{m}</th><td>{w}</td><td>{t}</td></tr>)}</tbody>
+            </table>
+          </div>
+          <h2>Calving season: January to March</h2>
+          <p>On the short-grass plains of the southern Serengeti and around Ndutu, a huge number of calves are born within a few weeks. Lions, cheetahs and hyenas follow the herds, so it's one of the best times of year for predators. It's also quieter and cheaper than the July to October peak.</p>
+          <h2>River crossings: June to October</h2>
+          <p>The Grumeti River in the western corridor comes first, around June. From about July, the herds reach the Mara River in the far north, where the famous crossings happen. The north is a long drive from Arusha, so we plan at least two nights there, or a flight.</p>
+          <h2>The rest of the year</h2>
+          <p>In April and May, the long rains turn the park green and the herds spread out across the central and western Serengeti. In November and December they head south again. These months are the quietest, and the resident wildlife of the central Serengeti is there all year.</p>
+          <p>See also our <a href="/parks/serengeti-national-park">Serengeti guide</a> and the <a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">best time to visit Tanzania</a>.</p>
+        </div>
+        <GuideAside facts={facts} title="Want to see the herds?" />
+      </div>
+    </div>
+  </article>
+  {south.length > 0 && (
+    <section class="section section--white">
+      <div class="wrap">
+        <h2>Camps for the calving season (Ndutu)</h2>
+        <div class="gp__grid">{south.map((l) => <LodgeCard lodge={l} />)}</div>
+        {central.length > 0 && <><h2 style="margin-top:2.5rem">Camps in the central Serengeti</h2><div class="gp__grid">{central.map((l) => <LodgeCard lodge={l} />)}</div></>}
+        <p style="margin-top:1.5rem"><a href="/lodges">All the lodges and camps we work with</a></p>
+      </div>
+    </section>
+  )}
+  <section class="section">
+    <div class="wrap">
+      <h2>Serengeti sample safaris</h2>
+      <div class="gp__grid">{related.map((t) => <TourRow tour={t} />)}</div>
+    </div>
+  </section>
+  <section class="section section--white"><div class="wrap measure"><Faq items={faqs} /></div></section>
+</Base>
+<style>
+  .mt { overflow-x: auto; }
+  .mt th[scope="row"] { font-family: var(--display); font-weight: 600; white-space: nowrap; }
+</style>

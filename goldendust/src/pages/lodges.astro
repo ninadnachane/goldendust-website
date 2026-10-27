@@ -1,0 +1,28 @@
+---
+import Base from "../layouts/Base.astro";
+import LodgeCard from "../components/LodgeCard.astro";
+import { lodgesWithPages, AREAS, AREA_ORDER } from "../data/lodges";
+import { parkUrl } from "../data/parks";
+import { breadcrumbs } from "../lib/schema";
+const groups = AREA_ORDER.map((a) => ({ id: a, ...AREAS[a], list: lodgesWithPages.filter((l) => l.area === a) })).filter((g) => g.list.length);
+---
+<Base title="Safari Lodges & Camps in Tanzania: Serengeti, Ngorongoro, Tarangire | Golden Dust Safaris"
+  description="Photos of the safari lodges and tented camps we work with in the Serengeti, Ngorongoro, Karatu, Tarangire and Lake Manyara, from Comfort to Luxury."
+  schema={[breadcrumbs([["Home", "/"], ["Lodges", "/lodges"]])]}>
+  <section class="section">
+    <div class="wrap">
+      <h1>Safari lodges and camps we work with</h1>
+      <p class="lede measure">Real photos of the places our guests stay, grouped by area. Each one is tagged Comfort, Premium or Luxury, the same styles you choose in our <a href="/planner">planner</a>.</p>
+      {groups.map((g) => (
+        <section class="grp">
+          <h2><a href={parkUrl(g.park)}>{g.name}</a></h2>
+          <div class="gp__grid">{g.list.map((l) => <LodgeCard lodge={l} />)}</div>
+        </section>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .grp { margin-top: 2.5rem; }
+  .grp h2 a { color: var(--ink); }
+</style>

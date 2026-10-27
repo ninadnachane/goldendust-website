@@ -1,0 +1,35 @@
+---
+import Base from "../layouts/Base.astro";
+import { parks, parkUrl } from "../data/parks";
+import { breadcrumbs } from "../lib/schema";
+---
+<Base title="Tanzania National Parks Guide: Serengeti, Ngorongoro, Tarangire | Golden Dust Safaris"
+  description="Local guides to the northern Tanzania safari parks: the Serengeti, Ngorongoro Crater, Tarangire, Lake Manyara and Karatu. Best time to go, wildlife, fees and lodges."
+  schema={[breadcrumbs([["Home", "/"], ["Parks", "/parks"]])]}>
+  <section class="section">
+    <div class="wrap">
+      <h1>Tanzania's northern safari parks</h1>
+      <p class="lede measure">The parks we know best, as our guides see them: what each one is good for, when to go, and where to stay.</p>
+      <div class="gp__grid pk">
+        {parks.map((p) => (
+          <a class="pk__c" href={parkUrl(p)}>
+            <img src={p.hero} alt={p.heroAlt} loading="lazy" width="600" height="300" />
+            <span class="pk__b"><span class="pk__n">{p.name}</span><span class="muted">{p.lede}</span></span>
+          </a>
+        ))}
+        <a class="pk__c" href="/great-migration-serengeti">
+          <img src="/images/gallery/guide-view-gazelles-serengeti.webp" alt="Herds on the Serengeti plains" loading="lazy" width="600" height="300" />
+          <span class="pk__b"><span class="pk__n">The Great Migration, month by month</span><span class="muted">Where the herds usually are in each month of the year, and where to stay to see them.</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .pk { margin-top: 2rem; }
+  .pk__c { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none; }
+  .pk__c img { width: 100%; aspect-ratio: 2 / 1; object-fit: cover; display: block; background: var(--line); }
+  .pk__b { display: grid; gap: 0.4rem; padding: 1rem 1.2rem 1.2rem; font-size: 0.95rem; }
+  .pk__n { font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+  .pk__c:hover .pk__n { color: var(--green); text-decoration: underline; }
+</style>
