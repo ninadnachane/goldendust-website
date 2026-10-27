@@ -422,7 +422,7 @@ import { site, waLink } from "../lib/site";
       if (!r) { price.innerHTML = `<p class="sum__wait">We couldn't work out the price just now. Send us your itinerary and we'll price it for you.</p>`; send.removeAttribute("aria-disabled"); return; }
       if (!r.ok) { mini(`<span class="sum__mt">Check your trip</span>`); price.innerHTML = `<ul class="sum__err">${r.errors.map((e: string) => `<li>${esc(e)}</li>`).join("")}</ul>`; send.setAttribute("aria-disabled", "true"); return; }
       const p = r.priced;
-      mini(`<span class="sum__ml">Total</span><strong>${usd(p.total)}</strong><span class="sum__mp">${usd(r.perPerson)} pp</span>`);
+      mini(`<strong>${usd(r.perPerson)}</strong><span class="sum__ml">per person</span><span class="sum__mp">Total ${usd(p.total)}</span>`);
       price.innerHTML = `<dl class="sum__rows">
           <div><dt>Park fees</dt><dd>${usd(p.park)}</dd></div>
           <div><dt>Vehicle, guide &amp; transfers${r.people.vehicles > 1 ? ` (${r.people.vehicles} vehicles)` : ""}</dt><dd>${usd(p.transport)}</dd></div>
@@ -431,8 +431,9 @@ import { site, waLink } from "../lib/site";
           ${p.extras ? `<div><dt>Add-ons</dt><dd>${usd(p.extras)}</dd></div>` : ""}
           <div><dt>Our margin</dt><dd>${usd(p.margin)}</dd></div>
         </dl>
-        <p class="sum__total"><span>Total</span><strong>${usd(p.total)}</strong></p>
-        <p class="sum__pp">about ${usd(r.perPerson)} per person${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</p>`;
+        <div class="sum__hl"><span>Price per person</span><strong>${usd(r.perPerson)}</strong>
+          <small>${r.people.adults + r.people.children} paying guest${r.people.adults + r.people.children > 1 ? "s" : ""}${r.people.infants ? `, under-${O.settings.childMinAge}s free` : ""}</small></div>
+        <p class="sum__total"><span>Total for your group</span><strong>${usd(p.total)}</strong></p>`;
       lastTotal = p.total;
       send.removeAttribute("aria-disabled");
       $("[data-pdf]").removeAttribute("aria-disabled");
@@ -683,9 +684,12 @@ import { site, waLink } from "../lib/site";
   .pl .sum__rows { margin: 0; border-top: 1px solid var(--line); padding-top: 0.7rem; }
   .pl .sum__rows div { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.95rem; }
   .pl .sum__rows dd { margin: 0; font-variant-numeric: tabular-nums; }
-  .pl .sum__total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--ink); margin: 0.6rem 0 0; padding-top: 0.6rem; }
-  .pl .sum__total strong { font-family: var(--display); font-size: 1.6rem; }
-  .pl .sum__pp { margin: 0.1rem 0 0; text-align: right; color: var(--ink-2); font-size: 0.88rem; }
+  .pl .sum__hl { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0 0.8rem; margin: 0.8rem 0 0; padding: 0.75rem 0.9rem; background: var(--tint); border: 1px solid var(--gold); border-radius: 12px; }
+  .pl .sum__hl span { font-weight: 600; }
+  .pl .sum__hl strong { font-family: var(--display); font-size: 1.75rem; line-height: 1.1; }
+  .pl .sum__hl small { grid-column: 1 / -1; color: var(--ink-2); font-size: 0.82rem; }
+  .pl .sum__total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); margin: 0.7rem 0 0; padding-top: 0.6rem; font-size: 0.95rem; }
+  .pl .sum__total strong { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
   .pl .sum__wait { color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 0.8rem; margin: 0; }
   .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
   .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
@@ -716,6 +720,8 @@ import { site, waLink } from "../lib/site";
   @media (max-width: 900px) { .pl .toast { bottom: 8.5rem; } }
   .pl .pl__fallback { margin-top: 1.5rem; }
   .pl .sum__mini { display: none; }
+  /* cookie banner goes to the top on phones so it doesn't cover the price bar */
+  @media (max-width: 900px) { body:has([data-planner]) .ck { top: 0.75rem; bottom: auto; } }
   @media (max-width: 900px) {
     .pl .pl__grid { grid-template-columns: 1fr; margin-top: 1rem; }
     .pl { padding-bottom: 7.5rem; }
@@ -726,7 +732,7 @@ import { site, waLink } from "../lib/site";
     .pl [data-mini] { display: flex; align-items: baseline; gap: 0.45rem; flex: 1; min-width: 0; }
     .pl .sum__mini strong { font-family: var(--display); font-size: 1.3rem; }
     .pl .sum__ml, .pl .sum__mp, .pl .sum__mt { color: var(--ink-2); font-size: 0.9rem; }
-    .pl .sum__mp { margin-right: auto; }
+    .pl .sum__ml { margin-right: auto; }
     .pl .sum__mt { margin-right: auto; }
     .pl .sum__chev { margin-left: auto; width: 0.6rem; height: 0.6rem; border: solid var(--ink); border-width: 2px 2px 0 0; transform: rotate(-45deg) translateY(0.15rem); transition: transform 0.2s; }
     .pl .sum.is-open .sum__chev { transform: rotate(135deg) translateY(-0.1rem); }
