@@ -90,7 +90,7 @@ import { site } from "../lib/site";
       const date = (from: string, to?: string) => `<div class="dt"><span class="dt__d">${dd(from)}${to ? `<i>–</i>${dd(to)}` : ""}</span><span class="dt__m">${to && mon(from) !== mon(to) ? `${mon(from)}–${mon(to)}` : mon(from)}</span></div>`;
       const stay = (name?: string) => name ? `<div class="st__stay"><span>Overnight</span><b>${esc(name)}</b></div>` : `<div></div>`;
       const rows: string[] = [];
-      rows.push(`<section class="st">${date(t.startDate)}<div class="st__body"><p class="eyebrow">Day 1 · Arrival</p><h3>${esc(o.arrivalName)}</h3><p>Welcome to Tanzania. Transfer to your hotel and an evening safari briefing with your guide.</p></div>${stay(arrival?.name ?? o.arrivalName)}</section>`);
+      rows.push(`<section class="st">${date(t.startDate)}<div class="st__body"><p class="eyebrow">Day 1 · Arrival</p><h3>${esc(o.arrivalName)}</h3><p><b>Your first night in Arusha is covered by us.</b> Welcome to Tanzania. Transfer to your hotel and an evening safari briefing with your guide.</p></div>${stay(arrival?.name ?? o.arrivalName)}</section>`);
       let d = 1;
       for (const s of t.stops) {
         const a = o.areas.find((x) => x.id === s.areaId);

@@ -53,7 +53,8 @@ import { site, waLink } from "../lib/site";
           <section class="step" data-step="3" data-where>
             <button type="button" class="step__head" data-open="3"><span class="step__n">3</span><span class="step__t">Where to, and where to stay?</span><span class="step__sum" data-sum="3"></span><span class="step__edit">Change</span></button>
             <div class="step__body">
-              <p class="note">Night 1 is in <strong data-arrival-name>Arusha</strong><span data-arrival-inc>, included</span>. Choose areas for your <strong data-safari-nights></strong> (we'll put them in the best order), then pick a camp or lodge in each. Every option is tagged <span class="tagkey">Budget · Comfort · Premium · Luxury</span>, and you can mix them.</p>
+              <p class="onus"><span class="onus__star" aria-hidden="true">★</span><span>Your first night in <strong data-arrival-name>Arusha</strong> is covered by us.</span></p>
+              <p class="note">Choose areas for your <strong data-safari-nights></strong> (we'll put them in the best order), then pick a camp or lodge in each. Every option is tagged <span class="tagkey">Budget · Comfort · Premium · Luxury</span>, and you can mix them.</p>
               <div class="chips" data-areas></div>
               <div class="stops" data-stops></div>
               <div class="addons" data-addons hidden><p class="addons__h">Add-ons <small>(optional)</small></p><div class="addons__list" data-addon-list></div></div>
@@ -73,7 +74,7 @@ import { site, waLink } from "../lib/site";
             </div>
             <button type="button" class="btn sum__wa" data-send aria-disabled="true">Send my itinerary on WhatsApp</button>
             <button type="button" class="sum__pdf" data-pdf aria-disabled="true">Download as PDF</button>
-            <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide, accommodation<span data-arrival-inc>, and your first night in Arusha</span>. International flights, visas, tips and drinks are extra.</p>
+            <p class="sum__fine">Prices in USD for your whole group. Includes park fees, vehicle, guide and accommodation. International flights, visas, tips and drinks are extra.</p>
           </div>
         </aside>
       </div>
@@ -306,7 +307,7 @@ import { site, waLink } from "../lib/site";
 
   function renderTrip() {
     const items: string[] = [];
-    if (st.date || st.stops.length) items.push(`<li>Arrive in ${esc(O.arrivalName)}${O.arrivalPriced ? ", first night included" : ""}</li>`);
+    if (st.date || st.stops.length) items.push(`<li>Arrive in ${esc(O.arrivalName)}<span class="onus-tag">First night on us</span></li>`);
     for (const s of st.stops) {
       const a = O.areas.find((x) => x.id === s.areaId)!;
       const l = O.lodges.find((x) => x.id === s.lodgeId);
@@ -575,6 +576,9 @@ import { site, waLink } from "../lib/site";
   .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
   .pl .chip[aria-pressed="true"] small { color: var(--dark); }
   .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+  .pl .onus { display: flex; gap: 0.5rem; align-items: center; margin: 0 0 0.7rem; padding: 0.6rem 0.85rem; background: var(--tint); border: 1px solid var(--gold); border-radius: 10px; font-weight: 600; }
+  .pl .onus .onus__star { color: var(--gold); }
+  .pl .sum__trip li .onus-tag { display: inline-block; justify-self: start; width: max-content; margin: 0.15rem 0 0; padding: 0.05rem 0.5rem; border-radius: 999px; background: var(--gold); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; vertical-align: 0.1em; }
   .pl .stop__none { margin: 0.6rem 0 0; color: var(--ink-2); font-size: 0.92rem; }
   .pl .addons { margin-top: 1.2rem; }
   .pl .addons[hidden] { display: none; }

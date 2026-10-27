@@ -27,7 +27,7 @@ export const defaultConfig: Config = {
     adminPct: 10, marginPct: 7, leadDays: 20,
     childMinAge: 5, childMaxAge: 15,
     minTotalNights: 2, maxTotalNights: 21, maxGuests: 21,
-    craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80, addonAdminPct: 2, arushaNightAdult: 0, arushaNightChild: 0, // TODO: set the fixed Arusha rate in /admin
+    craterFee: 295, ncaZoneId: "ncaa", airportTransfer: 80, addonAdminPct: 2, arushaNightAdult: 55, arushaNightChild: 55, // Arusha hotel, first night: fixed rate per person (assumed $55, Oct 2026)
   },
   // Incl. 18% VAT, peak season, non-East-African visitors. TANAPA figures from the 2023/24 tariff.
   // NCA (Ngorongoro) transit/entry $71.80 per adult and crater descent $295 per vehicle confirmed by Golden Dust (18 Oct 2026).
