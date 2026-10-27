@@ -71,9 +71,6 @@
       <h2>Add-ons</h2>
       <p class="hint">Optional extras guests can tick in the planner. Prices include VAT. Add-ons get no margin. "Park fee" add-ons get no admin fee; the others get the add-on admin fee (Costs above). The crater drive also adds a Ngorongoro entry day when the trip doesn't already stay in the conservation area.</p>
       <div data-addons-t></div>
-      <h2>Arusha arrival night</h2>
-      <p class="hint">Every trip starts with one night in Arusha, included. The price uses the fixed Arusha rate above, whichever hotel it is. Pick the hotel shown for each category (add Arusha hotels in "Lodges &amp; camps" with area "Arusha").</p>
-      <div class="cards" data-arrival></div>
       <h2>Itinerary PDF text</h2>
       <p class="hint">Printed on every itinerary PDF. One item per line.</p>
       <div class="doctext" data-doctext></div>
@@ -250,10 +247,6 @@
         markDirty();
       }));
 
-      const ar = $("[data-arrival]");
-      const arusha = cfg.lodges.filter((l) => l.areaId === "arusha");
-      ar.innerHTML = CATEGORIES.map((c) => `<label class="card">${c.name}<select data-arr="${c.id}">${arusha.map((l) => `<option value="${esc(l.id)}" ${cfg.arrival.lodges[c.id] === l.id ? "selected" : ""}>${esc(l.name)}${l.active ? "" : " (inactive)"}</option>`).join("")}</select></label>`).join("");
-      ar.querySelectorAll<HTMLSelectElement>("[data-arr]").forEach((el) => el.addEventListener("change", () => { (cfg.arrival.lodges as any)[el.dataset.arr!] = el.value; markDirty(); }));
     }
 
     function renderAddons() {
