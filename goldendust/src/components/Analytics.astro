@@ -3,12 +3,19 @@
 // The choice is kept in localStorage ("gd_consent"); the footer link "Cookie settings" opens the banner again.
 // Other scripts can call window.gdTrack(eventName, params) — it does nothing without consent.
 import { site } from "../lib/site";
+import { langOf } from "../i18n";
+const T = {
+  en: { aria: "Cookie choice", p: "We use Google Analytics cookies to see how visitors use our website, so we can improve it. No ads, and we don't sell your data.", yes: "Accept", no: "Decline" },
+  nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics om te zien hoe bezoekers onze website gebruiken, zodat we hem kunnen verbeteren. Geen advertenties, en we verkopen je gegevens niet.", yes: "Accepteren", no: "Weigeren" },
+  de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics, um zu sehen, wie Besucher unsere Website nutzen, damit wir sie verbessern können. Keine Werbung, und wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", no: "Ablehnen" },
+  fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics pour voir comment les visiteurs utilisent notre site et l'améliorer. Pas de publicité, et nous ne vendons pas vos données.", yes: "Accepter", no: "Refuser" },
+}[langOf(Astro.url)];
 ---
-<div class="ck" data-ck hidden role="region" aria-label="Cookie choice">
-  <p>We use Google Analytics cookies to see how visitors use our website, so we can improve it. No ads, and we don't sell your data.</p>
+<div class="ck" data-ck hidden role="region" aria-label={T.aria}>
+  <p>{T.p}</p>
   <div class="ck__b">
-    <button type="button" class="btn" data-ck-yes>Accept</button>
-    <button type="button" class="btn btn--ghost" data-ck-no>Decline</button>
+    <button type="button" class="btn" data-ck-yes>{T.yes}</button>
+    <button type="button" class="btn btn--ghost" data-ck-no>{T.no}</button>
   </div>
 </div>
 <script is:inline define:vars={{ id: site.gaId }}>

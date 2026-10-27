@@ -130,3 +130,9 @@ export const themes: Theme[] = [
 ];
 
 export const themeUrl = (t: Theme | string) => `/safaris/${typeof t === "string" ? t : t.slug}`;
+
+// The same pages with their text in another language (see src/data/i18n/themes.ts).
+import { THEMES_I18N } from "./i18n/themes";
+import type { Lang } from "../i18n";
+export const themesFor = (lang: Lang): Theme[] =>
+  lang === "en" ? themes : themes.map((t) => ({ ...t, ...(THEMES_I18N[lang]?.[t.slug] ?? {}) }));

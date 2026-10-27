@@ -1,0 +1,814 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import { site, waLink } from "../lib/site";
+import { langOf, LOCALE } from "../i18n";
+import { PLANNER_TEXT, AREA_TEXT, CATEGORY_TEXT, ADDON_TEXT } from "../i18n/planner";
+const lang = langOf(Astro.url);
+const P = PLANNER_TEXT[lang] as Record<string, any>;
+// everything the script needs, read from data-i18n
+const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT, cats: CATEGORY_TEXT, addons: ADDON_TEXT });
+---
+<Base
+  title={`${P.title} | Golden Dust Safaris`}
+  description={P.desc}
+  noindex
+>
+  <section class="section pl" data-planner data-wa={site.whatsapp} data-i18n={i18n}>
+    <div class="wrap">
+      <header class="pl__head">
+        <h1>{P.h1}</h1>
+        <p class="lede">{P.lede[0]}<a href={waLink()} target="_blank" rel="noopener">{P.lede[1]}</a>{P.lede[2]}</p>
+      </header>
+
+      <div class="pl__grid">
+        <div class="pl__steps">
+          <section class="step" data-step="1">
+            <button type="button" class="step__head" data-open="1"><span class="step__n">1</span><span class="step__t">{P.s1}</span><span class="step__sum" data-sum="1"></span><span class="step__edit">{P.change}</span></button>
+            <div class="step__body">
+              <div class="row">
+                <div class="count">
+                  <span class="count__l">{P.adultsL}</span>
+                  <div class="count__c"><button type="button" data-dec="adults" aria-label={P.fewerAdults}>−</button><output data-out="adults">2</output><button type="button" data-inc="adults" aria-label={P.moreAdults}>+</button></div>
+                </div>
+                <div class="count">
+                  <span class="count__l">{P.childrenL} <small data-child-note></small></span>
+                  <div class="count__c"><button type="button" data-dec="children" aria-label={P.fewerChildren}>−</button><output data-out="children">0</output><button type="button" data-inc="children" aria-label={P.moreChildren}>+</button></div>
+                </div>
+              </div>
+              <div class="ages" data-ages></div>
+              <button type="button" class="btn step__next" data-next="2">{P.next}</button>
+            </div>
+          </section>
+
+          <section class="step" data-step="2">
+            <button type="button" class="step__head" data-open="2"><span class="step__n">2</span><span class="step__t">{P.s2}</span><span class="step__sum" data-sum="2"></span><span class="step__edit">{P.change}</span></button>
+            <div class="step__body">
+              <div class="row">
+                <div class="fld fld--date"><span id="arr-l">{P.arrivalL}</span>
+                  <button type="button" class="datebtn" data-date-btn aria-labelledby="arr-l" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-date-text>{P.chooseDateBtn}</span></button>
+                  <div class="cal" data-cal hidden role="dialog" aria-label={P.calAria}></div>
+                </div>
+                <label class="fld">{P.nightsL}<select data-nights></select></label>
+              </div>
+              <p class="note" data-date-note></p>
+              <button type="button" class="btn step__next" data-next="3" disabled>{P.next}</button>
+            </div>
+          </section>
+
+          <section class="step" data-step="3" data-where>
+            <button type="button" class="step__head" data-open="3"><span class="step__n">3</span><span class="step__t">{P.s3}</span><span class="step__sum" data-sum="3"></span><span class="step__edit">{P.change}</span></button>
+            <div class="step__body">
+              <p class="onus"><span class="onus__star" aria-hidden="true">★</span><span>{P.onus[0]}<strong data-arrival-name>Arusha</strong>{P.onus[1]}</span></p>
+              <p class="note">{P.areasNote[0]}<strong data-safari-nights></strong>{P.areasNote[1]}<span class="tagkey">{["budget", "comfort", "premium", "luxury"].map((c) => CATEGORY_TEXT[c].name[lang]).join(" · ")}</span>{P.areasNote[2]}</p>
+              <div class="chips" data-areas></div>
+              <div class="stops" data-stops></div>
+              <div class="addons" data-addons hidden><p class="addons__h">{P.addonsH} <small>{P.optional}</small></p><div class="addons__list" data-addon-list></div></div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="pl__sum" aria-live="polite">
+          <div class="sum" data-sum-box>
+            <button type="button" class="sum__mini" data-sum-toggle aria-expanded="false">
+              <span data-mini>{P.yourSafari}</span><span class="sum__chev" aria-hidden="true"></span>
+            </button>
+            <div class="sum__full">
+              <p class="sum__h">{P.yourSafari}</p>
+              <ol class="sum__trip" data-trip></ol>
+              <div data-price></div>
+            </div>
+            <button type="button" class="btn sum__wa" data-send aria-disabled="true">{P.sendWa}</button>
+            <button type="button" class="sum__pdf" data-pdf aria-disabled="true">{P.pdf}</button>
+            <p class="sum__fine">{P.fine}</p>
+          </div>
+        </aside>
+      </div>
+
+      <dialog class="ct" data-contact aria-labelledby="ct-h">
+        <form class="ct__in" data-contact-form novalidate>
+          <div class="ct__head"><h2 id="ct-h">{P.sendH}</h2><button type="button" class="ct__x" data-ct-close aria-label={P.close}>✕</button></div>
+          <p class="ct__lede" data-ct-lede>{P.ctLede}</p>
+          <label>{P.ctName}<input name="name" autocomplete="name" required maxlength="100" /></label>
+          <label>{P.ctPhone}<input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+31 6 1234 5678" required /></label>
+          <label><span>{P.ctEmail} <small>{P.optional}</small></span><input name="email" type="email" autocomplete="email" /></label>
+          <label class="ct__hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+          <p class="ct__err" role="alert" data-ct-err></p>
+          <button type="submit" class="btn ct__go">{P.contWa}</button>
+          <p class="ct__fine">{P.ctFine}</p>
+        </form>
+      </dialog>
+
+      <noscript><p>{P.noscript[0]}<a href={`https://wa.me/${site.whatsapp}`}>{P.noscript[1]}</a>{P.noscript[2]}</p></noscript>
+      <div class="pl__fallback" data-fallback hidden>
+        <p>{P.fallback}</p>
+        <WaButton label={P.fallbackBtn} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { tripCategories, stopNights, lodgeProblem, imageUrl, craterIncluded, type Category } from "../planner/engine";
+  type Opt = {
+    settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
+    categories: { id: string; name: string; blurb: string }[];
+    arrivalName: string;
+    arrivalPriced?: boolean;
+    areas: { id: string; name: string; minNights: number }[];
+    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[]; minChildAge?: number; open?: { from: string; to: string }[] }[];
+    addons?: { id: string; name: string; blurb: string; per: string; rate: number; rateChild: number }[];
+  };
+  const root = document.querySelector<HTMLElement>("[data-planner]")!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  // text in the page's language (see src/i18n/planner.ts); WhatsApp messages stay in English for our team
+  const I = JSON.parse(root.dataset.i18n || "{}");
+  const LANG: string = I.lang || "en", LOC: string = I.locale || "en-GB";
+  const PR = new Intl.PluralRules(LOC);
+  const fill = (s: string, v: Record<string, unknown> = {}) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? ""));
+  const t = (k: string, v: Record<string, unknown> = {}) => { const x = I.t?.[k]; const s = Array.isArray(x) && x.length === 2 ? x[PR.select(Number(v.n ?? 0)) === "one" ? 0 : 1] : x; return fill(String(s ?? k), v); };
+  // admin text by id, translated only while the English in admin still matches
+  const tx = (m: any, id: string, kind: "name" | "blurb", en: string) => { const e = m?.[id]?.[kind]; return e && e.en === en ? (e[LANG] ?? en) : en; };
+  const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+  const usd = (n: number) => "$" + Math.round(n).toLocaleString(LANG === "en" ? "en-US" : LOC);
+  const usdEn = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+  const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
+  const nice = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString(LOC, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  const niceEn = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+  let O: Opt;
+  const st = { adults: 2, ages: [] as number[], date: "", nights: 6, category: "", stops: [] as { areaId: string; nights: number; lodgeId: string }[], addons: [] as string[], open: 1, reached: 1 };
+  const addonName = (id: string) => O.addons?.find((a) => a.id === id)?.name ?? id; // English (WhatsApp)
+  const addonShow = (id: string) => { const a = O.addons?.find((x) => x.id === id); return a ? tx(I.addons, a.id, "name", a.name) : id; };
+  const aName = (a: { id: string; name: string }) => tx(I.areas, a.id, "name", a.name);
+  const areaShow = (id: string) => { const a = O.areas.find((x) => x.id === id); return a ? aName(a) : id; };
+  const rank = (c: string) => O.categories.findIndex((x) => x.id === c);
+  const catEn = (c: string) => O.categories.find((x) => x.id === c)?.name ?? c;
+  const catName = (c: string) => tx(I.cats, c, "name", catEn(c));
+  const styleNames = () => tripCategories(O.lodges as { id: string; category: Category }[], st.stops).map(catEn).join(" + ");
+  const mobile = () => window.matchMedia("(max-width: 900px)").matches;
+
+  function openStep(n: number, scroll = false) {
+    st.open = n; st.reached = Math.max(st.reached, n);
+    renderSteps();
+    if (scroll) {
+      const el = root.querySelector<HTMLElement>(`[data-step="${n}"]`)!;
+      requestAnimationFrame(() => {
+        const y = el.getBoundingClientRect().top + window.scrollY - (mobile() ? 12 : 24);
+        if (el.getBoundingClientRect().top < 0 || el.getBoundingClientRect().top > window.innerHeight * 0.5) window.scrollTo({ top: y, behavior: "smooth" });
+      });
+    }
+  }
+
+  function renderSteps() {
+    const kids = st.ages.length ? ` · ${t("children", { n: st.ages.length })} (${st.ages.join(", ")})` : "";
+    const sums: Record<number, string> = {
+      1: `${t("adults", { n: st.adults })}${kids}`,
+      2: st.date ? `${nice(st.date)} · ${t("nights", { n: st.nights })}` : "",
+      3: st.stops.length ? O.areas.filter((a) => st.stops.some((s) => s.areaId === a.id)).map(aName).join(", ") + (st.addons.length ? ` + ${t("addonsN", { n: st.addons.length })}` : "") : "",
+    };
+    root.querySelectorAll<HTMLElement>("[data-step]").forEach((el) => {
+      const n = Number(el.dataset.step);
+      const open = st.open === n;
+      const locked = n > st.reached;
+      el.classList.toggle("is-open", open);
+      el.classList.toggle("is-locked", locked);
+      const head = el.querySelector<HTMLButtonElement>(".step__head")!;
+      head.setAttribute("aria-expanded", String(open));
+      head.disabled = locked;
+      el.querySelector("[data-sum]")!.textContent = open ? "" : sums[n];
+    });
+    root.querySelector<HTMLButtonElement>('[data-next="3"]')!.disabled = !st.date;
+  }
+
+  const safariNights = () => st.nights - 1;
+  const used = () => st.stops.reduce((a, s) => a + s.nights, 0);
+  const areaOrder = (id: string) => O.areas.findIndex((a) => a.id === id);
+
+  function renderPeople() {
+    $("[data-out=adults]").textContent = String(st.adults);
+    $("[data-out=children]").textContent = String(st.ages.length);
+    $("[data-child-note]").textContent = `(0–${O.settings.childMaxAge})`;
+    $("[data-ages]").innerHTML = st.ages.map((a, i) => `<label class="age">${esc(t("childAge", { i: i + 1 }))}<select data-age="${i}">${
+      Array.from({ length: O.settings.childMaxAge + 1 }, (_, n) => `<option value="${n}" ${n === a ? "selected" : ""}>${n < 1 ? esc(t("under1")) : n}</option>`).join("")}</select></label>`).join("");
+    root.querySelectorAll<HTMLSelectElement>("[data-age]").forEach((el) => el.addEventListener("change", () => { st.ages[Number(el.dataset.age)] = Number(el.value); update(); }));
+  }
+
+  // Lodges we can offer for each stop: a rate for every night (year ignored) and no child under the lodge's minimum age.
+  const offer = () => {
+    const nights = st.date ? stopNights(st.date, st.stops) : st.stops.map(() => []);
+    return st.stops.map((s, i) => O.lodges.filter((l) => l.areaId === s.areaId && !lodgeProblem(l, nights[i], st.ages)));
+  };
+  const kidsOk = (areaId: string) => O.lodges.some((l) => l.areaId === areaId && !lodgeProblem(l, [], st.ages));
+  let offerSig = "";
+  const sigOf = (o: ReturnType<typeof offer>) => JSON.stringify(o.map((ls) => ls.map((l) => l.id)));
+
+  function renderWhere() {
+    $("[data-safari-nights]").textContent = t("safariNights", { n: safariNights() });
+    const left = safariNights() - used();
+    $("[data-areas]").innerHTML = O.areas.map((a) => {
+      const on = st.stops.some((s) => s.areaId === a.id);
+      const hasLodge = kidsOk(a.id);
+      const blocked = !on && (!hasLodge || a.minNights > left);
+      const why = !hasLodge ? t("noLodges") : a.minNights > left ? t("needsNights", { n: a.minNights }) : "";
+      return `<button type="button" class="chip" data-area="${a.id}" aria-pressed="${on}" ${blocked ? 'aria-disabled="true"' : ""} title="${esc(why)}">${esc(aName(a))}${a.minNights > 1 ? ` <small>${esc(t("min", { n: a.minNights }))}</small>` : ""}</button>`;
+    }).join("");
+    root.querySelectorAll<HTMLButtonElement>("[data-area]").forEach((b) => b.addEventListener("click", () => {
+      const id = b.dataset.area!;
+      const i = st.stops.findIndex((s) => s.areaId === id);
+      if (i >= 0) st.stops.splice(i, 1);
+      else {
+        if (b.getAttribute("aria-disabled") === "true") { flash(b.title); return; }
+        const a = O.areas.find((x) => x.id === id)!;
+        st.stops.push({ areaId: id, nights: Math.max(a.minNights, Math.min(safariNights() - used(), a.minNights)), lodgeId: "" });
+        st.stops.sort((x, y) => areaOrder(x.areaId) - areaOrder(y.areaId));
+      }
+      renderWhere(); update();
+    }));
+
+    const avail = offer();
+    offerSig = sigOf(avail);
+    $("[data-stops]").innerHTML = st.stops.map((s, i) => {
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      const lodges = avail[i].sort((x, y) => rank(x.category) - rank(y.category));
+      if (!lodges.some((l) => l.id === s.lodgeId)) s.lodgeId = (["comfort", "premium", "luxury", "budget"].map((c) => lodges.find((l) => l.category === c)).find(Boolean) ?? lodges[0])?.id || "";
+      if (!lodges.length) return `<div class="stop">
+        <div class="stop__top"><strong>${esc(aName(a))}</strong>
+          <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="${esc(t("lessNight", { a: aName(a) }))}">−</button><output>${esc(t("nights", { n: s.nights }))}</output><button type="button" data-sinc="${i}" aria-label="${esc(t("moreNight", { a: aName(a) }))}">+</button></div></div>
+        <p class="stop__none">${esc(t("noRates"))}</p></div>`;
+      return `<div class="stop">
+        <div class="stop__top"><strong>${esc(aName(a))}</strong>
+          <div class="count__c sm"><button type="button" data-sdec="${i}" aria-label="${esc(t("lessNight", { a: aName(a) }))}">−</button><output>${esc(t("nights", { n: s.nights }))}</output><button type="button" data-sinc="${i}" aria-label="${esc(t("moreNight", { a: aName(a) }))}">+</button></div></div>
+        <div class="lodges-wrap"><button type="button" class="lodges__arrow lodges__arrow--l" data-lscroll="-1" aria-label="${esc(t("scrollL"))}" hidden>‹</button><div class="lodges" data-lrow>${lodges.map((l) => `<label class="lodge">
+          <input type="radio" name="lodge-${i}" value="${esc(l.id)}" ${l.id === s.lodgeId ? "checked" : ""} data-lodge="${i}">
+          <span class="lodge__img"><button type="button" class="lodge__view" data-gal="${esc(l.id)}" data-gal-stop="${i}" aria-label="${esc(t("seePhotos", { l: l.name }))}">${l.images.length
+            ? `<img src="${esc(imageUrl(l.images[0]))}" alt="" loading="lazy">`
+            : `<span class="lodge__none">${esc(t("photosSoon"))}</span>`}<span class="lodge__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>${esc(l.images.length > 1 ? t("photosN", { n: l.images.length }) : t("details"))}</span></button></span>
+          <span class="lodge__txt"><span class="tag tag--${esc(l.category)}">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<span>${esc(l.description)}</span>` : ""}</span>
+          <span class="lodge__tick" aria-hidden="true"></span>
+        </label>`).join("")}</div><button type="button" class="lodges__arrow lodges__arrow--r" data-lscroll="1" aria-label="${esc(t("scrollR"))}" hidden>›</button></div>
+      </div>`;
+    }).join("");
+    root.querySelectorAll<HTMLButtonElement>("[data-sinc]").forEach((b) => b.addEventListener("click", () => {
+      const s = st.stops[Number(b.dataset.sinc)];
+      if (used() >= safariNights()) return flash(t("allUsed"));
+      s.nights++; renderWhere(); update();
+    }));
+    root.querySelectorAll<HTMLButtonElement>("[data-sdec]").forEach((b) => b.addEventListener("click", () => {
+      const s = st.stops[Number(b.dataset.sdec)];
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      if (s.nights <= a.minNights) return flash(t("needsAtLeast", { a: aName(a), n: a.minNights }));
+      s.nights--; renderWhere(); update();
+    }));
+    root.querySelectorAll<HTMLButtonElement>("[data-gal]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGallery(b.dataset.gal!, Number(b.dataset.galStop)); }));
+    root.querySelectorAll<HTMLInputElement>("[data-lodge]").forEach((el) => el.addEventListener("change", () => { st.stops[Number(el.dataset.lodge)].lodgeId = el.value; update(); }));
+    // horizontal lodge rows: arrows on desktop, keep the chosen lodge in view
+    root.querySelectorAll<HTMLElement>(".lodges-wrap").forEach((w) => {
+      const row = w.querySelector<HTMLElement>("[data-lrow]")!;
+      const [l, r] = [w.querySelector<HTMLButtonElement>("[data-lscroll='-1']")!, w.querySelector<HTMLButtonElement>("[data-lscroll='1']")!];
+      const sync = () => { const can = row.scrollWidth > row.clientWidth + 4; l.hidden = !can || row.scrollLeft < 4; r.hidden = !can || row.scrollLeft + row.clientWidth > row.scrollWidth - 4; };
+      row.addEventListener("scroll", sync, { passive: true });
+      [l, r].forEach((b) => b.addEventListener("click", () => row.scrollBy({ left: Number(b.dataset.lscroll) * row.clientWidth * 0.8, behavior: "smooth" })));
+      const sel = row.querySelector<HTMLElement>(".lodge:has(input:checked)");
+      if (sel && sel.offsetLeft + sel.offsetWidth > row.clientWidth) row.scrollLeft = sel.offsetLeft - 8;
+      requestAnimationFrame(sync);
+    });
+  }
+
+  // photo viewer: enlarged, swipe or scroll through all photos, choose the lodge from here
+  function openGallery(id: string, stopIndex: number) {
+    const l = O.lodges.find((x) => x.id === id);
+    if (!l) return;
+    const n = Math.max(1, l.images.length);
+    const d = document.createElement("dialog");
+    d.className = "gv";
+    d.setAttribute("aria-label", t("gvAria", { l: l.name }));
+    d.innerHTML = `<div class="gv__in">
+        <div class="gv__top"><div><span class="gv__tag">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
+          <button type="button" class="gv__x" data-gv-close aria-label="${esc(t("close"))}">✕</button></div>
+        <div class="gv__stage">
+          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="${esc(imageUrl(im))}" alt="${esc(t("photoOf", { l: l.name, k: k + 1, n }))}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("") : `<figure class="gv__empty"><span>${esc(t(l.category === "budget" ? "soonCamp" : "soonLodge"))}</span></figure>`}</div>
+          ${n > 1 ? `<button type="button" class="gv__nav gv__prev" data-gv="-1" aria-label="${esc(t("prevPhoto"))}">‹</button><button type="button" class="gv__nav gv__next" data-gv="1" aria-label="${esc(t("nextPhoto"))}">›</button>` : ""}
+        </div>
+        <div class="gv__bottom">${n > 1 ? `<span class="gv__dots">${l.images.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</span><span class="gv__count" data-gv-count>1 / ${n}</span>` : "<span></span>"}
+          <button type="button" class="btn gv__pick" data-gv-pick>${esc(st.stops[stopIndex]?.lodgeId === l.id ? t("selected") : t("choose"))}</button></div>
+      </div>`;
+    const track = d.querySelector<HTMLElement>(".gv__track")!;
+    const idx = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = (k: number) => track.scrollTo({ left: ((k + n) % n) * track.clientWidth, behavior: "smooth" });
+    track.addEventListener("scroll", () => {
+      const k = idx();
+      const c = d.querySelector("[data-gv-count]"); if (c) c.textContent = `${k + 1} / ${n}`;
+      d.querySelectorAll(".gv__dots i").forEach((dot, j) => dot.classList.toggle("on", j === k));
+    }, { passive: true });
+    d.querySelectorAll<HTMLButtonElement>("[data-gv]").forEach((b) => b.addEventListener("click", () => go(idx() + Number(b.dataset.gv))));
+    d.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); go(idx() + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); go(idx() - 1); } });
+    d.querySelector("[data-gv-close]")!.addEventListener("click", () => d.close());
+    d.querySelector("[data-gv-pick]")!.addEventListener("click", () => {
+      if (st.stops[stopIndex]) { st.stops[stopIndex].lodgeId = l.id; renderWhere(); update(); }
+      d.close();
+    });
+    d.addEventListener("click", (e) => { if (e.target === d) d.close(); });
+    d.addEventListener("close", () => { d.remove(); document.documentElement.style.overflow = ""; });
+    root.append(d);
+    document.documentElement.style.overflow = "hidden";
+    d.showModal();
+    track.focus({ preventScroll: true });
+  }
+
+  let toast: number | undefined;
+  function flash(msg: string) {
+    if (!msg) return;
+    let t = root.querySelector<HTMLElement>(".toast");
+    if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); root.append(t); }
+    t.textContent = msg; t.classList.add("is-on");
+    clearTimeout(toast); toast = window.setTimeout(() => t!.classList.remove("is-on"), 3200);
+  }
+
+  function renderTrip() {
+    const items: string[] = [];
+    if (st.date || st.stops.length) items.push(`<li>${esc(t("arrive", { a: O.arrivalName }))}<span class="onus-tag">${esc(t("onUs"))}</span></li>`);
+    for (const s of st.stops) {
+      const a = O.areas.find((x) => x.id === s.areaId)!;
+      const l = O.lodges.find((x) => x.id === s.lodgeId);
+      items.push(`<li><b>${esc(t("nights", { n: s.nights }))} ${esc(aName(a))}</b>${l ? `<span>${esc(l.name)}</span>` : ""}</li>`);
+    }
+    for (const id of st.addons) items.push(`<li>${esc(addonShow(id))}</li>`);
+    if (st.stops.length) items.push(`<li>${esc(t("back"))}</li>`);
+    $("[data-trip]").innerHTML = items.join("") || `<li class="sum__empty">${esc(t("empty"))}</li>`;
+  }
+
+  function waText(total?: number, name?: string, ref?: string) {
+    const lines = [
+      `Hi Golden Dust Safaris${name ? `, this is ${name}` : ""}. I built this itinerary on your planner${ref ? ` (ref ${ref})` : ""}:`,
+      `• ${st.adults} adult${st.adults > 1 ? "s" : ""}${st.ages.length ? `, children aged ${st.ages.join(", ")}` : ""}`,
+      `• Arriving ${st.date ? niceEn(st.date) : "(date tbc)"}, ${st.nights} nights`,
+      `• Style: ${styleNames() || "tbc"}`,
+      `• Night 1: ${O.arrivalName}`,
+      ...st.stops.map((s) => `• ${s.nights} night${s.nights > 1 ? "s" : ""} ${O.areas.find((a) => a.id === s.areaId)?.name}: ${O.lodges.find((l) => l.id === s.lodgeId)?.name ?? ""}`),
+      ...st.addons.map((id) => `• Add-on: ${addonName(id)}`),
+    ];
+    if (total) lines.push(`• Planner price: ${usdEn(total)}`);
+    if (LANG !== "en") lines.push(`• Website language: ${LANG.toUpperCase()}`);
+    lines.push("Could you check availability?");
+    return lines.join("\n");
+  }
+
+  let timer: number | undefined, seq = 0, lastTotal = 0;
+
+  // ---- send on WhatsApp: collect name + number, save the lead, then open WhatsApp
+  const store = { get: (k: string) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} } };
+  // One lead per trip: if the guest already left their details for this exact trip, reuse it.
+  let lastLead: { key: string; ref: string; token: string } | null = null;
+  let mode: "whatsapp" | "pdf" = "whatsapp";
+  const tripNow = () => ({ startDate: st.date, adults: st.adults, childAges: st.ages, totalNights: st.nights, stops: st.stops, addons: st.addons });
+  const pdfUrl = (ref: string, token: string) => `${LANG === "en" ? "" : "/" + LANG}/itinerary#ref=${encodeURIComponent(ref)}&k=${encodeURIComponent(token)}`;
+  function openContact(m: "whatsapp" | "pdf") {
+    const send = $("[data-send]");
+    if (send.getAttribute("aria-disabled") === "true") { flash(t("finishFirst")); return; }
+    mode = m;
+    (window as any).gdTrack?.(m === "pdf" ? "planner_pdf_click" : "planner_whatsapp_click", { value: lastTotal || undefined, currency: "USD" });
+    const key = JSON.stringify(tripNow());
+    if (m === "pdf" && lastLead && lastLead.key === key) { window.open(pdfUrl(lastLead.ref, lastLead.token), "_blank"); return; }
+    const d = $<HTMLDialogElement>("[data-contact]");
+    const f = $<HTMLFormElement>("[data-contact-form]");
+    (f.elements.namedItem("name") as HTMLInputElement).value ||= store.get("gd_name");
+    (f.elements.namedItem("phone") as HTMLInputElement).value ||= store.get("gd_phone");
+    (f.elements.namedItem("email") as HTMLInputElement).value ||= store.get("gd_email");
+    $("[data-ct-err]").textContent = "";
+    $("#ct-h").textContent = m === "pdf" ? t("pdfH") : t("sendH");
+    $("[data-ct-lede]").textContent = m === "pdf" ? t("pdfLede") : t("ctLede");
+    f.querySelector<HTMLButtonElement>(".ct__go")!.textContent = m === "pdf" ? t("openPdf") : t("contWa");
+    d.showModal();
+  }
+  async function submitContact(e: Event) {
+    e.preventDefault();
+    const f = e.target as HTMLFormElement;
+    const v = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value.trim();
+    const err = $("[data-ct-err]");
+    const phone = v("phone").replace(/[^\d+]/g, "").replace(/^00/, "+");
+    if (v("name").length < 2) { err.textContent = t("errName"); return; }
+    if (!/^\+\d{8,15}$/.test(phone)) { err.textContent = t("errPhone"); return; }
+    if (v("email") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("email"))) { err.textContent = t("errEmail"); return; }
+    const btn = f.querySelector<HTMLButtonElement>(".ct__go")!;
+    const label = btn.textContent;
+    btn.disabled = true; btn.textContent = t("saving");
+    // open the new tab now (inside the click) so pop-up blockers allow it
+    const win = mode === "pdf" || window.matchMedia("(pointer: fine)").matches ? window.open("", "_blank") : null;
+    const trip = tripNow();
+    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip, source: mode }) })
+      .then(async (x) => ({ ok: x.ok, d: await x.json().catch(() => ({})) })).catch(() => ({ ok: false, d: { network: true } as any }));
+    btn.disabled = false; btn.textContent = label;
+    if (!r.ok && (mode === "pdf" || !r.d.network)) { win?.close(); err.textContent = (LANG === "en" && r.d.error) || t("errSave"); return; }
+    store.set("gd_name", v("name")); store.set("gd_phone", phone); store.set("gd_email", v("email"));
+    if (r.d.ref && r.d.token) lastLead = { key: JSON.stringify(trip), ref: r.d.ref, token: r.d.token };
+    const url = mode === "pdf"
+      ? pdfUrl(r.d.ref, r.d.token)
+      : `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(waText(lastTotal || undefined, v("name"), r.d.ref))}`;
+    $<HTMLDialogElement>("[data-contact]").close();
+    (window as any).gdTrack?.("generate_lead", { method: mode === "pdf" ? "pdf_download" : "whatsapp", value: lastTotal || undefined, currency: "USD" });
+    if (win) win.location.href = url; else window.location.href = url;
+  }
+  const mini = (html: string) => { $("[data-mini]").innerHTML = html; };
+  // a night at Ngorongoro always includes the crater game drive: tick it and lock it
+  let craterForced = false;
+  function syncCrater() {
+    const el = root.querySelector<HTMLInputElement>('[data-addon][value="crater"]');
+    if (!el) return;
+    const must = craterIncluded(st.stops);
+    if (must && !el.disabled) { el.checked = true; el.disabled = true; craterForced = true; }
+    else if (!must && el.disabled) { el.disabled = false; if (craterForced) el.checked = false; craterForced = false; }
+    el.closest(".addon")?.classList.toggle("is-included", must);
+    st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
+  }
+  function update() {
+    if (O && st.stops.length && sigOf(offer()) !== offerSig) renderWhere();
+    syncCrater();
+    renderPeople(); renderTrip(); renderSteps();
+    const send = $<HTMLButtonElement>("[data-send]");
+    const price = $("[data-price]");
+    const ready = st.date && st.stops.length;
+    lastTotal = 0;
+    $("[data-pdf]").setAttribute("aria-disabled", "true");
+    if (!ready) {
+      const w = !st.date ? t("chooseDate") : t("chooseWhere");
+      price.innerHTML = `<p class="sum__wait">${esc(t("toSee", { w }))}</p>`;
+      mini(`<span class="sum__mt">${esc(w)}</span>`);
+      send.setAttribute("aria-disabled", "true");
+      return;
+    }
+    const left = safariNights() - used();
+    if (left !== 0) {
+      mini(`<span class="sum__mt">${esc(left > 0 ? t("stillMini", { n: left }) : t("tooManyMini", { n: -left }))}</span>`);
+      price.innerHTML = `<p class="sum__wait">${esc(left > 0 ? t("stillLong", { n: left }) : t("tooManyLong", { n: -left }))}</p>`;
+      send.setAttribute("aria-disabled", "true");
+      return;
+    }
+    clearTimeout(timer);
+    price.classList.add("is-loading");
+    timer = window.setTimeout(async () => {
+      const my = ++seq;
+      const body = tripNow();
+      const r = await fetch("/api/planner/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((x) => x.json()).catch(() => null);
+      if (my !== seq) return;
+      price.classList.remove("is-loading");
+      if (!r) { price.innerHTML = `<p class="sum__wait">${esc(t("noPrice"))}</p>`; send.removeAttribute("aria-disabled"); return; }
+      if (!r.ok) { mini(`<span class="sum__mt">${esc(t("check"))}</span>`); price.innerHTML = `${LANG !== "en" ? `<p class="sum__wait">${esc(t("errIntro"))}</p>` : ""}<ul class="sum__err">${r.errors.map((e: string) => `<li>${esc(e)}</li>`).join("")}</ul>`; send.setAttribute("aria-disabled", "true"); return; }
+      const p = r.priced;
+      mini(`<strong>${usd(r.perPerson)}</strong><span class="sum__ml">${esc(t("pp"))}</span><span class="sum__mp">${esc(t("totalMini", { p: usd(p.total) }))}</span>`);
+      price.innerHTML = `<dl class="sum__rows">
+          <div><dt>${esc(t("park"))}</dt><dd>${usd(p.park)}</dd></div>
+          <div><dt>${esc(t("vehicle"))}${r.people.vehicles > 1 ? esc(t("vehiclesN", { n: r.people.vehicles })) : ""}</dt><dd>${usd(p.transport)}</dd></div>
+          <div><dt>${esc(t("acc"))}</dt><dd>${usd(p.accommodation)}</dd></div>
+          <div><dt>${esc(t("meals"))}</dt><dd>${usd(p.meals)}</dd></div>
+          ${p.extras ? `<div><dt>${esc(t("addonsRow"))}</dt><dd>${usd(p.extras)}</dd></div>` : ""}
+          <div><dt>${esc(t("margin"))}</dt><dd>${usd(p.margin)}</dd></div>
+        </dl>
+        <div class="sum__hl"><span>${esc(t("ppH"))}</span><strong>${usd(r.perPerson)}</strong>
+          <small>${esc(t("paying", { n: r.people.adults + r.people.children }))}${r.people.infants ? esc(t("infantsFree", { n: O.settings.childMinAge })) : ""}</small></div>
+        <p class="sum__total"><span>${esc(t("totalGroup"))}</span><strong>${usd(p.total)}</strong></p>`;
+      lastTotal = p.total;
+      send.removeAttribute("aria-disabled");
+      $("[data-pdf]").removeAttribute("aria-disabled");
+    }, 250);
+  }
+
+  function init(o: Opt) {
+    O = o;
+    const s = O.settings;
+    const min = addDays(new Date().toISOString().slice(0, 10), s.leadDays + 1);
+    $("[data-date-note]").textContent = t("leadNote", { d: s.leadDays, date: nice(min) });
+    const btn = $<HTMLButtonElement>("[data-date-btn]"), cal = $("[data-cal]");
+    let view = min.slice(0, 7); // YYYY-MM shown in the calendar
+    const monthName = (ym: string) => new Date(ym + "-01T00:00:00Z").toLocaleDateString(LOC, { month: "long", year: "numeric", timeZone: "UTC" });
+    const shiftMonth = (ym: string, k: number) => { const d = new Date(ym + "-01T00:00:00Z"); d.setUTCMonth(d.getUTCMonth() + k); return d.toISOString().slice(0, 7); };
+    const drawCal = () => {
+      const first = new Date(view + "-01T00:00:00Z");
+      const lead = (first.getUTCDay() + 6) % 7; // Monday first
+      const days = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+      const cells: string[] = Array.from({ length: lead }, () => "<span></span>");
+      for (let dd = 1; dd <= days; dd++) {
+        const iso = `${view}-${String(dd).padStart(2, "0")}`;
+        const off = iso < min;
+        cells.push(`<button type="button" data-day="${iso}" ${off ? "disabled" : ""} class="${iso === st.date ? "on" : ""}" aria-label="${nice(iso)}">${dd}</button>`);
+      }
+      cal.innerHTML = `<div class="cal__head"><button type="button" data-mon="-1" aria-label="${esc(t("prevMonth"))}" ${view <= min.slice(0, 7) ? "disabled" : ""}>‹</button><strong>${monthName(view)}</strong><button type="button" data-mon="1" aria-label="${esc(t("nextMonth"))}">›</button></div>
+        <div class="cal__grid">${((I.t?.wd as string[]) ?? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]).map((w) => `<em>${esc(w)}</em>`).join("")}${cells.join("")}</div>
+        <p class="cal__note">${esc(t("earliest", { date: nice(min) }))}</p>`;
+      cal.querySelectorAll<HTMLButtonElement>("[data-mon]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); view = shiftMonth(view, Number(b.dataset.mon)); drawCal(); }));
+      cal.querySelectorAll<HTMLButtonElement>("[data-day]").forEach((b) => b.addEventListener("click", () => {
+        st.date = b.dataset.day!;
+        $("[data-date-text]").textContent = new Date(st.date + "T00:00:00Z").toLocaleDateString(LOC, { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+        btn.classList.add("is-set");
+        closeCal(); update();
+      }));
+    };
+    const openCal = () => { if (st.date) view = st.date.slice(0, 7); drawCal(); cal.hidden = false; btn.setAttribute("aria-expanded", "true"); cal.querySelector<HTMLButtonElement>("button.on, [data-day]:not([disabled])")?.focus(); };
+    const closeCal = () => { cal.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+    btn.addEventListener("click", () => (cal.hidden ? openCal() : closeCal()));
+    document.addEventListener("click", (e) => { if (!cal.hidden && !cal.contains(e.target as Node) && !btn.contains(e.target as Node)) closeCal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !cal.hidden) { closeCal(); btn.focus(); } });
+    const n = $<HTMLSelectElement>("[data-nights]");
+    st.nights = Math.min(Math.max(st.nights, s.minTotalNights), s.maxTotalNights);
+    n.innerHTML = Array.from({ length: s.maxTotalNights - s.minTotalNights + 1 }, (_, i) => s.minTotalNights + i)
+      .map((v) => `<option value="${v}" ${v === st.nights ? "selected" : ""}>${esc(t("nightsOpt", { v, d: v + 1 }))}</option>`).join("");
+    n.addEventListener("change", () => {
+      st.nights = Number(n.value);
+      // trim stops from the end if the trip got shorter
+      while (used() > safariNights() && st.stops.length) {
+        const last = st.stops[st.stops.length - 1];
+        const a = O.areas.find((x) => x.id === last.areaId)!;
+        if (last.nights > a.minNights) last.nights--; else st.stops.pop();
+      }
+      renderWhere(); update();
+    });
+    $("[data-arrival-name]").textContent = O.arrivalName;
+    root.querySelectorAll<HTMLElement>("[data-arrival-inc]").forEach((x) => (x.hidden = !O.arrivalPriced));
+    root.querySelectorAll<HTMLButtonElement>("[data-inc],[data-dec]").forEach((b) => b.addEventListener("click", () => {
+      const k = b.dataset.inc || b.dataset.dec;
+      const up = !!b.dataset.inc;
+      const total = st.adults + st.ages.length;
+      if (up && total >= s.maxGuests) return flash(t("groupMax", { n: s.maxGuests }));
+      if (k === "adults") st.adults = Math.max(1, st.adults + (up ? 1 : -1));
+      else if (up) st.ages.push(8); else st.ages.pop();
+      update();
+    }));
+    root.querySelectorAll<HTMLButtonElement>("[data-open]").forEach((b) => b.addEventListener("click", () => {
+      const n = Number(b.dataset.open);
+      if (n <= st.reached && st.open !== n) openStep(n, true);
+    }));
+    root.querySelectorAll<HTMLButtonElement>("[data-next]").forEach((b) => b.addEventListener("click", () => openStep(Number(b.dataset.next), true)));
+    const box = $("[data-sum-box]"), tog = $("[data-sum-toggle]");
+    if (O.addons?.length) {
+      $("[data-addons]").hidden = false;
+      const per = (a: NonNullable<Opt["addons"]>[number]) => a.per === "vehicle" ? t("perVehicle") : a.per === "booking" ? t("perGroup") : a.rateChild && a.rateChild !== a.rate ? t("childRate", { r: usd(a.rateChild) }) : t("ppShort");
+      $("[data-addon-list]").innerHTML = O.addons.map((a) => { const blurb = a.blurb ? tx(I.addons, a.id, "blurb", a.blurb) : ""; return `<label class="addon" ${blurb ? `title="${esc(blurb)}"` : ""}><input type="checkbox" value="${esc(a.id)}" data-addon><span class="addon__t"><strong>${esc(tx(I.addons, a.id, "name", a.name))}</strong>${a.id === "crater" ? `<em class="addon__inc">${esc(t("craterInc"))}</em>` : ""}${blurb ? `<small>${esc(blurb)}</small>` : ""}</span><span class="addon__r">+${usd(a.rate)}<small>${esc(per(a))}</small></span></label>`; }).join("");
+      root.querySelectorAll<HTMLInputElement>("[data-addon]").forEach((el) => el.addEventListener("change", () => {
+        st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
+        update();
+      }));
+    }
+    $("[data-send]").addEventListener("click", () => openContact("whatsapp"));
+    $("[data-pdf]").addEventListener("click", () => openContact("pdf"));
+    $("[data-contact-form]").addEventListener("submit", submitContact);
+    $("[data-ct-close]").addEventListener("click", () => $<HTMLDialogElement>("[data-contact]").close());
+    $<HTMLDialogElement>("[data-contact]").addEventListener("click", (e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDialogElement).close(); });
+    tog.addEventListener("click", () => { const o = !box.classList.contains("is-open"); box.classList.toggle("is-open", o); tog.setAttribute("aria-expanded", String(o)); });
+    renderWhere(); update();
+  }
+
+  fetch("/api/planner/options").then((r) => (r.ok ? r.json() : Promise.reject(r.status))).then(init).catch(() => {
+    root.querySelector<HTMLElement>(".pl__grid")!.hidden = true;
+    root.querySelector<HTMLElement>("[data-fallback]")!.hidden = false;
+  });
+</script>
+
+<style is:global>
+  .pl .pl__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem); gap: clamp(1.5rem, 4vw, 3rem); align-items: start; margin-top: 1.5rem; }
+  .pl .pl__grid[hidden] { display: none; }
+  .pl .pl__grid > * { min-width: 0; }
+  .pl .step { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); margin: 0 0 0.75rem; min-width: 0; overflow: hidden; }
+  .pl .step:has(.cal:not([hidden])) { overflow: visible; position: relative; z-index: 5; }
+  .pl .step__head { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.95rem 1.2rem; border: 0; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+  .pl .step__head:disabled { cursor: default; }
+  .pl .step.is-locked .step__head { opacity: 0.5; }
+  .pl .step__t { font-family: var(--display); font-weight: 600; font-size: 1.08rem; white-space: nowrap; }
+  .pl .step__sum { flex: 1; min-width: 0; color: var(--ink-2); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+  .pl .step__edit { color: var(--rust); font-size: 0.85rem; font-weight: 600; text-decoration: underline; display: none; }
+  .pl .step:not(.is-open):not(.is-locked) .step__sum:not(:empty) + .step__edit { display: inline; }
+  .pl .step__body { display: none; padding: 0 1.2rem 1.2rem; }
+  .pl .step.is-open .step__body { display: block; }
+  .pl .step.is-open .step__head { padding-bottom: 0.6rem; }
+  .pl .step__next { margin-top: 1rem; }
+  .pl .step__next:disabled { opacity: 0.45; cursor: default; }
+  .pl .step__n { flex: none; display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--gold); color: var(--dark); font-size: 0.9rem; font-weight: 600; }
+  .pl .row { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
+  .pl .count { display: flex; flex-direction: column; gap: 0.4rem; }
+  .pl .count__l { font-weight: 600; font-size: 0.95rem; }
+  .pl .count__l small { font-weight: 400; color: var(--ink-2); }
+  .pl .count__c { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .pl .count__c button { width: 2.6rem; height: 2.6rem; border: 0; background: var(--tint); font-size: 1.2rem; cursor: pointer; color: var(--ink); }
+  .pl .count__c button:hover { background: var(--gold); }
+  .pl .count__c output { min-width: 3rem; text-align: center; font-weight: 600; padding: 0 0.4rem; }
+  .pl .count__c.sm button { width: 2.1rem; height: 2.1rem; }
+  .pl .count__c.sm output { min-width: 5.5rem; font-size: 0.92rem; }
+  .pl .ages { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.9rem; }
+  .pl .age, .pl .fld { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; font-size: 0.92rem; }
+  .pl .ages select, .pl .fld input, .pl .fld select { font: inherit; font-weight: 400; padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); min-width: 12rem; }
+  .pl .ages select { min-width: 7rem; }
+  .pl .note { color: var(--ink-2); font-size: 0.92rem; margin: 0.7rem 0 0; }
+  .pl .styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+  .pl .style { display: flex; flex-direction: column; gap: 0.25rem; text-align: left; padding: 0.9rem 1rem; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; font: inherit; color: var(--ink); }
+  .pl .style strong { font-family: var(--display); font-size: 1.05rem; }
+  .pl .style span { color: var(--ink-2); font-size: 0.88rem; }
+  .pl .style[aria-pressed="true"] { border-color: var(--gold); background: var(--tint); box-shadow: inset 0 0 0 1px var(--gold); }
+  .pl .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+  .pl .chip { font: inherit; font-weight: 600; font-size: 0.92rem; padding: 0.55rem 1rem; border-radius: 999px; border: 2px solid var(--line); background: #fff; cursor: pointer; color: var(--ink); }
+  .pl .chip small { font-weight: 400; color: var(--ink-2); }
+  .pl .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .pl .chip[aria-pressed="true"] small { color: var(--dark); }
+  .pl .chip[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+  .pl .onus { display: flex; gap: 0.5rem; align-items: center; margin: 0 0 0.7rem; padding: 0.6rem 0.85rem; background: var(--tint); border: 1px solid var(--gold); border-radius: 10px; font-weight: 600; }
+  .pl .onus .onus__star { color: var(--gold); }
+  .pl .sum__trip li .onus-tag { display: inline-block; justify-self: start; width: max-content; margin: 0.15rem 0 0; padding: 0.05rem 0.5rem; border-radius: 999px; background: var(--gold); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; vertical-align: 0.1em; }
+  .pl .addon__inc { display: none; font-style: normal; font-size: 0.78rem; font-weight: 700; color: var(--gold); }
+  .pl .addon.is-included .addon__inc { display: block; }
+  .pl .addon.is-included { cursor: default; }
+  .pl .stop__none { margin: 0.6rem 0 0; color: var(--ink-2); font-size: 0.92rem; }
+  .pl .addons { margin-top: 1.2rem; }
+  .pl .addons[hidden] { display: none; }
+  .pl .addons__h { font-family: var(--display); font-weight: 600; margin: 0 0 0.5rem; }
+  .pl .addons__h small { font-weight: 400; color: var(--ink-2); }
+  .pl .addons__list { display: grid; border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; }
+  .pl .addon { display: flex; gap: 0.65rem; align-items: center; padding: 0.55rem 0.85rem; cursor: pointer; min-width: 0; }
+  .pl .addon + .addon { border-top: 1px solid var(--line); }
+  .pl .addon:has(input:checked) { background: var(--tint); }
+  .pl .addon input { width: 1.1rem; height: 1.1rem; margin: 0; accent-color: var(--gold); flex: none; }
+  .pl .addon__t { flex: 1; min-width: 0; display: grid; }
+  .pl .addon__t strong { font-size: 0.95rem; font-weight: 600; }
+  .pl .addon__t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pl .addon__r { flex: none; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; display: grid; line-height: 1.2; }
+  .pl .addon__r small { font-weight: 400; font-size: 0.75rem !important; }
+  .pl .addon small { color: var(--ink-2); font-size: 0.86rem; line-height: 1.35; }
+  .pl .stops { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
+  .pl .stop { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; background: var(--bg); }
+  .pl .stop__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .pl .lodges-wrap { position: relative; margin-top: 0.8rem; }
+  .pl .lodges { display: grid; grid-auto-flow: column; grid-auto-columns: 14.5rem; gap: 0.7rem; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 0.2rem; padding: 0.2rem 0.2rem 0.6rem; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .pl .lodge { scroll-snap-align: start; }
+  .pl .lodges__arrow { position: absolute; top: 4.2rem; z-index: 2; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; box-shadow: 0 6px 16px -8px rgba(46, 36, 27, 0.5); font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--ink); }
+  .pl .lodges__arrow:hover { background: var(--gold); border-color: var(--gold); }
+  .pl .lodges__arrow--l { left: -0.6rem; } .pl .lodges__arrow--r { right: -0.6rem; }
+  .pl .lodges__arrow[hidden] { display: none; }
+  .pl .fld--date { position: relative; }
+  .pl .datebtn { display: inline-flex; align-items: center; gap: 0.55rem; font: inherit; font-weight: 400; padding: 0.6rem 0.9rem; min-width: 14rem; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink-2); cursor: pointer; text-align: left; }
+  .pl .datebtn.is-set { color: var(--ink); font-weight: 500; }
+  .pl .datebtn:hover, .pl .datebtn[aria-expanded="true"] { border-color: var(--gold); }
+  .pl .datebtn svg { width: 1.15rem; height: 1.15rem; fill: none; stroke: var(--gold-d, #a87c33); stroke-width: 1.8; stroke-linecap: round; flex: none; }
+  .pl .cal { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 30; width: 19rem; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 40px -20px rgba(46, 36, 27, 0.45); padding: 0.8rem; }
+  .pl .cal[hidden] { display: none; }
+  .pl .cal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+  .pl .cal__head strong { font-family: var(--display); font-weight: 600; }
+  .pl .cal__head button { width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 1.2rem; cursor: pointer; color: var(--ink); }
+  .pl .cal__head button:disabled { opacity: 0.3; cursor: default; }
+  .pl .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.15rem; text-align: center; }
+  .pl .cal__grid em { font-style: normal; font-size: 0.72rem; font-weight: 600; color: var(--ink-2); padding: 0.2rem 0; }
+  .pl .cal__grid button { aspect-ratio: 1; border: 0; border-radius: 50%; background: none; font: inherit; font-size: 0.9rem; cursor: pointer; color: var(--ink); }
+  .pl .cal__grid button:hover:not(:disabled) { background: var(--tint); }
+  .pl .cal__grid button.on { background: var(--gold); color: var(--dark); font-weight: 700; }
+  .pl .cal__grid button:disabled { color: #c9bfb1; cursor: default; text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.12); }
+  .pl .cal__note { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--ink-2); text-align: center; }
+  .pl .gv__tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e9cf9c; margin-right: 0.6rem; }
+  .pl .gv__empty { display: grid; place-items: center; padding: 2rem; text-align: center; color: #e9dfcf; }
+  .pl .gv__empty span { max-width: 26rem; line-height: 1.5; }
+  .pl .lodge { position: relative; display: flex; flex-direction: column; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }
+  .pl .lodge input { position: absolute; opacity: 0; pointer-events: none; }
+  .pl .lodge:has(input:checked) { border-color: var(--gold); box-shadow: 0 10px 24px -16px rgba(46, 36, 27, 0.6); }
+  .pl .lodge:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .pl .lodge__img { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--tint); overflow: hidden; }
+  .pl .lodge__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pl .lodge__none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2); font-size: 0.85rem; }
+  .pl .lodge__view { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: zoom-in; display: block; width: 100%; }
+  .pl .lodge__more { position: absolute; right: 0.5rem; bottom: 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; border-radius: 99px; padding: 0.3rem 0.7rem; background: rgba(46, 36, 27, 0.78); color: var(--ivory); }
+  .pl .lodge__more svg { width: 0.85rem; height: 0.85rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .pl .lodge__txt { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.65rem 0.8rem 0.8rem; }
+  .pl .lodge__txt .tag { align-self: flex-start; display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 99px; margin-bottom: 0.15rem; }
+  .pl .lodge__txt .tag--budget { background: #e9eddc; color: #4c5a2c; }
+  .pl .lodge__txt .tag--comfort { background: #f1e7d6; color: #7a5a2a; }
+  .pl .lodge__txt .tag--premium { background: #c89a4b; color: #2e241b; }
+  .pl .lodge__txt .tag--luxury { background: #2e241b; color: #e9cf9c; }
+  .pl .tagkey { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .pl .lodge__txt strong { font-size: 0.95rem; }
+  .pl .lodge__txt span { color: var(--ink-2); font-size: 0.85rem; line-height: 1.4; }
+  .pl .lodge__tick { position: absolute; top: 0.5rem; left: 0.5rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: rgba(255, 255, 255, 0.92); border: 2px solid var(--line); }
+  .pl .lodge:has(input:checked) .lodge__tick { background: var(--gold); border-color: var(--gold); }
+  .pl .lodge:has(input:checked) .lodge__tick::after { content: ""; position: absolute; left: 0.45rem; top: 0.2rem; width: 0.35rem; height: 0.7rem; border: solid var(--dark); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .pl .gv { border: 0; padding: 0; background: var(--dark); color: var(--ivory); width: min(68rem, calc(100% - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); border-radius: 16px; overflow: hidden; }
+  .pl .gv::backdrop { background: rgba(20, 15, 10, 0.85); }
+  .pl .gv__in { display: flex; flex-direction: column; max-height: calc(100dvh - 2rem); }
+  .pl .gv__top { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem 0.7rem 1.2rem; }
+  .pl .gv__top strong { font-family: var(--display); font-size: 1.1rem; }
+  .pl .gv__top p { margin: 0.2rem 0 0; font-size: 0.88rem; opacity: 0.8; }
+  .pl .gv__x { flex: none; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.15); color: var(--ivory); font-size: 1rem; cursor: pointer; }
+  .pl .gv__stage { position: relative; flex: 1; min-height: 0; }
+  .pl .gv__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; height: min(70dvh, 46rem); outline: none; }
+  .pl .gv__track::-webkit-scrollbar { display: none; }
+  .pl .gv__track figure { flex: 0 0 100%; margin: 0; scroll-snap-align: center; display: grid; place-items: center; background: #1d1711; }
+  .pl .gv__track img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+  .pl .gv__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 0; background: rgba(244, 237, 224, 0.92); color: var(--dark); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+  .pl .gv__prev { left: 0.8rem; } .pl .gv__next { right: 0.8rem; }
+  .pl .gv__bottom { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem 0.9rem 1.2rem; }
+  .pl .gv__dots { display: flex; gap: 5px; }
+  .pl .gv__dots i { width: 7px; height: 7px; border-radius: 99px; background: rgba(244, 237, 224, 0.4); transition: width 0.2s; }
+  .pl .gv__dots i.on { width: 20px; background: var(--gold); }
+  .pl .gv__count { font-size: 0.85rem; opacity: 0.75; margin-right: auto; }
+  .pl .gv__pick { margin-left: auto; }
+  @media (max-width: 700px) {
+    .pl .gv { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; margin: 0; }
+    .pl .gv__in { height: 100dvh; max-height: 100dvh; }
+    .pl .gv__track { height: 100%; }
+    .pl .gv__nav { display: none; }
+    .pl .gv__bottom { padding-bottom: calc(0.9rem + env(safe-area-inset-bottom)); }
+  }
+  .pl .pl__sum { position: sticky; top: 1rem; }
+  .pl .sum { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 48px -32px rgba(46, 36, 27, 0.5); padding: 1.3rem; }
+  .pl .sum__h { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.6rem; }
+  .pl .sum__trip { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.45rem; font-size: 0.9rem; }
+  .pl .sum__trip li { position: relative; padding-left: 1.1rem; display: grid; gap: 0.1rem; line-height: 1.4; }
+  .pl .sum__trip li::before { content: ""; position: absolute; left: 0.15rem; top: 0.5rem; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--gold); }
+  .pl .sum__trip li b { font-weight: 600; }
+  .pl .sum__trip li span { color: var(--ink-2); font-size: 0.86rem; }
+  .pl .sum__trip li.sum__empty { padding-left: 0; color: var(--ink-2); }
+  .pl .sum__trip li.sum__empty::before { display: none; }
+  .pl .sum__rows { margin: 0; border-top: 1px solid var(--line); padding-top: 0.7rem; }
+  .pl .sum__rows div { display: flex; justify-content: space-between; padding: 0.2rem 0; font-size: 0.95rem; }
+  .pl .sum__rows dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .pl .sum__hl { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0 0.8rem; margin: 0.8rem 0 0; padding: 0.75rem 0.9rem; background: var(--tint); border: 1px solid var(--gold); border-radius: 12px; }
+  .pl .sum__hl span { font-weight: 600; }
+  .pl .sum__hl strong { font-family: var(--display); font-size: 1.75rem; line-height: 1.1; }
+  .pl .sum__hl small { grid-column: 1 / -1; color: var(--ink-2); font-size: 0.82rem; }
+  .pl .sum__total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); margin: 0.7rem 0 0; padding-top: 0.6rem; font-size: 0.95rem; }
+  .pl .sum__total strong { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+  .pl .sum__wait { color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 0.8rem; margin: 0; }
+  .pl .sum__err { color: var(--rust); border-top: 1px solid var(--line); padding: 0.8rem 0 0 1.1rem; margin: 0; font-size: 0.92rem; }
+  .pl [data-price].is-loading { opacity: 0.55; transition: opacity 0.2s; }
+  .pl .sum__wa { width: 100%; justify-content: center; margin-top: 1.1rem; }
+  .pl .sum__pdf { display: block; width: 100%; text-align: center; margin-top: 0.6rem; font: inherit; font-weight: 600; font-size: 0.9rem; color: var(--rust); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+  .pl .sum__pdf[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+  .pl .sum__wa { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+  .pl .sum__wa[aria-disabled="true"] { opacity: 0.5; }
+  .pl .ct { border: 0; padding: 0; border-radius: 16px; width: min(26rem, calc(100% - 2rem)); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
+  .pl .ct::backdrop { background: rgba(46, 36, 27, 0.55); }
+  .pl .ct__in { display: grid; gap: 0.8rem; padding: 1.2rem 1.3rem 1.3rem; }
+  .pl .ct__head { display: flex; justify-content: space-between; align-items: center; }
+  .pl .ct__head h2 { margin: 0; font-size: 1.25rem; }
+  .pl .ct__x { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; color: var(--ink); }
+  .pl .ct__lede { margin: 0; color: var(--ink-2); font-size: 0.92rem; }
+  .pl .ct label { display: grid; gap: 0.3rem; font-weight: 600; font-size: 0.92rem; }
+  .pl .ct label small { font-weight: 400; color: var(--ink-2); }
+  .pl .ct input { font: inherit; font-weight: 400; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 10px; }
+  .pl .ct input:focus { outline: 2px solid var(--gold); outline-offset: 0; }
+  .pl .ct__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .pl .ct__err { color: var(--rust); margin: 0; min-height: 0; font-size: 0.9rem; }
+  .pl .ct__err:empty { display: none; }
+  .pl .ct__go { width: 100%; justify-content: center; border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+  .pl .ct__fine { margin: 0; font-size: 0.78rem; color: var(--ink-2); }
+  .pl .sum__fine { color: var(--ink-2); font-size: 0.8rem; margin: 0.8rem 0 0; }
+  .pl .toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 1rem); background: var(--dark); color: var(--ivory); padding: 0.7rem 1.1rem; border-radius: 10px; font-size: 0.92rem; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; max-width: calc(100% - 2rem); z-index: 50; }
+  .pl .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 900px) { .pl .toast { bottom: 8.5rem; } }
+  .pl .pl__fallback { margin-top: 1.5rem; }
+  .pl .sum__mini { display: none; }
+  /* cookie banner goes to the top on phones so it doesn't cover the price bar */
+  @media (max-width: 900px) { body:has([data-planner]) .ck { top: 0.75rem; bottom: auto; } }
+  @media (max-width: 900px) {
+    .pl .pl__grid { grid-template-columns: 1fr; margin-top: 1rem; }
+    .pl { padding-bottom: 7.5rem; }
+    /* summary becomes a bar fixed to the bottom of the screen; tap to see the details */
+    .pl .pl__sum { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; top: auto; }
+    .pl .sum { border-radius: 18px 18px 0 0; border-bottom: 0; padding: 0.6rem 1rem calc(0.8rem + env(safe-area-inset-bottom)); box-shadow: 0 -12px 30px -18px rgba(46, 36, 27, 0.55); display: flex; flex-direction: column; max-height: 82vh; }
+    .pl .sum__mini { display: flex; align-items: baseline; gap: 0.5rem; width: 100%; border: 0; background: none; font: inherit; color: var(--ink); padding: 0.35rem 0 0.55rem; cursor: pointer; text-align: left; }
+    .pl [data-mini] { display: flex; align-items: baseline; gap: 0.45rem; flex: 1; min-width: 0; }
+    .pl .sum__mini strong { font-family: var(--display); font-size: 1.3rem; }
+    .pl .sum__ml, .pl .sum__mp, .pl .sum__mt { color: var(--ink-2); font-size: 0.9rem; }
+    .pl .sum__ml { margin-right: auto; }
+    .pl .sum__mt { margin-right: auto; }
+    .pl .sum__chev { margin-left: auto; width: 0.6rem; height: 0.6rem; border: solid var(--ink); border-width: 2px 2px 0 0; transform: rotate(-45deg) translateY(0.15rem); transition: transform 0.2s; }
+    .pl .sum.is-open .sum__chev { transform: rotate(135deg) translateY(-0.1rem); }
+    .pl .sum__full { display: none; overflow-y: auto; }
+    .pl .sum.is-open .sum__full { display: block; }
+    .pl .sum__h { display: none; }
+    .pl .sum__wa { margin-top: 0.3rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+    .pl .sum__fine { display: none; }
+    .pl .sum__pdf { display: none; }
+    .pl .sum.is-open .sum__pdf { display: block; }
+    .pl .sum.is-open .sum__fine { display: block; margin-top: 0.5rem; }
+    /* lodge photo cards: swipe sideways instead of stacking */
+    .pl .lodges { grid-auto-columns: 78%; scrollbar-width: none; margin-right: -1rem; padding-right: 1rem; }
+    .pl .lodges__arrow { display: none !important; }
+    .pl .datebtn { width: 100%; min-width: 0; }
+    .pl .cal { width: 100%; }
+    .pl .lodges::-webkit-scrollbar { display: none; }
+    .pl .lodge { scroll-snap-align: start; }
+    .pl .lodges:has(> .lodge:only-child) { grid-auto-columns: 100%; margin-right: 0; padding-right: 0; }
+    .pl .fld--date { flex: 1 1 100%; }
+  }
+  @media (max-width: 560px) {
+    .pl .pl__head .lede { font-size: 1rem; }
+    .pl .step__head { padding: 0.85rem 1rem; }
+    .pl .step__body { padding: 0 1rem 1rem; }
+    .pl .step__t { font-size: 1rem; }
+    .pl .styles { grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+    .pl .style { padding: 0.65rem 0.6rem; }
+    .pl .style strong { font-size: 0.95rem; }
+    .pl .style span { font-size: 0.75rem; line-height: 1.3; }
+    .pl .row { gap: 0.8rem 1.2rem; }
+    .pl .fld input, .pl .fld select { min-width: 0; width: 100%; }
+    .pl .row > .fld { flex: 1 1 100%; }
+    .pl .chips { gap: 0.4rem; }
+    .pl .chip { padding: 0.45rem 0.8rem; font-size: 0.86rem; }
+    .pl .stop { padding: 0.7rem 0.75rem; }
+    .pl .lodge__txt { padding: 0.55rem 0.7rem 0.65rem; }
+    .pl .lodge__img { aspect-ratio: 2 / 1; }
+  }
+</style>

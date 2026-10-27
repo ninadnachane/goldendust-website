@@ -1,0 +1,226 @@
+---
+import Base from "../layouts/Base.astro";
+import Gallery from "../components/Gallery.astro";
+import InstagramFeed from "../components/InstagramFeed.astro";
+import Reviews from "../components/Reviews.astro";
+import WaButton from "../components/WaButton.astro";
+import PlannerButton from "../components/PlannerButton.astro";
+import { orgSchema } from "../lib/schema";
+import { langOf, lp } from "../i18n";
+
+const lang = langOf(Astro.url);
+const T = {
+  en: {
+    title: "Private Tanzania Safaris with Local Guides | Golden Dust Safaris",
+    desc: "Private Tanzania safaris from Arusha with local experts. Serengeti, Ngorongoro and Tarangire packages from $800 per person, honest pricing and direct WhatsApp planning.",
+    h1: "Private Tanzania safaris with local guides",
+    points: ["Your guide plans the trip with you, from the first call", "Build your own itinerary and see the price instantly, no quote requests", "No cookie-cutter itineraries: we start with why you're coming"],
+    whyH: "Why travelers plan with us", swipe: "Swipe to see all three",
+    why: [
+      ["You travel with the guide you've already met", "The guides you see on our Instagram are the guides you travel with, and you meet yours while planning your itinerary. Your guide shapes the whole experience, so you know exactly what you're signing up for. Most safari companies don't work that way: you only meet your guide on the first morning."],
+      ["Radical honesty, even when we earn less", "If a park isn't worth the extra drive, we'll say so. If a cheaper option gives the same experience, we'll recommend it. You get a full cost breakdown, real photos of our vehicles, references from recent guests and a free review of other companies' quotes."],
+      ["Talk to a local, then decide for yourself", "Send us a message on WhatsApp and we'll usually set up a call. We want to understand what you're looking for and why you're planning to travel to Tanzania, then explain the different national parks and the experiences each one offers. You decide what's best for you. No cookie-cutter itineraries."],
+    ],
+    howH: "How it works", howP: "From the first message to the airport drop-off, you deal with the same local team.", howLink: "Read the full process",
+    steps: [
+      ["Message us on WhatsApp.", "Tell us your dates, group size and what you'd love to see."],
+      ["Talk to your guide.", "We arrange a call with the guide who will travel with you."],
+      ["Tell us why Tanzania.", "Share what's drawing you here, and we'll give you tips and advice from our own experience."],
+      ["Receive your custom plan.", "A day-by-day itinerary with a full cost breakdown."],
+      ["Land in Tanzania.", "We meet you at the airport, and your first night's stay is on us."],
+      ["Something special begins.", "Set off on what we hope becomes the most memorable experience of your life."],
+    ],
+    ctaH: "Ready to plan your safari?", ctaP: "Message us on WhatsApp and talk directly to a local safari expert in Arusha.", ctaBtn: "Start planning on WhatsApp",
+  },
+  nl: {
+    title: "Privésafari's in Tanzania met lokale gidsen | Golden Dust Safaris",
+    desc: "Privésafari's in Tanzania vanuit Arusha met lokale experts. Serengeti, Ngorongoro en Tarangire, eerlijke prijzen en je reis direct plannen via WhatsApp.",
+    h1: "Privésafari's in Tanzania met lokale gidsen",
+    points: ["Je gids plant de reis met je, vanaf het eerste gesprek", "Stel je eigen reis samen en zie meteen de prijs, zonder offerte aan te vragen", "Geen standaardreizen: we beginnen bij de reden van je reis"],
+    whyH: "Waarom reizigers met ons plannen", swipe: "Veeg om alle drie te zien",
+    why: [
+      ["Je reist met de gids die je al kent", "De gidsen die je op onze Instagram ziet, zijn de gidsen met wie je reist, en je leert de jouwe kennen terwijl je je reis plant. Je gids bepaalt de hele beleving, dus je weet precies waar je aan begint. Bij de meeste safaribedrijven werkt dat anders: daar ontmoet je je gids pas op de eerste ochtend."],
+      ["Eerlijk, ook als we er minder aan verdienen", "Is een park de extra rit niet waard, dan zeggen we dat. Geeft een goedkopere optie dezelfde beleving, dan raden we die aan. Je krijgt een volledig overzicht van de kosten, echte foto's van onze voertuigen, referenties van recente gasten en gratis ons eerlijke oordeel over offertes van andere bedrijven."],
+      ["Praat met een local en beslis zelf", "Stuur ons een bericht via WhatsApp, dan plannen we meestal een gesprek. We willen begrijpen wat je zoekt en waarom je naar Tanzania wilt, en daarna leggen we uit wat de verschillende nationale parken te bieden hebben. Jij beslist wat het beste bij je past. Geen standaardreizen."],
+    ],
+    howH: "Zo werkt het", howP: "Van het eerste bericht tot je terugrit naar het vliegveld heb je met hetzelfde lokale team te maken.", howLink: "Lees hoe het precies werkt",
+    steps: [
+      ["Stuur ons een WhatsApp.", "Vertel ons je data, met hoeveel je bent en wat je graag wilt zien."],
+      ["Praat met je gids.", "We plannen een gesprek met de gids die met je meereist."],
+      ["Vertel ons waarom Tanzania.", "Vertel wat je hierheen trekt, dan geven we je tips en advies uit eigen ervaring."],
+      ["Ontvang je reisvoorstel op maat.", "Een dagprogramma met een volledig overzicht van de kosten."],
+      ["Landen in Tanzania.", "We halen je op van het vliegveld, en je eerste overnachting is van ons."],
+      ["Er begint iets bijzonders.", "Op weg naar wat hopelijk de mooiste ervaring van je leven wordt."],
+    ],
+    ctaH: "Klaar om je safari te plannen?", ctaP: "Stuur ons een WhatsApp en praat direct met een lokale safari-expert in Arusha.", ctaBtn: "Begin met plannen via WhatsApp",
+  },
+  de: {
+    title: "Privatsafaris in Tansania mit einheimischen Guides | Golden Dust Safaris",
+    desc: "Privatsafaris in Tansania ab Arusha mit einheimischen Experten. Serengeti, Ngorongoro und Tarangire, ehrliche Preise und direkte Planung per WhatsApp.",
+    h1: "Privatsafaris in Tansania mit einheimischen Guides",
+    points: ["Ihr Guide plant die Reise mit Ihnen, ab dem ersten Gespräch", "Stellen Sie Ihre Route selbst zusammen und sehen Sie sofort den Preis, ohne Angebotsanfrage", "Keine Safaris von der Stange: Wir fangen damit an, warum Sie kommen"],
+    whyH: "Warum Reisende mit uns planen", swipe: "Wischen Sie für alle drei",
+    why: [
+      ["Sie reisen mit dem Guide, den Sie schon kennen", "Die Guides, die Sie auf unserem Instagram sehen, sind die Guides, mit denen Sie reisen, und Ihren lernen Sie schon bei der Planung kennen. Ihr Guide prägt das ganze Erlebnis, Sie wissen also genau, worauf Sie sich einlassen. Bei den meisten Safarianbietern ist das anders: Dort treffen Sie Ihren Guide erst am ersten Morgen."],
+      ["Ehrlich, auch wenn wir weniger verdienen", "Wenn ein Park die zusätzliche Fahrt nicht wert ist, sagen wir es. Wenn eine günstigere Option dasselbe Erlebnis bietet, empfehlen wir sie. Sie bekommen eine vollständige Kostenaufstellung, echte Fotos unserer Fahrzeuge, Referenzen von Gästen und eine kostenlose Einschätzung der Angebote anderer Anbieter."],
+      ["Sprechen Sie mit einem Einheimischen, dann entscheiden Sie", "Schreiben Sie uns per WhatsApp, meist vereinbaren wir dann ein Gespräch. Wir möchten verstehen, was Sie suchen und warum Sie nach Tansania reisen, und erklären Ihnen dann die verschiedenen Nationalparks und was jeder zu bieten hat. Sie entscheiden, was am besten passt. Keine Safaris von der Stange."],
+    ],
+    howH: "So funktioniert's", howP: "Von der ersten Nachricht bis zur Fahrt zum Flughafen haben Sie es mit demselben Team vor Ort zu tun.", howLink: "Den ganzen Ablauf lesen",
+    steps: [
+      ["Schreiben Sie uns per WhatsApp.", "Nennen Sie uns Ihre Reisedaten, die Gruppengröße und was Sie gern sehen möchten."],
+      ["Sprechen Sie mit Ihrem Guide.", "Wir vereinbaren ein Gespräch mit dem Guide, der mit Ihnen reist."],
+      ["Erzählen Sie uns, warum Tansania.", "Sagen Sie uns, was Sie hierher zieht, und wir geben Ihnen Tipps aus unserer eigenen Erfahrung."],
+      ["Ihr persönlicher Reiseplan.", "Ein Reiseverlauf Tag für Tag mit vollständiger Kostenaufstellung."],
+      ["Landung in Tansania.", "Wir holen Sie am Flughafen ab, und die erste Nacht übernehmen wir."],
+      ["Etwas Besonderes beginnt.", "Auf zu dem, was hoffentlich das unvergesslichste Erlebnis Ihres Lebens wird."],
+    ],
+    ctaH: "Bereit, Ihre Safari zu planen?", ctaP: "Schreiben Sie uns per WhatsApp und sprechen Sie direkt mit einem Safari-Experten vor Ort in Arusha.", ctaBtn: "Per WhatsApp planen",
+  },
+  fr: {
+    title: "Safaris privés en Tanzanie avec des guides locaux | Golden Dust Safaris",
+    desc: "Safaris privés en Tanzanie au départ d'Arusha, avec des experts locaux. Serengeti, Ngorongoro et Tarangire, des prix honnêtes et une organisation directe sur WhatsApp.",
+    h1: "Safaris privés en Tanzanie avec des guides locaux",
+    points: ["Votre guide prépare le voyage avec vous, dès le premier appel", "Composez votre itinéraire et voyez le prix tout de suite, sans demande de devis", "Pas d'itinéraire tout fait : on commence par la raison de votre venue"],
+    whyH: "Pourquoi les voyageurs nous choisissent", swipe: "Faites glisser pour voir les trois",
+    why: [
+      ["Vous voyagez avec le guide que vous connaissez déjà", "Les guides que vous voyez sur notre Instagram sont ceux avec qui vous voyagez, et vous faites connaissance avec le vôtre pendant la préparation. C'est votre guide qui façonne toute l'expérience, vous savez donc exactement à quoi vous attendre. La plupart des agences ne fonctionnent pas ainsi : vous ne rencontrez votre guide que le premier matin."],
+      ["Une honnêteté totale, même quand nous gagnons moins", "Si un parc ne vaut pas le détour, nous vous le disons. Si une option moins chère offre la même expérience, nous vous la conseillons. Vous recevez le détail complet des coûts, de vraies photos de nos véhicules, des références de voyageurs récents et un avis gratuit sur les devis d'autres agences."],
+      ["Parlez à un local, puis décidez vous-même", "Envoyez-nous un message sur WhatsApp, et nous organisons généralement un appel. Nous voulons comprendre ce que vous recherchez et pourquoi vous souhaitez venir en Tanzanie, puis vous présenter les différents parcs nationaux et ce que chacun offre. C'est vous qui décidez. Pas d'itinéraire tout fait."],
+    ],
+    howH: "Comment ça marche", howP: "Du premier message jusqu'au retour à l'aéroport, vous avez affaire à la même équipe locale.", howLink: "Voir tout le déroulement",
+    steps: [
+      ["Écrivez-nous sur WhatsApp.", "Donnez-nous vos dates, le nombre de voyageurs et ce que vous aimeriez voir."],
+      ["Parlez à votre guide.", "Nous organisons un appel avec le guide qui voyagera avec vous."],
+      ["Dites-nous pourquoi la Tanzanie.", "Racontez-nous ce qui vous attire ici, et nous vous donnerons des conseils tirés de notre expérience."],
+      ["Recevez votre programme sur mesure.", "Un itinéraire jour par jour avec le détail complet des coûts."],
+      ["Atterrissez en Tanzanie.", "Nous vous accueillons à l'aéroport, et votre première nuit est offerte."],
+      ["Quelque chose de spécial commence.", "En route pour ce qui deviendra, nous l'espérons, l'expérience la plus mémorable de votre vie."],
+    ],
+    ctaH: "Prêt à préparer votre safari ?", ctaP: "Écrivez-nous sur WhatsApp et parlez directement à un expert du safari basé à Arusha.", ctaBtn: "Commencer sur WhatsApp",
+  },
+}[lang];
+---
+<Base title={T.title} description={T.desc} schema={[orgSchema]} hideTours>
+  <section class="hero">
+    <div class="hero__frame">
+      <Gallery />
+      <div class="hero__panel">
+        <h1>{T.h1}</h1>
+        <ul class="hero__points">{T.points.map((p) => <li>{p}</li>)}</ul>
+        <div class="hero__cta">
+          <WaButton label="WhatsApp" />
+          <PlannerButton variant="glass" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white why-sec">
+    <div class="wrap">
+      <h2 class="measure">{T.whyH}</h2>
+      <p class="why__hint muted">{T.swipe}</p>
+      <div class="why">{T.why.map(([h, p]) => <div><h3>{h}</h3><p>{p}</p></div>)}</div>
+    </div>
+  </section>
+
+  <InstagramFeed />
+
+  <Reviews />
+
+  <section class="section">
+    <div class="wrap steps-wrap">
+      <div>
+        <h2>{T.howH}</h2>
+        <p class="muted">{T.howP}</p>
+        <a href={lp(lang, "/how-it-works")}>{T.howLink}</a>
+      </div>
+      <ol class="steps">{T.steps.map(([b, t]) => <li><strong>{b}</strong> {t}</li>)}</ol>
+    </div>
+  </section>
+
+  <section class="section section--green">
+    <div class="wrap cta">
+      <h2>{T.ctaH}</h2>
+      <p class="measure">{T.ctaP}</p>
+      <div class="cta__btns">
+        <WaButton variant="light" label={T.ctaBtn} />
+        <PlannerButton variant="light-outline" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Full-width photo gallery with the headline on a frosted panel */
+  .hero { padding: 0; }
+  .hero__frame { position: relative; }
+  /* photos run edge to edge, no rounded corners */
+  .hero__frame > :global(.gal) {
+    border-radius: 0; box-shadow: none; background: transparent;
+  }
+  .hero__frame > :global(.gal .gal__bar) { bottom: 1.25rem; background: none; padding-top: 0; justify-content: flex-end; gap: 1rem; }
+  .hero__frame > :global(.gal .gal__btns button) { box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5); }
+  .hero__frame > :global(.gal .gal__dots) { background: rgba(46, 36, 27, 0.5); padding: 7px 10px; border-radius: 99px; }
+  .hero__frame > :global(.gal .gal__track) { aspect-ratio: auto; height: clamp(480px, 76vh, 820px); }
+  .hero__panel {
+    position: absolute; z-index: 2; left: clamp(1rem, 3.5vw, 3rem); top: 50%; transform: translateY(-50%);
+    width: min(27rem, calc(100% - 2rem)); min-height: 74%;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(1.6rem, 3vw, 2.6rem) clamp(1.4rem, 2.4vw, 2rem);
+    border-radius: 20px; color: var(--ivory);
+    background: rgba(46, 36, 27, 0.45);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1);
+    border: 1px solid rgba(244, 237, 224, 0.22);
+    box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
+  }
+  .hero__panel h1 { color: var(--ivory); font-size: clamp(1.75rem, 3vw, 2.45rem); letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+  .hero__points { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  .hero__points li { position: relative; padding-left: 1.9rem; color: rgba(244, 237, 224, 0.94); font-size: 1rem; line-height: 1.5; }
+  .hero__points li::before {
+    content: ""; position: absolute; left: 0; top: 0.15rem; width: 1.2rem; height: 1.2rem; border-radius: 50%;
+    background: var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232e241b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 0.8rem no-repeat;
+  }
+  .hero__cta { display: grid; gap: 0.7rem; margin-top: 1.8rem; }
+  .hero__cta :global(.btn) { width: 100%; justify-content: center; }
+  .cta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+  .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 2rem; }
+  .why h3 { font-size: 1.3rem; padding-top: 1rem; border-top: 3px solid var(--gold); }
+  .why p { color: var(--ink-2); }
+  .why__hint { display: none; font-size: 0.85rem; margin: -0.3rem 0 0; }
+  .sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem 2rem; margin-bottom: 2rem; }
+  .sec-head h2 { margin: 0; }
+  .sec-head p { margin: 0; }
+  .steps-wrap { display: grid; grid-template-columns: 1fr 1.6fr; gap: 3rem; }
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .steps li { counter-increment: s; position: relative; padding: 0 0 1.4rem 3.2rem; color: var(--ink-2); }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: -0.1rem; width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    display: grid; place-items: center; background: var(--btn); color: var(--btn-text); font-family: var(--display); font-weight: 600;
+  }
+  .steps li:not(:last-child)::after { content: ""; position: absolute; left: 1.03rem; top: 2.2rem; bottom: 0.2rem; border-left: 2px dashed var(--gold); }
+  .steps strong { color: var(--rust); font-family: var(--display); font-weight: 600; }
+  .cta { text-align: left; }
+  .cta h2 { color: var(--gold); }
+  @media (max-width: 900px) {
+    .steps-wrap { grid-template-columns: 1fr; }
+    /* Phones: the three reasons become swipeable cards instead of one long column */
+    .why {
+      display: flex; gap: 0.9rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+      margin: 1.4rem calc(var(--gutter) * -1) 0; padding: 0 var(--gutter) 0.4rem; scroll-padding-left: var(--gutter);
+    }
+    .why::-webkit-scrollbar { display: none; }
+    .why > div {
+      flex: 0 0 84%; scroll-snap-align: start; background: var(--surface); border-radius: 16px;
+      padding: 1.1rem 1.2rem 0.4rem; border: 1px solid var(--line); border-top: 3px solid var(--gold);
+    }
+    .why h3 { border-top: 0; padding-top: 0; font-size: 1.12rem; }
+    .why p { font-size: 0.95rem; line-height: 1.6; }
+    .why__hint { display: block; }
+  }
+  /* Phones: photo on top, the frosted panel overlaps its lower edge */
+  @media (max-width: 680px) {
+    .hero__frame > :global(.gal .gal__track) { height: 62vh; min-height: 380px; }
+    .hero__frame > :global(.gal .gal__bar) { top: auto; bottom: 9rem; padding: 0 1rem; }
+    .hero__panel { position: relative; left: auto; top: auto; transform: none; width: auto; min-height: 0; margin: -5.5rem 0.75rem 0; background: rgba(46, 36, 27, 0.9); }
+  }
+</style>

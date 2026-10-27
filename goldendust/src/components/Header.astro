@@ -2,34 +2,46 @@
 import { site, waLink } from "../lib/site";
 import WaIcon from "./WaIcon.astro";
 import MapIcon from "./MapIcon.astro";
-const path = Astro.url.pathname.replace(/\.html$/, "");
+import { langOf, basePath, lp, LANGS, LANG_NAMES } from "../i18n";
+import { w } from "../i18n/common";
+const lang = langOf(Astro.url);
+const path = basePath(Astro.url);
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About us" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/blog", label: "Blogs", match: ["/blog", "/post"] },
+  { href: "/", label: w(lang, "home") },
+  { href: "/about", label: w(lang, "about") },
+  { href: "/how-it-works", label: w(lang, "how") },
+  { href: "/blog", label: w(lang, "blogs"), match: ["/blog", "/post"] },
 ];
 const isActive = (l: { href: string; match?: string[] }) =>
-  l.href === "/" ? path === "/" || path === "/index" : (l.match ?? [l.href]).some((m) => path.startsWith(m));
+  l.href === "/" ? path === "/" : (l.match ?? [l.href]).some((m) => path.startsWith(m));
 const planActive = path.startsWith("/planner");
+// language links: the same page in the other language (the 404 page has no copies, so go to that language's home page)
+const other = path === "/404" ? "/" : path;
+const menu = { en: ["Open menu", "Close menu"], nl: ["Menu openen", "Menu sluiten"], de: ["Menü öffnen", "Menü schließen"], fr: ["Ouvrir le menu", "Fermer le menu"] }[lang];
+const langLabel = { en: "Language", nl: "Taal", de: "Sprache", fr: "Langue" }[lang];
 ---
 <header class="hdr" data-hdr>
   <div class="wrap hdr__in">
-    <a href="/" class="hdr__logo" aria-label={`${site.name} home`}>
+    <a href={lp(lang, "/")} class="hdr__logo" aria-label={site.name}>
       <img src="/images/logo-header.webp" alt={site.name} width="520" height="254" />
     </a>
-    <nav class="hdr__nav" id="main-menu" aria-label="Main">
+    <nav class="hdr__nav" id="main-menu" aria-label="Menu">
       <ul>
         {links.map((l) => (
-          <li><a href={l.href} aria-current={isActive(l) ? "page" : undefined}>{l.label}</a></li>
+          <li><a href={lp(lang, l.href)} aria-current={isActive(l) ? "page" : undefined}>{l.label}</a></li>
         ))}
-        <li class="hdr__menu-plan"><a class="hdr__plan" href="/planner" aria-current={planActive ? "page" : undefined}><MapIcon /><span>Itinerary planner</span></a></li>
+        <li class="hdr__menu-plan"><a class="hdr__plan" href={lp(lang, "/planner")} aria-current={planActive ? "page" : undefined}><MapIcon /><span>{w(lang, "planner")}</span></a></li>
+        <li class="hdr__menu-lang">{LANGS.map((l) => <a href={lp(l, other)} hreflang={l} lang={l} aria-current={l === lang ? "true" : undefined}>{LANG_NAMES[l]}</a>)}</li>
       </ul>
     </nav>
     <div class="hdr__btns">
-      <a class="hdr__plan hdr__plan--bar" href="/planner" aria-current={planActive ? "page" : undefined}><MapIcon /><span>Itinerary planner</span></a>
+      <details class="hdr__lang" data-lang-menu>
+        <summary aria-label={langLabel}>{lang.toUpperCase()}</summary>
+        <ul>{LANGS.map((l) => <li><a href={lp(l, other)} hreflang={l} lang={l} aria-current={l === lang ? "true" : undefined}>{LANG_NAMES[l]}</a></li>)}</ul>
+      </details>
+      <a class="hdr__plan hdr__plan--bar" href={lp(lang, "/planner")} aria-current={planActive ? "page" : undefined}><MapIcon /><span>{w(lang, "planner")}</span></a>
       <a class="hdr__wa" href={waLink()} target="_blank" rel="noopener"><WaIcon /><span>WhatsApp</span></a>
-      <button class="hdr__toggle" type="button" aria-expanded="false" aria-controls="main-menu" aria-label="Open menu" data-menu-toggle>
+      <button class="hdr__toggle" type="button" aria-expanded="false" aria-controls="main-menu" aria-label={menu[0]} data-menu-toggle data-open={menu[0]} data-close={menu[1]}>
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -43,11 +55,16 @@ const planActive = path.startsWith("/planner");
     const set = (open: boolean) => {
       hdr.classList.toggle("is-open", open);
       btn.setAttribute("aria-expanded", String(open));
-      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      btn.setAttribute("aria-label", (open ? btn.dataset.close : btn.dataset.open) ?? "");
     };
     btn.addEventListener("click", () => set(!hdr.classList.contains("is-open")));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
     document.addEventListener("click", (e) => { if (!hdr.contains(e.target as Node)) set(false); });
+  }
+  const lm = document.querySelector<HTMLDetailsElement>("[data-lang-menu]");
+  if (lm) {
+    document.addEventListener("click", (e) => { if (!lm.contains(e.target as Node)) lm.open = false; });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") lm.open = false; });
   }
 </script>
 
@@ -77,6 +94,22 @@ const planActive = path.startsWith("/planner");
   }
   .hdr__plan:hover, .hdr__plan[aria-current] { background: var(--gold); color: var(--dark); }
   .hdr__toggle { display: none; }
+  .hdr__lang { position: relative; }
+  .hdr__lang summary {
+    list-style: none; cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.04em;
+    padding: 0.55rem 0.75rem; border-radius: 999px; border: 2px solid var(--line); color: var(--ink);
+  }
+  .hdr__lang summary::-webkit-details-marker { display: none; }
+  .hdr__lang summary::after { content: ""; display: inline-block; margin-left: 0.35rem; border: 4px solid transparent; border-top-color: currentColor; transform: translateY(2px); }
+  .hdr__lang[open] summary, .hdr__lang summary:hover { border-color: var(--gold); }
+  .hdr__lang ul {
+    position: absolute; right: 0; top: calc(100% + 0.4rem); z-index: 30; display: grid; gap: 0; min-width: 10rem;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0.4rem; box-shadow: 0 18px 30px -18px rgba(46, 36, 27, 0.4);
+  }
+  .hdr__lang a { display: block; padding: 0.5rem 0.8rem; border-radius: 8px; color: var(--ink); text-decoration: none; font-family: var(--display); font-weight: 600; font-size: 0.92rem; }
+  .hdr__lang a:hover { background: var(--tint); }
+  .hdr__lang a[aria-current] { color: var(--rust); }
+  .hdr__menu-lang { display: none; }
 
   /* Phones and small tablets: logo, WhatsApp and a three-line menu button */
   @media (max-width: 860px) {
@@ -84,7 +117,10 @@ const planActive = path.startsWith("/planner");
     .hdr__logo { align-self: center; padding-top: 0; }
     .hdr__logo img { height: 68px; }
     .hdr__btns { margin-left: auto; }
-    .hdr__plan--bar { display: none; }
+    .hdr__plan--bar, .hdr__lang { display: none; }
+    .hdr__menu-lang { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .hdr__nav .hdr__menu-lang a { padding: 0.45rem 0.9rem; border: 1px solid var(--line); border-radius: 999px; font-family: var(--display); font-weight: 600; font-size: 0.9rem; color: var(--ink); text-decoration: none; }
+    .hdr__menu-lang a[aria-current] { border-color: var(--gold); background: var(--tint); }
     .hdr__toggle {
       display: grid; place-content: center; gap: 5px; width: 2.75rem; height: 2.75rem; border-radius: 50%;
       border: 2px solid var(--gold); background: transparent; cursor: pointer; padding: 0;
@@ -102,7 +138,7 @@ const planActive = path.startsWith("/planner");
     }
     .hdr.is-open .hdr__nav { display: block; }
     ul { flex-direction: column; align-items: stretch; gap: 0; }
-    .hdr__nav li:not(.hdr__menu-plan) a { display: block; padding: 0.9rem 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
+    .hdr__nav li:not(.hdr__menu-plan):not(.hdr__menu-lang) a { display: block; padding: 0.9rem 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
     .hdr__nav a:not(.hdr__plan)[aria-current] { border-bottom-color: var(--line); color: var(--rust); }
     .hdr__menu-plan { display: block; margin-top: 1rem; }
     .hdr__menu-plan .hdr__plan { width: 100%; justify-content: center; padding: 0.8rem 1rem; font-size: 1rem; }

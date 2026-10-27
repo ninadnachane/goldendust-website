@@ -1,7 +1,7 @@
 ---
 title: "Tipping on Safari in Tanzania: A Simple Guide"
 seoTitle: "Tipping on a Tanzania Safari: Guides, Lodges & Camps"
-description: "How tipping works on a Tanzania safari: who to tip, typical amounts for your guide and lodge staff, cash or card, and why it's always your choice."
+description: "How tipping works on a Tanzania safari: how much to give, who it goes to, cash or card, and why it's always your choice."
 pubDate: 2026-10-27
 updatedDate: 2026-10-27
 image: "gallery/guide-view-gazelles-serengeti.webp"
@@ -15,13 +15,17 @@ Tipping is a normal part of a safari in Tanzania, and guests often ask us how mu
 
 A tip is a thank-you, not part of the price. If you're happy with the service, tip. If you're not, you don't have to.
 
+## How much?
+
+Our standard guidance for tips is around US$10 to US$20 per person per day in total. Use it as a rough guide, not a rule.
+
 ## Your guide
 
-Your guide drives you, finds the animals and looks after you every day, so most guests give their biggest tip to the guide, at the end of the safari. Many travel companies suggest roughly US$20 to US$30 per day from the whole group, more for a larger group or if the guide went out of their way for you. Use it as a rough guide, not a rule.
+Your guide drives you, finds the animals and looks after you every day, so most guests give the biggest share to the guide, at the end of the safari.
 
 ## Lodge and camp staff
 
-Most camps and lodges have a tip box at reception, shared among all the staff, including the people you don't see in the kitchen and housekeeping. A few dollars per guest per night is common. If someone did something special for you, you can tip them directly.
+Most camps and lodges have a tip box at reception, shared among all the staff, including the people you don't see in the kitchen and housekeeping. If someone did something special for you, you can tip them directly.
 
 ## Cash or card?
 

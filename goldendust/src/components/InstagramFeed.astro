@@ -4,31 +4,38 @@
 // loaded, it falls back to Behold's standard widget.
 import { site } from "../lib/site";
 import BrandLink from "./BrandLink.astro";
+import { langOf } from "../i18n";
+const T = {
+  en: { h: "From our Instagram", follow: `Follow ${site.instagramHandle} on Instagram`, p: "Real trips, real guides and real vehicles, straight from the bush.", latest: "Latest Instagram posts", empty: "See our latest safari photos and reels on Instagram", prev: "Previous posts", next: "Next posts" },
+  nl: { h: "Van onze Instagram", follow: `Volg ${site.instagramHandle} op Instagram`, p: "Echte reizen, echte gidsen en echte voertuigen, rechtstreeks uit de bush.", latest: "Nieuwste Instagram-berichten", empty: "Bekijk onze nieuwste safarifoto's en reels op Instagram", prev: "Vorige berichten", next: "Volgende berichten" },
+  de: { h: "Von unserem Instagram", follow: `${site.instagramHandle} auf Instagram folgen`, p: "Echte Reisen, echte Guides und echte Fahrzeuge, direkt aus dem Busch.", latest: "Neueste Instagram-Beiträge", empty: "Unsere neuesten Safarifotos und Reels auf Instagram", prev: "Vorherige Beiträge", next: "Nächste Beiträge" },
+  fr: { h: "Sur notre Instagram", follow: `Suivre ${site.instagramHandle} sur Instagram`, p: "De vrais voyages, de vrais guides et de vrais véhicules, tout droit de la brousse.", latest: "Dernières publications Instagram", empty: "Nos dernières photos et vidéos de safari sur Instagram", prev: "Publications précédentes", next: "Publications suivantes" },
+}[langOf(Astro.url)];
 const widgetId = site.instagramFeedId;
 const jsonId = site.instagramJsonFeedId || site.instagramFeedId;
 ---
 <section class="section" aria-labelledby="ig-h">
   <div class="wrap">
     <div class="ig__head">
-      <h2 id="ig-h">From our Instagram</h2>
-      <BrandLink brand="instagram" href={site.instagram} label={`Follow ${site.instagramHandle} on Instagram`} size="lg" />
+      <h2 id="ig-h">{T.h}</h2>
+      <BrandLink brand="instagram" href={site.instagram} label={T.follow} size="lg" />
     </div>
-    <p class="muted measure">Real trips, real guides and real vehicles, straight from the bush.</p>
+    <p class="muted measure">{T.p}</p>
     {widgetId ? (
       <div class="ig" data-ig data-json={`https://feeds.behold.so/${jsonId}`} data-widget={widgetId}>
-        <div class="ig__track" data-ig-track tabindex="0" aria-label="Latest Instagram posts"></div>
+        <div class="ig__track" data-ig-track tabindex="0" aria-label={T.latest}></div>
         <div class="ig__nav" data-ig-nav hidden>
           <div class="ig__dots" data-ig-dots aria-hidden="true"></div>
           <div class="ig__btns">
-            <button type="button" data-ig-dir="-1" aria-label="Previous posts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
-            <button type="button" data-ig-dir="1" aria-label="Next posts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+            <button type="button" data-ig-dir="-1" aria-label={T.prev}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+            <button type="button" data-ig-dir="1" aria-label={T.next}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
           </div>
         </div>
         <div class="ig__fallback" data-ig-fallback></div>
       </div>
     ) : (
       <a class="ig__empty" href={site.instagram} target="_blank" rel="noopener">
-        See our latest safari photos and reels on Instagram
+        {T.empty}
       </a>
     )}
   </div>

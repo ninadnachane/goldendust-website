@@ -208,3 +208,17 @@ export const fromPrice = (t: Tour) => Math.min(t.prices.high.pp, t.prices.green.
 export const tourUrl = (t: Tour) => `/product-page/${t.slug}`;
 export const mapUrl = (t: Tour) => `/images/maps/${t.slug}.svg`;
 export const tierClass = (t: Tour) => t.tier.toLowerCase();
+
+// The same safaris with their text in another language (see src/data/i18n/tours.ts).
+import { TOURS_I18N } from "./i18n/tours";
+import { usdFor, type Lang } from "../i18n";
+export function toursFor(lang: Lang): Tour[] {
+  if (lang === "en") return tours;
+  return tours.map((t) => {
+    const x = TOURS_I18N[lang]?.[t.slug];
+    if (!x) return t;
+    const from = usdFor(lang, fromPrice(t));
+    return { ...t, ...x, description: x.description.replace("{from}", from) };
+  });
+}
+export const mapUrlFor = (lang: Lang, t: Tour) => (lang === "en" ? mapUrl(t) : `/images/maps/${lang}/${t.slug}.svg`);

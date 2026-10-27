@@ -1,0 +1,10 @@
+---
+import View from "../../../views/Park.astro";
+import { OTHER_LANGS } from "../../../i18n";
+import { parks } from "../../../data/parks";
+export function getStaticPaths() {
+  const slugs = parks.map((p) => p.slug);
+  return OTHER_LANGS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
+}
+---
+<View slug={Astro.params.slug} />

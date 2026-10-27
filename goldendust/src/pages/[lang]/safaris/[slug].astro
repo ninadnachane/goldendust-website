@@ -1,0 +1,10 @@
+---
+import View from "../../../views/Theme.astro";
+import { OTHER_LANGS } from "../../../i18n";
+import { themes } from "../../../data/themes";
+export function getStaticPaths() {
+  const slugs = themes.map((t) => t.slug);
+  return OTHER_LANGS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
+}
+---
+<View slug={Astro.params.slug} />

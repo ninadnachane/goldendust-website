@@ -1,55 +1,66 @@
 ---
 import { site, waLink } from "../lib/site";
-import { tours, tourUrl } from "../data/tours";
-import { parks, parkUrl } from "../data/parks";
-import { themes, themeUrl } from "../data/themes";
+import { toursFor, tourUrl } from "../data/tours";
+import { parksFor, parkUrl } from "../data/parks";
+import { themesFor, themeUrl } from "../data/themes";
+import { langOf, lp } from "../i18n";
+import { w, tierName } from "../i18n/common";
+const lang = langOf(Astro.url);
+const L = (p: string) => lp(lang, p);
 const year = new Date().getFullYear();
 // hideTours: the fixed sample itineraries stay on their own pages (and in the sitemap) for SEO,
 // but aren't promoted where we want guests to build their own trip.
 const { hideTours = false } = Astro.props as { hideTours?: boolean };
+const T = {
+  en: { tag: "A TALA-registered safari operator based in Arusha, Tanzania.", all: "All sample safaris", day: (n: number) => `${n}-day`, explore: "Explore Tanzania", migration: "Great Migration by month", lodges: "Lodges and camps", plan: "Plan your trip", cost: "Tanzania safari cost", best: "Best time to visit", vs: "Serengeti vs Ngorongoro", visa: "Tanzania visa", yf: "Yellow fever and vaccinations", pack: "Safari packing list", tip: "Tipping on safari", weather: "Weather by month", itins: "Sample itineraries", cookies: "Cookie settings" },
+  nl: { tag: "Een safaribedrijf uit Arusha, Tanzania, geregistreerd bij TALA.", all: "Alle voorbeeldsafari's", day: (n: number) => `${n}-daagse`, explore: "Ontdek Tanzania", migration: "De Grote Migratie per maand", lodges: "Lodges en kampen", plan: "Plan je reis", cost: "Wat kost een safari in Tanzania", best: "Beste reistijd", vs: "Serengeti of Ngorongoro", visa: "Visum voor Tanzania", yf: "Gele koorts en vaccinaties", pack: "Paklijst voor je safari", tip: "Fooi geven op safari", weather: "Het weer per maand", itins: "Voorbeeldreizen", cookies: "Cookie-instellingen" },
+  de: { tag: "Ein bei TALA registrierter Safarianbieter aus Arusha, Tansania.", all: "Alle Beispielsafaris", day: (n: number) => `${n} Tage:`, explore: "Tansania entdecken", migration: "Die Große Migration nach Monaten", lodges: "Lodges und Camps", plan: "Reise planen", cost: "Was kostet eine Safari in Tansania?", best: "Beste Reisezeit", vs: "Serengeti oder Ngorongoro", visa: "Visum für Tansania", yf: "Gelbfieber und Impfungen", pack: "Packliste für die Safari", tip: "Trinkgeld auf Safari", weather: "Das Wetter nach Monaten", itins: "Beispielreisen", cookies: "Cookie-Einstellungen" },
+  fr: { tag: "Agence de safari enregistrée auprès de la TALA, basée à Arusha, en Tanzanie.", all: "Tous nos exemples de safaris", day: (n: number) => `${n} jours :`, explore: "Découvrir la Tanzanie", migration: "La Grande Migration mois par mois", lodges: "Lodges et camps", plan: "Préparer votre voyage", cost: "Le prix d'un safari en Tanzanie", best: "Meilleure période", vs: "Serengeti ou Ngorongoro", visa: "Visa pour la Tanzanie", yf: "Fièvre jaune et vaccins", pack: "Liste de bagages pour un safari", tip: "Les pourboires en safari", weather: "La météo mois par mois", itins: "Exemples d'itinéraires", cookies: "Paramètres des cookies" },
+}[lang];
+const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
 ---
 <footer class="ftr">
   <div class="wrap ftr__grid">
     <div>
       <p class="ftr__name">{site.name}</p>
-      <p>A TALA-registered safari operator based in Arusha, Tanzania.</p>
+      <p>{T.tag}</p>
       <p><a href={waLink()} target="_blank" rel="noopener">WhatsApp {site.phoneDisplay}</a><br />
       <a href={site.instagram} target="_blank" rel="noopener">Instagram {site.instagramHandle}</a></p>
     </div>
     {!hideTours && <div>
-      <p class="ftr__h">Sample safaris</p>
-      <ul><li><a href="/tanzania-safari-packages">All sample safaris</a></li>{tours.map((t) => <li><a href={tourUrl(t)}>{t.nights + 1}-day {t.shortName} ({t.tier})</a></li>)}</ul>
+      <p class="ftr__h">{w(lang, "samples")}</p>
+      <ul><li><a href={L("/tanzania-safari-packages")}>{T.all}</a></li>{tours.map((t) => <li><a href={L(tourUrl(t))}>{T.day(t.nights + 1)} {t.shortName} ({tierName(lang, t.tier)})</a></li>)}</ul>
     </div>}
     <div>
-      <p class="ftr__h">Explore Tanzania</p>
+      <p class="ftr__h">{T.explore}</p>
       <ul>
-        {parks.map((p) => <li><a href={parkUrl(p)}>{p.name}</a></li>)}
-        <li><a href="/great-migration-serengeti">Great Migration by month</a></li>
-        <li><a href="/lodges">Lodges and camps</a></li>
-        {themes.map((t) => <li><a href={themeUrl(t)}>{t.name}</a></li>)}
+        {parks.map((p) => <li><a href={L(parkUrl(p))}>{p.name}</a></li>)}
+        <li><a href={L("/great-migration-serengeti")}>{T.migration}</a></li>
+        <li><a href={L("/lodges")}>{T.lodges}</a></li>
+        {themes.map((t) => <li><a href={L(themeUrl(t))}>{t.name}</a></li>)}
       </ul>
     </div>
     <div>
-      <p class="ftr__h">Plan your trip</p>
+      <p class="ftr__h">{T.plan}</p>
       <ul>
-        <li><a href="/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown">Tanzania safari cost</a></li>
-        <li><a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">Best time to visit</a></li>
-        <li><a href="/post/serengeti-vs-ngorongoro-which-safari-experience-is-right-for-you">Serengeti vs Ngorongoro</a></li>
-        <li><a href="/post/tanzania-visa-guide-for-safari-travellers">Tanzania visa</a></li>
-        <li><a href="/post/yellow-fever-vaccination-tanzania-safari">Yellow fever and vaccinations</a></li>
-        <li><a href="/post/tanzania-safari-packing-list">Safari packing list</a></li>
-        <li><a href="/post/tipping-on-safari-in-tanzania">Tipping on safari</a></li>
-        <li><a href="/post/tanzania-weather-by-month">Weather by month</a></li>
-        <li><a href="/how-it-works">How it works</a></li>
-        <li><a href="/planner">Planner</a></li>
-        <li><a href="/blog">Blogs</a></li>
-        <li><a href="/about">About us</a></li>
-        <li><a href="/meet-your-guide">Meet your guide</a></li>
-        {hideTours && <li><a href="/tanzania-safari-packages" class="ftr__quiet">Sample itineraries</a></li>}
+        <li><a href={L("/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown")}>{T.cost}</a></li>
+        <li><a href={L("/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide")}>{T.best}</a></li>
+        <li><a href={L("/post/serengeti-vs-ngorongoro-which-safari-experience-is-right-for-you")}>{T.vs}</a></li>
+        <li><a href={L("/post/tanzania-visa-guide-for-safari-travellers")}>{T.visa}</a></li>
+        <li><a href={L("/post/yellow-fever-vaccination-tanzania-safari")}>{T.yf}</a></li>
+        <li><a href={L("/post/tanzania-safari-packing-list")}>{T.pack}</a></li>
+        <li><a href={L("/post/tipping-on-safari-in-tanzania")}>{T.tip}</a></li>
+        <li><a href={L("/post/tanzania-weather-by-month")}>{T.weather}</a></li>
+        <li><a href={L("/how-it-works")}>{w(lang, "how")}</a></li>
+        <li><a href={L("/planner")}>{w(lang, "plannerShort")}</a></li>
+        <li><a href={L("/blog")}>{w(lang, "blogs")}</a></li>
+        <li><a href={L("/about")}>{w(lang, "about")}</a></li>
+        <li><a href={L("/meet-your-guide")}>{w(lang, "meetGuide")}</a></li>
+        {hideTours && <li><a href={L("/tanzania-safari-packages")} class="ftr__quiet">{T.itins}</a></li>}
       </ul>
     </div>
   </div>
-  <div class="wrap ftr__base">© {year} {site.name}, Arusha, Tanzania · <a href="#" data-ck-open>Cookie settings</a></div>
+  <div class="wrap ftr__base">© {year} {site.name}, Arusha, Tanzania · <a href="#" data-ck-open>{T.cookies}</a></div>
 </footer>
 
 <style>

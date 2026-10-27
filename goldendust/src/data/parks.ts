@@ -224,3 +224,9 @@ export const parks: Park[] = [
 ];
 
 export const parkUrl = (p: Park | string) => `/parks/${typeof p === "string" ? p : p.slug}`;
+
+// The same guides with their text in another language (see src/data/i18n/parks.ts).
+import { PARKS_I18N } from "./i18n/parks";
+import type { Lang } from "../i18n";
+export const parksFor = (lang: Lang): Park[] =>
+  lang === "en" ? parks : parks.map((p) => ({ ...p, ...(PARKS_I18N[lang]?.[p.slug] ?? {}) }));

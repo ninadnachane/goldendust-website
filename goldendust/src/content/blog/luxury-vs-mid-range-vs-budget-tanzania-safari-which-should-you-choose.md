@@ -17,7 +17,7 @@ Here's how the three really compare, from people who drive guests through all th
 
 ## What a luxury safari in Tanzania actually gets you
 
-When people imagine a [luxury safari in Tanzania](/) they picture bush dinners under the stars, small camps far from the crowds and a guide who knows the area intimately. That's not far off.
+When people imagine a [luxury safari in Tanzania](/product-page/luxury-serengeti-ngorongoro-safari-5-days) they picture bush dinners under the stars, small camps far from the crowds and a guide who knows the area intimately. That's not far off.
 
 Luxury camps are small, often just a handful of tents, and they're usually in remote corners of the Serengeti or the Ngorongoro Highlands, so you see fewer other vehicles. The real luxury is time. You set the schedule, stay at a sighting as long as you like and stop for a sundowner wherever the light is good. Many camps add spa treatments, stargazing decks and visits to Maasai communities, and transfers between parks are often by small plane.
 

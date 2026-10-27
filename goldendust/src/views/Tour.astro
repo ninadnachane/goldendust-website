@@ -1,0 +1,181 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import TourRow from "../components/TourRow.astro";
+import { tours, toursFor, fromPrice, tourUrl, mapUrlFor, tierClass } from "../data/tours";
+import { site } from "../lib/site";
+import { breadcrumbs } from "../lib/schema";
+import { langOf, lp, usdFor } from "../i18n";
+import { w, tierName, place } from "../i18n/common";
+
+const { slug } = Astro.props as { slug: string };
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const usd = (n: number) => usdFor(lang, n);
+const local = toursFor(lang);
+const t = local.find((x) => x.slug === slug)!;
+const en = tours.find((x) => x.slug === slug)!;
+const days = t.nights + 1;
+const tier = tierName(lang, t.tier);
+const others = local.filter((o) => o.slug !== t.slug).sort((a, b) => Number(b.tier === t.tier) - Number(a.tier === t.tier)).slice(0, 3);
+const extra = t.paying !== 2;
+const T = {
+  en: { name: `${days}-Day ${t.shortName} Safari (${t.tier})`, travelers: `${t.tier} travelers`, crumb: `${days} days, ${tier}`, priv: "private safari", h1: `${days}-day ${t.shortName} safari`, from: "From", pp: "per person", len: "Length", lenV: `${days} days, ${t.nights} nights on safari`, se: "Start and end", acc: "Accommodation", veh: "Vehicle", vehV: "Private 4x4 with your own guide", priceH: "Price per person", season: "Season", high: "High season", highEg: "e.g. arriving in August", green: "Green season", greenEg: "e.g. arriving in May", note: `For ${t.travellers}${extra ? `, ${t.paying} paying guests` : ""}, sharing rooms. Includes park fees, your private vehicle and guide, accommodation, airport transfers and the crater game drive. Prices for 2027; bigger groups pay less each. Your first night in Arusha is covered by us.`, ask: "Ask about this safari", itin: "Day-by-day itinerary", over: "Overnight:", map: "Route map", mapCap: "Route map (approximate)", to: " to ", know: "Good to know", knowList: ["We pick you up at Kilimanjaro or Arusha airport, and your first night in Arusha is covered by us.", "Your guide briefs you before you set off and picks you up from your hotel on the first morning.", "After the safari we drop you at the airport or your hotel.", "Every day can be changed: add a park, swap a camp or extend your trip."], unsure: ["Not sure which safari fits? Read our ", "Tanzania safari cost breakdown", " or ", "budget vs mid-range vs luxury guide", "."], othersH: "Other sample safaris", or: ["Or ", "plan your own", " with every camp and lodge and live prices."] },
+  nl: { name: `${days}-daagse safari: ${t.shortName} (${tier})`, travelers: `Reizigers (${tier})`, crumb: `${days} dagen, ${tier}`, priv: "privésafari", h1: `${days}-daagse safari: ${t.shortName}`, from: "Vanaf", pp: "per persoon", len: "Duur", lenV: `${days} dagen, ${t.nights} nachten op safari`, se: "Begin en einde", acc: "Accommodatie", veh: "Voertuig", vehV: "Eigen 4x4 met je eigen gids", priceH: "Prijs per persoon", season: "Seizoen", high: "Hoogseizoen", highEg: "bijv. aankomst in augustus", green: "Groen seizoen", greenEg: "bijv. aankomst in mei", note: `Voor ${t.travellers}${extra ? `, ${t.paying} betalende gasten` : ""}, kamers gedeeld. Inclusief parkkosten, je eigen voertuig en gids, accommodatie, vervoer van en naar het vliegveld en de game drive in de krater. Prijzen voor 2027; met een grotere groep betaal je minder per persoon. Je eerste nacht in Arusha is van ons.`, ask: "Vraag naar deze safari", itin: "Dagprogramma", over: "Overnachting:", map: "Routekaart", mapCap: "Routekaart (bij benadering)", to: " naar ", know: "Goed om te weten", knowList: ["We halen je op van Kilimanjaro Airport of het vliegveld van Arusha, en je eerste nacht in Arusha is van ons.", "Je gids bespreekt alles met je voor vertrek en haalt je op de eerste ochtend op bij je hotel.", "Na de safari brengen we je naar het vliegveld of je hotel.", "Elke dag kun je aanpassen: een park toevoegen, een kamp ruilen of je reis verlengen."], unsure: ["Twijfel je welke safari bij je past? Lees ons ", "overzicht van de kosten van een safari in Tanzania", " of onze ", "vergelijking van budget, middenklasse en luxe", "."], othersH: "Andere voorbeeldsafari's", or: ["Of ", "plan je eigen reis", " met alle kampen en lodges en actuele prijzen."] },
+  de: { name: `${days} Tage Safari: ${t.shortName} (${tier})`, travelers: `Reisende (${tier})`, crumb: `${days} Tage, ${tier}`, priv: "Privatsafari", h1: `${days} Tage Safari: ${t.shortName}`, from: "Ab", pp: "pro Person", len: "Dauer", lenV: `${days} Tage, ${t.nights} Nächte auf Safari`, se: "Start und Ende", acc: "Unterkunft", veh: "Fahrzeug", vehV: "Eigener Geländewagen mit eigenem Guide", priceH: "Preis pro Person", season: "Saison", high: "Hochsaison", highEg: "z. B. Ankunft im August", green: "Grüne Saison", greenEg: "z. B. Ankunft im Mai", note: `Für ${t.travellers}${extra ? `, ${t.paying} zahlende Gäste` : ""}, in geteilten Zimmern. Inklusive Parkgebühren, eigenem Fahrzeug mit Guide, Unterkunft, Flughafentransfers und der Pirschfahrt im Krater. Preise für 2027; größere Gruppen zahlen weniger pro Person. Die erste Nacht in Arusha übernehmen wir.`, ask: "Zu dieser Safari anfragen", itin: "Reiseverlauf Tag für Tag", over: "Übernachtung:", map: "Routenkarte", mapCap: "Routenkarte (ungefähr)", to: " nach ", know: "Gut zu wissen", knowList: ["Wir holen Sie am Kilimanjaro International Airport oder am Flughafen Arusha ab, und die erste Nacht in Arusha übernehmen wir.", "Ihr Guide bespricht alles mit Ihnen vor der Abfahrt und holt Sie am ersten Morgen im Hotel ab.", "Nach der Safari bringen wir Sie zum Flughafen oder zu Ihrem Hotel.", "Jeder Tag lässt sich ändern: einen Park hinzufügen, ein Camp tauschen oder die Reise verlängern."], unsure: ["Unsicher, welche Safari passt? Lesen Sie unsere ", "Kostenaufstellung für eine Safari in Tansania", " oder unseren ", "Vergleich von Budget, Mittelklasse und Luxus", "."], othersH: "Weitere Beispielsafaris", or: ["Oder ", "planen Sie Ihre eigene Safari", " mit allen Camps und Lodges und aktuellen Preisen."] },
+  fr: { name: `Safari de ${days} jours : ${t.shortName} (${tier})`, travelers: `Voyageurs (${tier})`, crumb: `${days} jours, ${tier}`, priv: "safari privé", h1: `Safari de ${days} jours : ${t.shortName}`, from: "À partir de", pp: "par personne", len: "Durée", lenV: `${days} jours, ${t.nights} nuits en safari`, se: "Départ et retour", acc: "Hébergement", veh: "Véhicule", vehV: "4x4 privé avec votre propre guide", priceH: "Prix par personne", season: "Saison", high: "Haute saison", highEg: "p. ex. arrivée en août", green: "Saison verte", greenEg: "p. ex. arrivée en mai", note: `Pour ${t.travellers}${extra ? `, ${t.paying} voyageurs payants` : ""}, en chambres partagées. Comprend les droits d'entrée des parcs, votre véhicule privé et votre guide, l'hébergement, les transferts aéroport et le safari dans le cratère. Prix pour 2027 ; plus le groupe est grand, moins chacun paie. Votre première nuit à Arusha est offerte.`, ask: "Se renseigner sur ce safari", itin: "Programme jour par jour", over: "Nuit :", map: "Carte de l'itinéraire", mapCap: "Carte de l'itinéraire (approximative)", to: " à ", know: "Bon à savoir", knowList: ["Nous venons vous chercher à l'aéroport du Kilimandjaro ou d'Arusha, et votre première nuit à Arusha est offerte.", "Votre guide vous présente le programme avant le départ et vient vous chercher à l'hôtel le premier matin.", "Après le safari, nous vous déposons à l'aéroport ou à votre hôtel.", "Chaque journée peut être modifiée : ajouter un parc, changer de camp ou prolonger le voyage."], unsure: ["Vous hésitez ? Lisez notre ", "détail du prix d'un safari en Tanzanie", " ou notre ", "comparatif économique, intermédiaire et luxe", "."], othersH: "Autres exemples de safaris", or: ["Ou ", "créez le vôtre", " avec tous nos camps et lodges et des prix en temps réel."] },
+}[lang];
+
+const productSchema = {
+  "@context": "https://schema.org",
+  "@type": ["Product", "TouristTrip"],
+  name: T.name,
+  description: t.description,
+  image: site.url + mapUrlFor(lang, t),
+  brand: { "@type": "Brand", name: site.name },
+  touristType: T.travelers,
+  itinerary: {
+    "@type": "ItemList",
+    itemListElement: t.days.map((d, i) => ({ "@type": "ListItem", position: i + 1, name: d.title, description: d.text })),
+  },
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "USD",
+    lowPrice: fromPrice(t),
+    highPrice: Math.max(t.prices.high.pp, t.prices.green.pp),
+    offerCount: 2,
+    availability: "https://schema.org/InStock",
+    url: site.url + L(tourUrl(t)),
+  },
+};
+// WhatsApp messages stay in English: they go to our team in Arusha
+const waText = `Hi Golden Dust Safaris, I'm interested in the ${days}-day ${en.shortName} safari (${en.tier}). Can you help me plan it?`;
+---
+<Base
+  title={`${t.seoTitle} | Golden Dust Safaris`}
+  description={t.description}
+  type="product"
+  schema={[productSchema, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "samples"), L("/tanzania-safari-packages")], [t.shortName, L(tourUrl(t))]])]}
+>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/tanzania-safari-packages")}>{w(lang, "samples")}</a> / <span>{T.crumb}</span>
+    </nav>
+  </div>
+
+  <section class="top">
+    <div class="wrap top__grid">
+      <div>
+        <p class="tier"><span class={`tag tag--${tierClass(t)}`}>{tier}</span> {T.priv}</p>
+        <h1>{T.h1}</h1>
+        <p class="lede">{t.summary}</p>
+        <p class="from">{T.from} <strong>{usd(fromPrice(t))}</strong> {T.pp}</p>
+        <dl class="facts">
+          <div><dt>{T.len}</dt><dd>{T.lenV}</dd></div>
+          <div><dt>{T.se}</dt><dd>Arusha</dd></div>
+          <div><dt>{T.acc}</dt><dd>{t.stay}</dd></div>
+          <div><dt>{T.veh}</dt><dd>{T.vehV}</dd></div>
+        </dl>
+      </div>
+      <aside class="price" aria-labelledby="price-h">
+        <h2 id="price-h">{T.priceH}</h2>
+        <table>
+          <thead><tr><th scope="col">{T.season}</th><th scope="col">{T.pp.charAt(0).toUpperCase() + T.pp.slice(1)}</th></tr></thead>
+          <tbody>
+            <tr><td>{T.high}<small>{T.highEg}</small></td><td>{usd(t.prices.high.pp)}</td></tr>
+            <tr><td>{T.green}<small>{T.greenEg}</small></td><td>{usd(t.prices.green.pp)}</td></tr>
+          </tbody>
+        </table>
+        <p class="muted small">{T.note}</p>
+        <WaButton label={T.ask} text={waText} />
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap itin-grid">
+      <div>
+        <h2>{T.itin}</h2>
+        <ol class="itin">
+          {t.days.map((d) => (
+            <li>
+              <h3>{d.title}</h3>
+              <p>{d.text}</p>
+              {d.overnight && <p class="overnight"><strong>{T.over}</strong> {d.overnight}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <figure class="map">
+        <img src={mapUrlFor(lang, t)} alt={`${T.map}: ${t.route.map((r) => place(lang, r)).join(T.to)}`} loading="lazy" width="800" height="690" />
+        <figcaption class="muted">{T.mapCap}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>{T.know}</h2>
+      <ul class="know">{T.knowList.map((x) => <li>{x}</li>)}</ul>
+      <p>{T.unsure[0]}<a href={L("/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown")}>{T.unsure[1]}</a>{T.unsure[2]}<a href={L("/post/luxury-vs-mid-range-vs-budget-tanzania-safari-which-should-you-choose")}>{T.unsure[3]}</a>{T.unsure[4]}</p>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>{T.othersH}</h2>
+      <p class="muted">{T.or[0]}<a href={L("/planner")}>{T.or[1]}</a>{T.or[2]}</p>
+      <div class="others">{others.map((o) => <TourRow tour={o} />)}</div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .crumbs { font-size: 0.88rem; padding: 1.2rem 0 0; color: var(--ink-2); }
+  .crumbs a { color: var(--ink-2); }
+  .top { padding: 1.5rem 0 3.5rem; }
+  .top__grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: start; }
+  .tier { font-family: var(--display); font-weight: 600; color: var(--ink-2); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .tag { padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+  .tag--budget { background: #6f7d3c; } .tag--comfort { background: #9a6a2f; } .tag--premium { background: #c89a4b; } .tag--luxury { background: #2e241b; }
+  td small { display: block; font-size: 0.8rem; color: var(--ink-2); font-family: inherit; font-weight: 400; }
+  h1 { font-size: clamp(2rem, 4.4vw, 3rem); }
+  .from { font-size: 1.1rem; margin: 0 0 1.8rem; }
+  .from strong { font-family: var(--display); font-size: 1.5rem; }
+  .route-box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.4rem 1.5rem 1.2rem; margin: 1.8rem 0; }
+  .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 2rem; margin: 0; }
+  .facts dt { font-family: var(--display); font-weight: 600; font-size: 0.85rem; color: var(--ink-2); }
+  .facts dd { margin: 0; }
+  .price { background: var(--surface); border-radius: 10px; padding: 1.6rem; border: 2px solid var(--gold); position: sticky; top: 1rem; }
+  .price h2 { font-size: var(--step-1); }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+  th { text-align: left; font-family: var(--display); font-size: 0.85rem; color: var(--ink-2); padding-bottom: 0.4rem; border-bottom: 1px solid var(--line); }
+  td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
+  td:last-child, th:last-child { text-align: right; }
+  td:last-child { font-family: var(--display); font-weight: 600; font-size: 1.15rem; }
+  .small { font-size: 0.88rem; }
+  .itin-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 3rem; align-items: start; }
+  .itin { list-style: none; margin: 1.5rem 0 0; padding: 0; }
+  .itin li { position: relative; padding: 0 0 1.8rem 2.2rem; border-left: 3px dashed var(--gold); margin-left: 0.5rem; }
+  .itin li:last-child { border-left-color: transparent; }
+  .itin li::before {
+    content: ""; position: absolute; left: -0.7rem; top: 0.1rem; width: 1.1rem; height: 1.1rem; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--gold);
+  }
+  .itin h3 { margin-bottom: 0.35rem; }
+  .itin p { margin: 0 0 0.4rem; color: var(--ink-2); }
+  .overnight { font-size: 0.95rem; }
+  .overnight strong { color: var(--ink); font-family: var(--display); }
+  .map { margin: 0; position: sticky; top: 1rem; }
+  .map img { border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+  .map figcaption { font-size: 0.85rem; margin-top: 0.4rem; }
+  .know { padding-left: 1.2rem; max-width: 44rem; }
+  .know li { margin-bottom: 0.5rem; }
+  .others { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  @media (max-width: 900px) {
+    .top__grid, .itin-grid { grid-template-columns: 1fr; }
+    .others { grid-template-columns: 1fr; }
+    .price, .map { position: static; }
+  }
+  @media (max-width: 520px) { .facts { grid-template-columns: 1fr; } }
+</style>

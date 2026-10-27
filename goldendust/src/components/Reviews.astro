@@ -3,6 +3,14 @@
 import { site } from "../lib/site";
 import { reviews } from "../data/reviews";
 import BrandLink from "./BrandLink.astro";
+import { langOf } from "../i18n";
+const lang = langOf(Astro.url);
+const T = {
+  en: { h: "What our guests say", p: "Honest reviews from travelers who've been on safari with our guides.", ta: "Read our reviews on Tripadvisor", go: "Read our reviews on Google", all: "Read all reviews", car: "Guest reviews", of: (i: number, n: number) => `Review ${i} of ${n}`, stars: (r: number) => `${r} out of 5 stars`, tr: "translated", prev: "Previous review", next: "Next review", g: "Google reviews", note: "" },
+  nl: { h: "Wat onze gasten zeggen", p: "Eerlijke reviews van reizigers die met onze gidsen op safari zijn geweest.", ta: "Lees onze reviews op Tripadvisor", go: "Lees onze reviews op Google", all: "Alle reviews lezen", car: "Reviews van gasten", of: (i: number, n: number) => `Review ${i} van ${n}`, stars: (r: number) => `${r} van de 5 sterren`, tr: "vertaald", prev: "Vorige review", next: "Volgende review", g: "Google-reviews", note: "Reviews in de oorspronkelijke taal." },
+  de: { h: "Was unsere Gäste sagen", p: "Ehrliche Bewertungen von Reisenden, die mit unseren Guides auf Safari waren.", ta: "Unsere Bewertungen auf Tripadvisor lesen", go: "Unsere Bewertungen auf Google lesen", all: "Alle Bewertungen lesen", car: "Gästebewertungen", of: (i: number, n: number) => `Bewertung ${i} von ${n}`, stars: (r: number) => `${r} von 5 Sternen`, tr: "übersetzt", prev: "Vorherige Bewertung", next: "Nächste Bewertung", g: "Google-Bewertungen", note: "Bewertungen in der Originalsprache." },
+  fr: { h: "Ce que disent nos voyageurs", p: "Des avis sincères de voyageurs partis en safari avec nos guides.", ta: "Lire nos avis sur Tripadvisor", go: "Lire nos avis sur Google", all: "Lire tous les avis", car: "Avis de voyageurs", of: (i: number, n: number) => `Avis ${i} sur ${n}`, stars: (r: number) => `${r} sur 5 étoiles`, tr: "traduit", prev: "Avis précédent", next: "Avis suivant", g: "Avis Google", note: "Avis dans leur langue d'origine." },
+}[lang];
 const { tripadvisorUrl, googleReviewsUrl, reviewsWidgetScript } = site;
 const shown = reviews.filter((r) => r.rating >= 4);
 const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math.round(n));
@@ -11,26 +19,26 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
   <section class="section section--white rv" aria-labelledby="rv-h">
     <div class="wrap rv__grid">
       <div class="rv__intro">
-        <h2 id="rv-h">What our guests say</h2>
-        <p class="muted">Honest reviews from travelers who've been on safari with our guides.</p>
+        <h2 id="rv-h">{T.h}</h2>
+        <p class="muted">{T.p}{T.note && <> {T.note}</>}</p>
         <div class="rv__sources">
-          {tripadvisorUrl && <BrandLink brand="tripadvisor" href={tripadvisorUrl} label="Read our reviews on Tripadvisor" size="lg" />}
-          {googleReviewsUrl && <BrandLink brand="google" href={googleReviewsUrl} label="Read our reviews on Google" size="lg" />}
-          <span class="rv__srclabel">Read all reviews</span>
+          {tripadvisorUrl && <BrandLink brand="tripadvisor" href={tripadvisorUrl} label={T.ta} size="lg" />}
+          {googleReviewsUrl && <BrandLink brand="google" href={googleReviewsUrl} label={T.go} size="lg" />}
+          <span class="rv__srclabel">{T.all}</span>
         </div>
       </div>
 
       {shown.length > 0 && (
-        <div class="rv__car" aria-roledescription="carousel" aria-label="Guest reviews">
+        <div class="rv__car" aria-roledescription="carousel" aria-label={T.car}>
           <div class="rv__track" data-rv-track tabindex="0">
             {shown.map((r, i) => (
-              <figure class="rv__slide" aria-label={`Review ${i + 1} of ${shown.length}`}>
-                <p class="rv__stars" aria-label={`${r.rating} out of 5 stars`}>{stars(r.rating)}</p>
+              <figure class="rv__slide" aria-label={T.of(i + 1, shown.length)}>
+                <p class="rv__stars" aria-label={T.stars(r.rating)}>{stars(r.rating)}</p>
                 {r.title && <p class="rv__title">{r.title}</p>}
                 <blockquote class="rv__text">“{r.text}”</blockquote>
                 <figcaption class="rv__by">
                   <strong><bdi>{r.name}</bdi></strong>
-                  <span>{r.source} · {r.date}{r.translated ? " · translated" : ""}</span>
+                  <span>{r.source} · {r.date}{r.translated ? ` · ${T.tr}` : ""}</span>
                 </figcaption>
               </figure>
             ))}
@@ -40,8 +48,8 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
               {shown.map((_, i) => <span class:list={["rv__dot", i === 0 && "is-on"]}></span>)}
             </div>
             <div class="rv__btns">
-              <button type="button" data-rv-dir="-1" aria-label="Previous review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
-              <button type="button" data-rv-dir="1" aria-label="Next review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+              <button type="button" data-rv-dir="-1" aria-label={T.prev}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+              <button type="button" data-rv-dir="1" aria-label={T.next}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
             </div>
           </div>
         </div>
@@ -49,7 +57,7 @@ const stars = (n: number) => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math
     </div>
     {reviewsWidgetScript && (
       <div class="wrap rv__google">
-        <p class="rv__google-h">Google reviews</p>
+        <p class="rv__google-h">{T.g}</p>
         <div class="rv__widget">
           <script defer async src={reviewsWidgetScript} is:inline></script>
         </div>

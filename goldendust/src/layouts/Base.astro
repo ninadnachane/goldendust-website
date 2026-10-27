@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Analytics from "../components/Analytics.astro";
 import { site, img } from "../lib/site";
+import { langOf, basePath, lp, LANGS, OG_LOCALE } from "../i18n";
 
 interface Props {
   title: string;
@@ -15,19 +16,27 @@ interface Props {
   hideTours?: boolean;
 }
 const { title, description, image, type = "website", schema = [], noindex = false, hideTours = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname.replace(/\/$/, "") || "/", site.url).href;
+const lang = langOf(Astro.url);
+const base = basePath(Astro.url);
+const canonical = new URL(Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/", site.url).href;
+// the same page in every language, for Google (hreflang)
+const alternates = noindex ? [] : LANGS.map((l) => ({ l, href: new URL(lp(l, base), site.url).href }));
+const skip = { en: "Skip to content", nl: "Naar de inhoud", de: "Zum Inhalt", fr: "Aller au contenu" }[lang];
 const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcfbca9bc0~mv2.png", 1200);
 ---
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.l} href={a.href} />)}
+    {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={alternates[0].href} />}
     {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
     <meta property="og:type" content={type === "article" ? "article" : "website"} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -47,7 +56,7 @@ const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcf
     {schema.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">{skip}</a>
     <Header />
     <main id="main"><slot /></main>
     <Footer hideTours={hideTours} />

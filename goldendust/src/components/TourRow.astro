@@ -1,20 +1,29 @@
 ---
-import { type Tour, usd, tourUrl, mapUrl, tierClass } from "../data/tours";
+import { type Tour, tourUrl, mapUrlFor, tierClass } from "../data/tours";
+import { langOf, lp, usdFor } from "../i18n";
+import { tierName, place } from "../i18n/common";
 interface Props { tour: Tour }
 const { tour: t } = Astro.props;
+const lang = langOf(Astro.url);
 const days = t.nights + 1;
+const T = {
+  en: { aria: `${days}-day ${t.shortName}: route map and day-by-day plan`, map: "Route map", head: `${days} days: ${t.shortName}`, from: "From", pp: "per person", see: "See the day-by-day plan", to: " to " },
+  nl: { aria: `${days}-daagse ${t.shortName}: routekaart en dagprogramma`, map: "Routekaart", head: `${days} dagen: ${t.shortName}`, from: "Vanaf", pp: "per persoon", see: "Bekijk het dagprogramma", to: " naar " },
+  de: { aria: `${days} Tage ${t.shortName}: Routenkarte und Tagesablauf`, map: "Routenkarte", head: `${days} Tage: ${t.shortName}`, from: "Ab", pp: "pro Person", see: "Zum Reiseverlauf", to: " nach " },
+  fr: { aria: `${days} jours, ${t.shortName} : carte et programme jour par jour`, map: "Carte de l'itinéraire", head: `${days} jours : ${t.shortName}`, from: "À partir de", pp: "par personne", see: "Voir le programme jour par jour", to: " à " },
+}[lang];
 ---
 <article class="tr">
-  <a href={tourUrl(t)} class="tr__map" aria-label={`${days}-day ${t.shortName}: route map and day-by-day plan`}>
-    <img src={mapUrl(t)} alt={`Route map: ${t.route.join(" to ")}`} loading="lazy" width="800" height="690" />
-    <span class={`tag tag--${tierClass(t)}`}>{t.tier}</span>
+  <a href={lp(lang, tourUrl(t))} class="tr__map" aria-label={T.aria}>
+    <img src={mapUrlFor(lang, t)} alt={`${T.map}: ${t.route.map((r) => place(lang, r)).join(T.to)}`} loading="lazy" width="800" height="690" />
+    <span class={`tag tag--${tierClass(t)}`}>{tierName(lang, t.tier)}</span>
   </a>
   <div class="tr__body">
-    <h3><a href={tourUrl(t)}>{days} days: {t.shortName}</a></h3>
+    <h3><a href={lp(lang, tourUrl(t))}>{T.head}</a></h3>
     <p class="muted">{t.summary}</p>
     <div class="tr__foot">
-      <p><strong>From {usd(Math.min(t.prices.high.pp, t.prices.green.pp))}</strong> per person</p>
-      <a href={tourUrl(t)} class="tr__link">See the day-by-day plan</a>
+      <p><strong>{T.from} {usdFor(lang, Math.min(t.prices.high.pp, t.prices.green.pp))}</strong> {T.pp}</p>
+      <a href={lp(lang, tourUrl(t))} class="tr__link">{T.see}</a>
     </div>
   </div>
 </article>

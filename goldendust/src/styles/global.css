@@ -115,11 +115,11 @@ p { margin: 0 0 1em; }
 }
 
 /* tier pill used on park, lodge and theme pages */
-.tier { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: #9a6a2f; }
-.tier--budget { background: #6f7d3c; }
-.tier--comfort { background: #9a6a2f; }
-.tier--premium { background: #c89a4b; }
-.tier--luxury { background: #2e241b; }
+.tierpill { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: #9a6a2f; }
+.tierpill--budget { background: #6f7d3c; }
+.tierpill--comfort { background: #9a6a2f; }
+.tierpill--premium { background: #c89a4b; }
+.tierpill--luxury { background: #2e241b; }
 
 /* guide pages (parks, themes, migration, lodges) */
 .gp__hero { width: 100%; border-radius: 10px; aspect-ratio: 2 / 1; object-fit: cover; background: var(--line); margin: 1.5rem 0 2rem; }

@@ -1,0 +1,44 @@
+---
+import Base from "../layouts/Base.astro";
+import { parksFor, parkUrl } from "../data/parks";
+import { breadcrumbs } from "../lib/schema";
+import { langOf, lp } from "../i18n";
+import { w } from "../i18n/common";
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const parks = parksFor(lang);
+const T = {
+  en: { title: "Tanzania National Parks Guide: Serengeti, Ngorongoro, Tarangire", desc: "Local guides to the northern Tanzania safari parks: the Serengeti, Ngorongoro Crater, Tarangire, Lake Manyara and Karatu. Best time to go, wildlife, fees and lodges.", h1: "Tanzania's northern safari parks", lede: "The parks we know best, as our guides see them: what each one is good for, when to go, and where to stay.", migAlt: "Herds on the Serengeti plains", mig: "The Great Migration, month by month", migP: "Where the herds usually are in each month of the year, and where to stay to see them." },
+  nl: { title: "Nationale parken in Tanzania: Serengeti, Ngorongoro, Tarangire", desc: "Lokale gidsen voor de safariparken in het noorden van Tanzania: de Serengeti, de Ngorongorokrater, Tarangire, Lake Manyara en Karatu. Beste reistijd, dieren, kosten en lodges.", h1: "De safariparken van Noord-Tanzania", lede: "De parken die we het best kennen, zoals onze gidsen ze zien: waar elk park goed voor is, wanneer je gaat en waar je overnacht.", migAlt: "Kuddes op de vlaktes van de Serengeti", mig: "De Grote Migratie per maand", migP: "Waar de kuddes meestal zijn in elke maand van het jaar, en waar je overnacht om ze te zien." },
+  de: { title: "Nationalparks in Tansania: Serengeti, Ngorongoro, Tarangire", desc: "Ratgeber zu den Safariparks im Norden Tansanias: Serengeti, Ngorongoro-Krater, Tarangire, Lake Manyara und Karatu. Beste Reisezeit, Tiere, Gebühren und Lodges.", h1: "Die Safariparks im Norden Tansanias", lede: "Die Parks, die wir am besten kennen, so wie unsere Guides sie sehen: wofür jeder Park ideal ist, wann Sie reisen und wo Sie übernachten.", migAlt: "Herden in den Ebenen der Serengeti", mig: "Die Große Migration nach Monaten", migP: "Wo die Herden in jedem Monat meist sind und wo Sie übernachten, um sie zu sehen." },
+  fr: { title: "Les parcs nationaux de Tanzanie : Serengeti, Ngorongoro, Tarangire", desc: "Nos guides des parcs du nord de la Tanzanie : le Serengeti, le cratère du Ngorongoro, Tarangire, le lac Manyara et Karatu. Meilleure période, faune, frais et lodges.", h1: "Les parcs du nord de la Tanzanie", lede: "Les parcs que nous connaissons le mieux, vus par nos guides : ce que chacun offre, quand partir et où dormir.", migAlt: "Des troupeaux dans les plaines du Serengeti", mig: "La Grande Migration mois par mois", migP: "Où se trouvent généralement les troupeaux chaque mois, et où dormir pour les voir." },
+}[lang];
+---
+<Base title={`${T.title} | Golden Dust Safaris`} description={T.desc} schema={[breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "parks"), L("/parks")]])]}>
+  <section class="section">
+    <div class="wrap">
+      <h1>{T.h1}</h1>
+      <p class="lede measure">{T.lede}</p>
+      <div class="gp__grid pk">
+        {parks.map((p) => (
+          <a class="pk__c" href={L(parkUrl(p))}>
+            <img src={p.hero} alt={p.heroAlt} loading="lazy" width="600" height="300" />
+            <span class="pk__b"><span class="pk__n">{p.name}</span><span class="muted">{p.lede}</span></span>
+          </a>
+        ))}
+        <a class="pk__c" href={L("/great-migration-serengeti")}>
+          <img src="/images/gallery/guide-view-gazelles-serengeti.webp" alt={T.migAlt} loading="lazy" width="600" height="300" />
+          <span class="pk__b"><span class="pk__n">{T.mig}</span><span class="muted">{T.migP}</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .pk { margin-top: 2rem; }
+  .pk__c { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none; }
+  .pk__c img { width: 100%; aspect-ratio: 2 / 1; object-fit: cover; display: block; background: var(--line); }
+  .pk__b { display: grid; gap: 0.4rem; padding: 1rem 1.2rem 1.2rem; font-size: 0.95rem; }
+  .pk__n { font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+  .pk__c:hover .pk__n { color: var(--green); text-decoration: underline; }
+</style>

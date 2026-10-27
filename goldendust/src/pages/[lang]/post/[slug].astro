@@ -1,0 +1,10 @@
+---
+import View from "../../../views/Post.astro";
+import { OTHER_LANGS } from "../../../i18n";
+import { getCollection } from "astro:content";
+export async function getStaticPaths() {
+  const slugs = (await getCollection("blog")).filter((p) => !p.id.includes("/")).map((p) => p.id);
+  return OTHER_LANGS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
+}
+---
+<View slug={Astro.params.slug} />

@@ -1,14 +1,17 @@
 ---
 import { type PartnerLodge, AREAS, lodgeUrl } from "../data/lodges";
+import { langOf, lp } from "../i18n";
+import { tierName, place } from "../i18n/common";
+const lang = langOf(Astro.url);
 interface Props { lodge: PartnerLodge }
 const { lodge: l } = Astro.props;
 ---
-<a class="lc" href={lodgeUrl(l)}>
+<a class="lc" href={lp(lang, lodgeUrl(l))}>
   <img src={l.photos[0]} alt={l.name} loading="lazy" width="600" height="400" />
   <span class="lc__b">
-    <span class={`tier tier--${l.tier.toLowerCase()}`}>{l.tier}</span>
+    <span class={`tierpill tierpill--${l.tier.toLowerCase()}`}>{tierName(lang, l.tier)}</span>
     <span class="lc__n">{l.name}</span>
-    <span class="lc__a">{AREAS[l.area].name}</span>
+    <span class="lc__a">{place(lang, AREAS[l.area].name)}</span>
   </span>
 </a>
 <style>

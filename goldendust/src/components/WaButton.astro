@@ -1,8 +1,10 @@
 ---
 import WaIcon from "./WaIcon.astro";
 import { waLink } from "../lib/site";
+import { langOf } from "../i18n";
+import { w } from "../i18n/common";
 interface Props { label?: string; text?: string; variant?: "" | "light" | "ghost" }
-const { label = "Message us on WhatsApp", text, variant = "" } = Astro.props;
+const { label = w(langOf(Astro.url), "msgWa"), text, variant = "" } = Astro.props;
 ---
 <a class:list={["btn", variant && `btn--${variant}`]} href={waLink(text)} target="_blank" rel="noopener">
   <WaIcon />{label}

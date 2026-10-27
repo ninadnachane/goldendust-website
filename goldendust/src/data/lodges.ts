@@ -32,9 +32,9 @@ export const lodges: PartnerLodge[] = (list as { name: string; area: AreaId; tie
 export const lodgesWithPages = lodges.filter((l) => l.photos.length > 0);
 export const lodgeUrl = (l: PartnerLodge) => `/lodges/${l.slug}`;
 export const lodgesIn = (...areas: AreaId[]) => lodges.filter((l) => areas.includes(l.area));
-export const TIER_TEXT: Record<Tier, string> = {
-  Budget: "tents in a public campsite with shared washrooms",
-  Comfort: "a comfortable lodge or tented camp",
-  Premium: "an upmarket lodge or camp in a good spot",
-  Luxury: "one of the finest lodges and camps in the area",
+export const TIER_TEXT: Record<Tier, Record<"en" | "nl" | "de" | "fr", string>> = {
+  Budget: { en: "tents in a public campsite with shared washrooms", nl: "tenten op een openbare camping met gedeeld sanitair", de: "Zelte auf einem öffentlichen Campingplatz mit gemeinsamen Waschräumen", fr: "des tentes dans un camping public, avec sanitaires partagés" },
+  Comfort: { en: "a comfortable lodge or tented camp", nl: "een comfortabele lodge of tentenkamp", de: "eine komfortable Lodge oder ein komfortables Zeltcamp", fr: "un lodge ou un camp de tentes confortable" },
+  Premium: { en: "an upmarket lodge or camp in a good spot", nl: "een luxere lodge of kamp op een mooie plek", de: "eine gehobene Lodge oder ein Camp in guter Lage", fr: "un lodge ou un camp haut de gamme, bien situé" },
+  Luxury: { en: "one of the finest lodges and camps in the area", nl: "een van de mooiste lodges en kampen in de omgeving", de: "eine der besten Lodges und Camps der Gegend", fr: "l'un des plus beaux lodges et camps de la région" },
 };

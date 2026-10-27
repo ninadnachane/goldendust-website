@@ -1,11 +1,20 @@
 ---
 import WaButton from "./WaButton.astro";
+import { langOf, lp } from "../i18n";
+import { w } from "../i18n/common";
 interface Props { facts?: [string, string][]; title?: string }
-const { facts = [], title = "Planning a safari?" } = Astro.props;
+const lang = langOf(Astro.url);
+const T = {
+  en: { title: "Planning a safari?", text: "Talk to our guides in Arusha, or price your own route in the planner.", open: "Open the itinerary planner" },
+  nl: { title: "Een safari plannen?", text: "Praat met onze gidsen in Arusha, of bereken de prijs van je eigen route in de reisplanner.", open: "Open de reisplanner" },
+  de: { title: "Planen Sie eine Safari?", text: "Sprechen Sie mit unseren Guides in Arusha, oder berechnen Sie Ihre eigene Route im Reiseplaner.", open: "Reiseplaner öffnen" },
+  fr: { title: "Vous préparez un safari ?", text: "Parlez à nos guides à Arusha, ou calculez le prix de votre itinéraire dans le planificateur.", open: "Ouvrir le planificateur" },
+}[lang];
+const { facts = [], title = T.title } = Astro.props;
 ---
 <aside class="gp__facts">
   {facts.length > 0 && <dl>{facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}
-  <p><strong>{title}</strong> Talk to our guides in Arusha, or price your own route in the planner.</p>
-  <WaButton label="Ask us on WhatsApp" />
-  <a class="btn btn--ghost" href="/planner">Open the itinerary planner</a>
+  <p><strong>{title}</strong> {T.text}</p>
+  <WaButton label={w(lang, "askWa")} />
+  <a class="btn btn--ghost" href={lp(lang, "/planner")}>{T.open}</a>
 </aside>

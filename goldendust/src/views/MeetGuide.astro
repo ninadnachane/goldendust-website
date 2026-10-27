@@ -1,0 +1,90 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import { breadcrumbs, orgSchema } from "../lib/schema";
+import { site } from "../lib/site";
+import { langOf, lp } from "../i18n";
+import { w } from "../i18n/common";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const ig = (t: string) => `<a href="${site.instagram}" target="_blank" rel="noopener">${t}</a>`;
+const T = {
+  en: {
+    title: "Meet Your Safari Guide, Joshua Joseph", job: "Safari guide and owner",
+    desc: "Meet Joshua Joseph, the Arusha safari guide who plans your Tanzania safari with you, meets you at the airport and drives you every day of the trip.",
+    alt: "Joshua Joseph smiling behind the wheel of his safari vehicle", h1: "Meet your guide, Joshua",
+    lede: "Joshua Joseph is the founder of Golden Dust Safaris and the guide you'll travel with. The person who plans your safari with you is the same person who meets you at the airport and drives you every day.",
+    s: [
+      ["Know your guide before you travel", ["With most safari companies, you meet your guide for the first time on the morning of day one. With us, you talk to Joshua while you're still planning. You can ask him anything, hear how he'd shape the trip, and decide whether he's the right person for you before you book.", `If you follow us on ${ig("Instagram")}, you've probably seen him already. The guide in our videos is the guide in the driver's seat.`]],
+      ["Small on purpose", ["We don't believe in volume. We only take as many bookings as we can guide ourselves, so your trip gets Joshua's full attention, from the first message to the drive back to the airport."]],
+      ["Say hello", ["The easiest way to start is a message on WhatsApp. Tell Joshua what you'd love to see and when you're thinking of coming, and he'll set up a call."]],
+    ],
+    wa: "Message Joshua on WhatsApp", own: "Plan your own route",
+  },
+  nl: {
+    title: "Maak kennis met je safarigids, Joshua Joseph", job: "Safarigids en eigenaar",
+    desc: "Maak kennis met Joshua Joseph, de safarigids uit Arusha die je safari in Tanzania met je plant, je ophaalt van het vliegveld en je elke dag van de reis rondrijdt.",
+    alt: "Joshua Joseph lacht achter het stuur van zijn safarivoertuig", h1: "Maak kennis met je gids, Joshua",
+    lede: "Joshua Joseph is de oprichter van Golden Dust Safaris en de gids met wie je reist. Wie je safari met je plant, is ook degene die je ophaalt van het vliegveld en je elke dag rondrijdt.",
+    s: [
+      ["Ken je gids voordat je vertrekt", ["Bij de meeste safaribedrijven ontmoet je je gids pas op de ochtend van de eerste dag. Bij ons praat je al met Joshua terwijl je nog aan het plannen bent. Je kunt hem alles vragen, horen hoe hij de reis zou aanpakken en beslissen of hij de juiste persoon voor je is, voordat je boekt.", `Volg je ons op ${ig("Instagram")}, dan heb je hem waarschijnlijk al gezien. De gids in onze video's is de gids achter het stuur.`]],
+      ["Bewust klein", ["We geloven niet in volume. We nemen alleen zoveel boekingen aan als we zelf kunnen begeleiden, dus je reis krijgt Joshua's volle aandacht, van het eerste bericht tot de rit terug naar het vliegveld."]],
+      ["Zeg hallo", ["De makkelijkste manier om te beginnen is een WhatsApp-bericht. Vertel Joshua wat je graag wilt zien en wanneer je wilt komen, dan plant hij een gesprek."]],
+    ],
+    wa: "Stuur Joshua een WhatsApp", own: "Plan je eigen route",
+  },
+  de: {
+    title: "Lernen Sie Ihren Safari-Guide kennen: Joshua Joseph", job: "Safari-Guide und Inhaber",
+    desc: "Lernen Sie Joshua Joseph kennen, den Safari-Guide aus Arusha, der Ihre Tansania-Safari mit Ihnen plant, Sie am Flughafen abholt und Sie jeden Tag der Reise fährt.",
+    alt: "Joshua Joseph lächelt am Steuer seines Safarifahrzeugs", h1: "Lernen Sie Ihren Guide kennen: Joshua",
+    lede: "Joshua Joseph ist der Gründer von Golden Dust Safaris und der Guide, mit dem Sie reisen. Wer Ihre Safari mit Ihnen plant, holt Sie auch am Flughafen ab und fährt Sie jeden Tag.",
+    s: [
+      ["Kennen Sie Ihren Guide schon vor der Reise", ["Bei den meisten Safarianbietern treffen Sie Ihren Guide erst am Morgen des ersten Tages. Bei uns sprechen Sie schon während der Planung mit Joshua. Sie können ihn alles fragen, hören, wie er die Reise gestalten würde, und vor der Buchung entscheiden, ob er der Richtige für Sie ist.", `Wenn Sie uns auf ${ig("Instagram")} folgen, kennen Sie ihn wahrscheinlich schon. Der Guide in unseren Videos ist der Guide am Steuer.`]],
+      ["Bewusst klein", ["Wir setzen nicht auf Masse. Wir nehmen nur so viele Buchungen an, wie wir selbst begleiten können, damit Ihre Reise Joshuas volle Aufmerksamkeit bekommt, von der ersten Nachricht bis zur Fahrt zurück zum Flughafen."]],
+      ["Sagen Sie Hallo", ["Am einfachsten beginnen Sie mit einer WhatsApp-Nachricht. Erzählen Sie Joshua, was Sie gern sehen möchten und wann Sie kommen möchten, und er vereinbart ein Gespräch."]],
+    ],
+    wa: "Joshua per WhatsApp schreiben", own: "Eigene Route planen",
+  },
+  fr: {
+    title: "Votre guide de safari, Joshua Joseph", job: "Guide de safari et fondateur",
+    desc: "Faites connaissance avec Joshua Joseph, le guide de safari d'Arusha qui prépare votre safari en Tanzanie avec vous, vous accueille à l'aéroport et vous conduit chaque jour du voyage.",
+    alt: "Joshua Joseph souriant au volant de son véhicule de safari", h1: "Votre guide, Joshua",
+    lede: "Joshua Joseph est le fondateur de Golden Dust Safaris et le guide avec qui vous voyagerez. La personne qui prépare votre safari avec vous est celle qui vous accueille à l'aéroport et vous conduit chaque jour.",
+    s: [
+      ["Connaître votre guide avant de partir", ["Avec la plupart des agences, vous rencontrez votre guide le matin du premier jour. Avec nous, vous parlez à Joshua dès la préparation. Vous pouvez lui poser toutes vos questions, entendre comment il imagine le voyage et décider s'il est la bonne personne pour vous, avant de réserver.", `Si vous nous suivez sur ${ig("Instagram")}, vous l'avez sans doute déjà vu. Le guide de nos vidéos est celui qui sera au volant.`]],
+      ["Petits, par choix", ["Nous ne croyons pas au volume. Nous n'acceptons que les réservations que nous pouvons guider nous-mêmes, pour que votre voyage ait toute l'attention de Joshua, du premier message jusqu'au retour à l'aéroport."]],
+      ["Dites-lui bonjour", ["Le plus simple pour commencer, c'est un message sur WhatsApp. Dites à Joshua ce que vous aimeriez voir et quand vous pensez venir, et il organisera un appel."]],
+    ],
+    wa: "Écrire à Joshua sur WhatsApp", own: "Créer votre itinéraire",
+  },
+}[lang];
+const person = {
+  "@context": "https://schema.org", "@type": "Person", name: "Joshua Joseph", jobTitle: T.job,
+  image: site.url + "/images/guide/joshua-joseph.webp", worksFor: { "@id": orgSchema["@id"] },
+};
+---
+<Base title={`${T.title} | Golden Dust Safaris`} description={T.desc}
+  schema={[orgSchema, person, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "meetGuide"), L("/meet-your-guide")]])]}>
+  <section class="section">
+    <div class="wrap mg">
+      <img class="mg__img" src="/images/guide/joshua-joseph.webp" alt={T.alt} width="864" height="1080" />
+      <div>
+        <nav class="gp__crumbs" aria-label="Breadcrumb"><a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/about")}>{w(lang, "about")}</a></nav>
+        <h1>{T.h1}</h1>
+        <p class="lede">{T.lede}</p>
+        <div class="prose">{T.s.map(([h, ps]) => <><h2>{h}</h2>{(ps as string[]).map((x) => <p set:html={x} />)}</>)}</div>
+        <div class="mg__cta">
+          <WaButton label={T.wa} text="Hi Joshua, I'd like to talk about a Tanzania safari." />
+          <a class="btn btn--ghost" href={L("/planner")}>{T.own}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .mg { display: grid; grid-template-columns: minmax(0, 26rem) minmax(0, 40rem); gap: 3rem; align-items: start; }
+  .mg__img { width: 100%; height: auto; border-radius: 12px; position: sticky; top: 1rem; }
+  .mg__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+  @media (max-width: 860px) { .mg { grid-template-columns: 1fr; gap: 1.5rem; } .mg__img { position: static; max-width: 26rem; } }
+</style>

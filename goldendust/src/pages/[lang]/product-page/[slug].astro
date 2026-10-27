@@ -1,0 +1,10 @@
+---
+import View from "../../../views/Tour.astro";
+import { OTHER_LANGS } from "../../../i18n";
+import { tours } from "../../../data/tours";
+export function getStaticPaths() {
+  const slugs = tours.map((t) => t.slug);
+  return OTHER_LANGS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
+}
+---
+<View slug={Astro.params.slug} />

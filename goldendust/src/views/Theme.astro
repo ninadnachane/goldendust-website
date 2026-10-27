@@ -1,0 +1,63 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import GuideAside from "../components/GuideAside.astro";
+import Faq from "../components/Faq.astro";
+import { themesFor, themeUrl } from "../data/themes";
+import { tours, toursFor } from "../data/tours";
+import { breadcrumbs, faqSchema } from "../lib/schema";
+import { langOf, lp, localizeLinks } from "../i18n";
+import { w } from "../i18n/common";
+
+const { slug } = Astro.props as { slug: string };
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const themes = themesFor(lang);
+const t = themes.find((x) => x.slug === slug)!;
+const url = L(themeUrl(t));
+const localTours = toursFor(lang);
+// the filters test the English text, so pick the tours in English and show them in the page's language
+const related = tours.filter(t.tours).slice(0, 6).map((x) => localTours.find((y) => y.slug === x.slug)!);
+const others = themes.filter((x) => x.slug !== t.slug);
+const T = {
+  en: { samples: "Sample safaris", change: "Every sample can be changed, or", own: "plan your own", more: "More ways to travel", parks: "Park guides" },
+  nl: { samples: "Voorbeeldsafari's", change: "Elk voorbeeld kun je aanpassen, of", own: "plan je eigen reis", more: "Andere manieren van reizen", parks: "Parkgidsen" },
+  de: { samples: "Beispielsafaris", change: "Jedes Beispiel lässt sich anpassen, oder", own: "planen Sie Ihre eigene Safari", more: "Weitere Reisearten", parks: "Park-Ratgeber" },
+  fr: { samples: "Exemples de safaris", change: "Chaque exemple peut être modifié, ou", own: "créez le vôtre", more: "D'autres façons de voyager", parks: "Guides des parcs" },
+}[lang];
+const schema: object[] = [breadcrumbs([[w(lang, "home"), L("/")], [t.name, url]])];
+if (t.faqs.length) schema.push(faqSchema(t.faqs));
+---
+<Base title={`${t.seoTitle} | Golden Dust Safaris`} description={t.description} schema={schema}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/tanzania-safari-packages")}>{w(lang, "safaris")}</a></nav>
+      <h1>{t.h1}</h1>
+      <p class="lede measure">{t.lede}</p>
+      <img class="gp__hero" src={t.hero} alt={t.heroAlt} width="1200" height="600" />
+      <div class="gp__body">
+        <div class="prose">{t.sections.map((s) => (<><h2>{s.h}</h2>{s.p.map((x) => <p set:html={localizeLinks(lang, x)} />)}</>))}</div>
+        <GuideAside />
+      </div>
+    </div>
+  </article>
+  {related.length > 0 && (
+    <section class="section section--white">
+      <div class="wrap">
+        <h2>{T.samples}</h2>
+        <div class="gp__grid">{related.map((x) => <TourRow tour={x} />)}</div>
+        <p style="margin-top:1.5rem">{T.change} <a href={L("/planner")}>{T.own}</a>.</p>
+      </div>
+    </section>
+  )}
+  {t.faqs.length > 0 && <section class="section"><div class="wrap measure"><Faq items={t.faqs} /></div></section>}
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>{T.more}</h2>
+      <ul class="others">{others.map((o) => <li><a href={L(themeUrl(o))}>{o.name}</a></li>)}<li><a href={L("/parks")}>{T.parks}</a></li></ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .others { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; }
+</style>

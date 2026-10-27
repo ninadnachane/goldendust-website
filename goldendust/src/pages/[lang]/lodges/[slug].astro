@@ -1,0 +1,10 @@
+---
+import View from "../../../views/Lodge.astro";
+import { OTHER_LANGS } from "../../../i18n";
+import { lodgesWithPages } from "../../../data/lodges";
+export function getStaticPaths() {
+  const slugs = lodgesWithPages.map((l) => l.slug);
+  return OTHER_LANGS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
+}
+---
+<View slug={Astro.params.slug} />

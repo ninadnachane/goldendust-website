@@ -1,0 +1,88 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import TourRow from "../components/TourRow.astro";
+import { getCollection, render } from "astro:content";
+import { img, site } from "../lib/site";
+import { orgSchema, breadcrumbs, faqSchema } from "../lib/schema";
+import { toursFor } from "../data/tours";
+import { langOf, lp, LOCALE } from "../i18n";
+import { w } from "../i18n/common";
+
+const { slug } = Astro.props as { slug: string };
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const all = await getCollection("blog");
+// a translated post lives at src/content/blog/<lang>/<slug>.md; without one, the English post is shown
+const post = (lang !== "en" && all.find((p) => p.id === `${lang}/${slug}`)) || all.find((p) => p.id === slug)!;
+const { Content } = await render(post);
+const d = post.data;
+const url = L(`/post/${slug}`);
+const fmt = (x: Date) => x.toLocaleDateString(LOCALE[lang], { day: "numeric", month: "long", year: "numeric" });
+const T = {
+  en: { by: "By the Golden Dust Safaris team in Arusha", upd: "Updated", min: "min read", boxH: "Planning a Tanzania safari?", boxP: "Message our team in Arusha. We'll give you an honest opinion and a full cost breakdown, free.", consider: "Safaris to consider", all: "See all safari packages" },
+  nl: { by: "Door het team van Golden Dust Safaris in Arusha", upd: "Bijgewerkt", min: "min. lezen", boxH: "Een safari in Tanzania plannen?", boxP: "Stuur ons team in Arusha een bericht. We geven je gratis ons eerlijke advies en een volledig overzicht van de kosten.", consider: "Safari's om te overwegen", all: "Bekijk alle safarireizen" },
+  de: { by: "Vom Team von Golden Dust Safaris in Arusha", upd: "Aktualisiert", min: "Min. Lesezeit", boxH: "Planen Sie eine Safari in Tansania?", boxP: "Schreiben Sie unserem Team in Arusha. Wir geben Ihnen kostenlos eine ehrliche Einschätzung und eine vollständige Kostenaufstellung.", consider: "Safaris, die passen könnten", all: "Alle Safarireisen ansehen" },
+  fr: { by: "Par l'équipe de Golden Dust Safaris à Arusha", upd: "Mis à jour le", min: "min de lecture", boxH: "Vous préparez un safari en Tanzanie ?", boxP: "Écrivez à notre équipe à Arusha. Nous vous donnerons gratuitement un avis honnête et le détail complet des coûts.", consider: "Des safaris à découvrir", all: "Voir tous nos circuits safari" },
+}[lang];
+
+const article = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: d.title,
+  description: d.description,
+  inLanguage: lang,
+  image: img(d.image, 1200),
+  datePublished: d.pubDate.toISOString(),
+  dateModified: d.updatedDate.toISOString(),
+  author: { "@type": "Organization", name: site.name, url: site.url },
+  publisher: { "@id": orgSchema["@id"], "@type": "TravelAgency", name: site.name, logo: { "@type": "ImageObject", url: orgSchema.logo } },
+  mainEntityOfPage: site.url + url,
+};
+const schema: object[] = [article, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "guides"), L("/blog")], [d.title, url]])];
+if (d.faqs.length) schema.push(faqSchema(d.faqs));
+const related = toursFor(lang).slice(0, 2);
+---
+<Base title={`${d.seoTitle} | Golden Dust Safaris`} description={d.description} image={d.image} type="article" schema={schema}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/blog")}>{w(lang, "guides")}</a></nav>
+      <header class="head">
+        <h1>{d.title}</h1>
+        <p class="meta">{T.by} · {T.upd} {fmt(d.updatedDate)} · {d.minutes} {T.min}</p>
+      </header>
+      <img class="hero" src={img(d.image, 1200)} alt={d.imageAlt} width="1200" height="600" />
+      <div class="body">
+        <div class="prose"><Content /></div>
+        <aside class="side">
+          <div class="side__box">
+            <p class="side__h">{T.boxH}</p>
+            <p>{T.boxP}</p>
+            <WaButton label={w(lang, "askWa")} />
+          </div>
+        </aside>
+      </div>
+    </div>
+  </article>
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>{T.consider}</h2>
+      <div class="rel">{related.map((t) => <TourRow tour={t} />)}</div>
+      <p style="margin-top:1.5rem"><a href={L("/tanzania-safari-packages")}>{T.all}</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .crumbs { font-size: 0.88rem; color: var(--ink-2); margin-bottom: 1rem; }
+  .crumbs a { color: var(--ink-2); }
+  .head { max-width: 48rem; }
+  h1 { font-size: clamp(2rem, 4.4vw, 3rem); }
+  .meta { color: var(--ink-2); font-size: 0.92rem; }
+  .hero { width: 100%; max-width: 64rem; border-radius: 10px; margin: 1.5rem 0 2.5rem; aspect-ratio: 2 / 1; object-fit: cover; background: var(--line); }
+  .body { display: grid; grid-template-columns: minmax(0, 40rem) 1fr; gap: 3.5rem; }
+  .side__box { position: sticky; top: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.4rem; font-size: 0.95rem; }
+  .side__h { font-family: var(--display); font-weight: 600; font-size: 1.1rem; }
+  .rel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  @media (max-width: 900px) { .body, .rel { grid-template-columns: 1fr; } .side__box { position: static; } }
+</style>

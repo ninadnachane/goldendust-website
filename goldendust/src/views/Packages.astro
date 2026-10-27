@@ -1,0 +1,87 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import WaButton from "../components/WaButton.astro";
+import { toursFor, fromPrice, tourUrl, tierClass } from "../data/tours";
+import { site } from "../lib/site";
+import { breadcrumbs } from "../lib/schema";
+import { langOf, lp, usdFor } from "../i18n";
+import { w, tierName, place } from "../i18n/common";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const usd = (n: number) => usdFor(lang, n);
+const tours = toursFor(lang);
+const min = usd(Math.min(...tours.map(fromPrice)));
+const T = {
+  en: { title: `Tanzania Safari Packages from ${min}`, desc: "Sample private Tanzania safaris from Arusha: Tarangire, the Serengeti and Ngorongoro Crater in 3 to 7 days, from Budget camping to Luxury lodges, with high and green season prices per person.", list: "Tanzania safari packages", h1: "Sample Tanzania safaris", lede: ["Popular routes from Arusha to Tarangire, the Serengeti and Ngorongoro Crater, priced with real camps and lodges. Every safari includes your own vehicle and guide, and every one can be changed to suit you, or ", "plan your own", "."], cmp: "Package comparison", cols: ["Safari", "Days", "Style", "Parks", "High season pp", "Green season pp"], note: "Per person for 2 adults sharing (the family safari: 2 adults and 2 children), prices for 2027. High season e.g. arriving in August, green season e.g. arriving in May.", diffH: "Want something different?", diffP: "Tanzania has 22 national parks. If you'd like to add Lake Manyara, go further to Ruaha or Katavi, or need a family-friendly pace, we'll build a custom plan around your dates and budget.", diffBtn: "Ask for a custom safari" },
+  nl: { title: `Safarireizen in Tanzania vanaf ${min}`, desc: "Voorbeelden van privésafari's in Tanzania vanuit Arusha: Tarangire, de Serengeti en de Ngorongorokrater in 3 tot 7 dagen, van budgetkamperen tot luxe lodges, met prijzen per persoon voor het hoogseizoen en het groene seizoen.", list: "Safarireizen in Tanzania", h1: "Voorbeeldsafari's in Tanzania", lede: ["Populaire routes vanuit Arusha naar Tarangire, de Serengeti en de Ngorongorokrater, berekend met echte kampen en lodges. Bij elke safari heb je je eigen voertuig en gids, en elke safari kun je aanpassen, of ", "plan je eigen reis", "."], cmp: "Vergelijking van de safari's", cols: ["Safari", "Dagen", "Stijl", "Parken", "Hoogseizoen p.p.", "Groen seizoen p.p."], note: "Per persoon voor 2 volwassenen op een gedeelde kamer (de gezinssafari: 2 volwassenen en 2 kinderen), prijzen voor 2027. Hoogseizoen bijv. aankomst in augustus, groen seizoen bijv. aankomst in mei.", diffH: "Iets anders in gedachten?", diffP: "Tanzania heeft 22 nationale parken. Wil je Lake Manyara toevoegen, verder reizen naar Ruaha of Katavi, of reizen op het tempo van je gezin? Dan maken we een plan op maat rond je data en budget.", diffBtn: "Vraag een safari op maat aan" },
+  de: { title: `Safarireisen in Tansania ab ${min}`, desc: "Beispiele für Privatsafaris in Tansania ab Arusha: Tarangire, Serengeti und Ngorongoro-Krater in 3 bis 7 Tagen, vom Budget-Camping bis zur Luxuslodge, mit Preisen pro Person für Hochsaison und grüne Saison.", list: "Safarireisen in Tansania", h1: "Beispielsafaris in Tansania", lede: ["Beliebte Routen ab Arusha zum Tarangire, in die Serengeti und zum Ngorongoro-Krater, berechnet mit echten Camps und Lodges. Zu jeder Safari gehören Ihr eigenes Fahrzeug und Ihr eigener Guide, und jede lässt sich anpassen, oder ", "planen Sie Ihre eigene", "."], cmp: "Vergleich der Safaris", cols: ["Safari", "Tage", "Stil", "Parks", "Hochsaison p. P.", "Grüne Saison p. P."], note: "Pro Person bei 2 Erwachsenen im Doppelzimmer (Familiensafari: 2 Erwachsene und 2 Kinder), Preise für 2027. Hochsaison z. B. Ankunft im August, grüne Saison z. B. Ankunft im Mai.", diffH: "Lieber etwas anderes?", diffP: "Tansania hat 22 Nationalparks. Wenn Sie den Lake Manyara hinzufügen, weiter nach Ruaha oder Katavi reisen oder im Familientempo unterwegs sein möchten, planen wir Ihre Reise passend zu Ihren Daten und Ihrem Budget.", diffBtn: "Individuelle Safari anfragen" },
+  fr: { title: `Circuits safari en Tanzanie à partir de ${min}`, desc: "Exemples de safaris privés en Tanzanie au départ d'Arusha : Tarangire, le Serengeti et le cratère du Ngorongoro en 3 à 7 jours, du camping économique aux lodges de luxe, avec les prix par personne en haute saison et en saison verte.", list: "Circuits safari en Tanzanie", h1: "Exemples de safaris en Tanzanie", lede: ["Des itinéraires populaires d'Arusha à Tarangire, au Serengeti et au cratère du Ngorongoro, calculés avec de vrais camps et lodges. Chaque safari comprend votre propre véhicule et votre guide, et chacun peut être adapté, ou ", "créez le vôtre", "."], cmp: "Comparatif des safaris", cols: ["Safari", "Jours", "Style", "Parcs", "Haute saison / pers.", "Saison verte / pers."], note: "Par personne, pour 2 adultes en chambre partagée (le safari en famille : 2 adultes et 2 enfants), prix pour 2027. Haute saison : p. ex. arrivée en août ; saison verte : p. ex. arrivée en mai.", diffH: "Envie d'autre chose ?", diffP: "La Tanzanie compte 22 parcs nationaux. Si vous souhaitez ajouter le lac Manyara, aller plus loin jusqu'à Ruaha ou Katavi, ou voyager au rythme de votre famille, nous créons un programme sur mesure selon vos dates et votre budget.", diffBtn: "Demander un safari sur mesure" },
+}[lang];
+
+const list = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: T.list,
+  itemListElement: tours.map((t, i) => ({ "@type": "ListItem", position: i + 1, url: site.url + L(tourUrl(t)), name: t.seoTitle })),
+};
+---
+<Base
+  title={`${T.title} | Golden Dust Safaris`}
+  description={T.desc}
+  schema={[list, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "samples"), L("/tanzania-safari-packages")]])]}
+>
+  <section class="section">
+    <div class="wrap">
+      <h1>{T.h1}</h1>
+      <p class="lede">{T.lede[0]}<a href={L("/planner")}>{T.lede[1]}</a>{T.lede[2]}</p>
+
+      <div class="compare" role="region" aria-label={T.cmp} tabindex="0">
+        <table>
+          <thead>
+            <tr>{T.cols.map((c) => <th scope="col">{c}</th>)}</tr>
+          </thead>
+          <tbody>
+            {tours.map((t) => (
+              <tr>
+                <td><a href={L(tourUrl(t))}>{t.shortName}</a></td>
+                <td>{t.nights + 1}</td>
+                <td><span class={`tag tag--${tierClass(t)}`}>{tierName(lang, t.tier)}</span></td>
+                <td>{t.route.slice(1, -1).map((r) => place(lang, r)).join(", ")}</td>
+                <td><strong>{usd(t.prices.high.pp)}</strong></td>
+                <td><strong>{usd(t.prices.green.pp)}</strong></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="note">{T.note}</p>
+      <div class="tours">{tours.map((t) => <TourRow tour={t} />)}</div>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="wrap measure">
+      <h2>{T.diffH}</h2>
+      <p>{T.diffP}</p>
+      <WaButton label={T.diffBtn} text="Hi Golden Dust Safaris, I'd like a custom Tanzania safari." />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .compare { overflow-x: auto; margin: 2rem 0 2.5rem; background: var(--surface); border-radius: 10px; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; min-width: 36rem; font-size: 0.97rem; }
+  th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--display); font-size: 0.85rem; color: var(--ink-2); }
+  tr:last-child td { border-bottom: 0; }
+  td a { font-family: var(--display); font-weight: 600; }
+  .tours { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .tag { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+  .tag--budget { background: #6f7d3c; } .tag--comfort { background: #9a6a2f; } .tag--premium { background: #c89a4b; } .tag--luxury { background: #2e241b; }
+  .note { font-size: 0.88rem; color: var(--ink-2); margin: -1.5rem 0 2rem; }
+  @media (max-width: 1000px) { .tours { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .tours { grid-template-columns: 1fr; } }
+</style>

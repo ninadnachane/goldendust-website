@@ -1,6 +1,8 @@
 ---
+import { langOf } from "../i18n";
+import { w } from "../i18n/common";
 interface Props { items: { q: string; a: string }[]; heading?: string }
-const { items, heading = "Frequently asked questions" } = Astro.props;
+const { items, heading = w(langOf(Astro.url), "faq") } = Astro.props;
 ---
 <section class="faq" aria-labelledby="faq-h">
   <h2 id="faq-h">{heading}</h2>

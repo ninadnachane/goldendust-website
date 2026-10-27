@@ -1,0 +1,214 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import LodgeCard from "../components/LodgeCard.astro";
+import GuideAside from "../components/GuideAside.astro";
+import Faq from "../components/Faq.astro";
+import { tours, toursFor } from "../data/tours";
+import { lodgesWithPages } from "../data/lodges";
+import { breadcrumbs, faqSchema } from "../lib/schema";
+import { langOf, lp, localizeLinks } from "../i18n";
+import { w } from "../i18n/common";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+type M = [string, string, string];
+// Typical pattern only: the herds follow the rain, so timing shifts by weeks from year to year.
+const C = {
+  en: {
+    title: "Great Migration Serengeti: Month-by-Month Guide",
+    desc: "Where the Great Migration usually is in each month, from calving at Ndutu to the Mara River crossings, and where to stay to see it. A guide from our Arusha safari team.",
+    crumb: "Great Migration", h1: "The Great Migration, month by month",
+    lede: "Well over a million wildebeest, with zebras and gazelles, circle the Serengeti every year following the rain. Here's where they usually are, so you can pick your month and your camps.",
+    alt: "Herds on the Serengeti plains, seen from the guide's seat",
+    intro: "The migration isn't a single event. It's a loop that never stops, and the timing changes every year with the rain. Treat the months below as a guide, not a timetable. Before you book, we check where the herds are and suggest camps close to them.",
+    tableAria: "Migration by month", cols: ["Month", "Where the herds usually are", "What's happening"],
+    months: [
+      ["January", "Southern Serengeti and Ndutu", "The herds settle on the short-grass plains in the south. Calving starts."],
+      ["February", "Southern Serengeti and Ndutu", "The peak of the calving season. Lots of predator action around the herds."],
+      ["March", "Southern Serengeti and Ndutu", "Calving continues. The calves grow stronger and the herds start to gather."],
+      ["April", "Moving north-west through the central Serengeti", "The long rains. The herds leave the plains and spread out. Quiet and green."],
+      ["May", "Central and western Serengeti", "Long columns of wildebeest on the move. The rut begins."],
+      ["June", "Western corridor", "The herds reach the Grumeti River, and the first crossings can happen."],
+      ["July", "Western and northern Serengeti", "Most herds head north. The Mara River crossings can start late in the month."],
+      ["August", "Northern Serengeti", "Mara River crossing season. Some herds move into Kenya's Maasai Mara."],
+      ["September", "Northern Serengeti", "Crossings continue, back and forth across the Mara River."],
+      ["October", "Northern Serengeti", "The herds start drifting south as the short rains approach."],
+      ["November", "Eastern and central Serengeti", "The short rains bring fresh grass, and the herds move south."],
+      ["December", "Southern Serengeti and Ndutu", "The herds arrive back on the southern plains, ready to calve."],
+    ] as M[],
+    sections: [
+      ["Calving season: January to March", "On the short-grass plains of the southern Serengeti and around Ndutu, a huge number of calves are born within a few weeks. Lions, cheetahs and hyenas follow the herds, so it's one of the best times of year for predators. It's also quieter and cheaper than the July to October peak."],
+      ["River crossings: June to October", "The Grumeti River in the western corridor comes first, around June. From about July, the herds reach the Mara River in the far north, where the famous crossings happen. The north is a long drive from Arusha, so we plan at least two nights there, or a flight."],
+      ["The rest of the year", "In April and May, the long rains turn the park green and the herds spread out across the central and western Serengeti. In November and December they head south again. These months are the quietest, and the resident wildlife of the central Serengeti is there all year."],
+    ],
+    see: `See also our <a href="/parks/serengeti-national-park">Serengeti guide</a> and the <a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">best time to visit Tanzania</a>.`,
+    want: "Want to see the herds?", south: "Camps for the calving season (Ndutu)", central: "Camps in the central Serengeti", all: "All the lodges and camps we work with", samples: "Serengeti sample safaris",
+    facts: [["Calving", "About January to March, south and Ndutu"], ["Grumeti crossings", "Around June, western corridor"], ["Mara crossings", "About July to October, north"], ["Where we'd stay", "Close to wherever the herds are that month"]] as [string, string][],
+    faqs: [
+      { q: "What is the best month to see the Great Migration?", a: "For river crossings, July to September in the northern Serengeti. For the calving season and predators, January to March in the south around Ndutu." },
+      { q: "Can you guarantee a river crossing?", a: "No. The herds can wait on the bank for hours or days, and they sometimes turn back. Two or three nights in the north gives you a good chance." },
+      { q: "Where does the Great Migration happen?", a: "In the Serengeti ecosystem, which includes the Serengeti National Park, the Ngorongoro Conservation Area around Ndutu, and Kenya's Maasai Mara." },
+    ],
+  },
+  nl: {
+    title: "De Grote Migratie in de Serengeti: gids per maand",
+    desc: "Waar de Grote Migratie meestal is in elke maand, van het kalfseizoen in Ndutu tot de oversteken van de Mara-rivier, en waar je overnacht om het te zien. Een gids van ons safariteam in Arusha.",
+    crumb: "Grote Migratie", h1: "De Grote Migratie per maand",
+    lede: "Ruim een miljoen gnoes trekken elk jaar met zebra's en gazellen rond door de Serengeti, achter de regen aan. Hier zie je waar ze meestal zijn, zodat je je maand en je kampen kunt kiezen.",
+    alt: "Kuddes op de vlaktes van de Serengeti, gezien vanaf de stoel van de gids",
+    intro: "De migratie is geen eenmalige gebeurtenis. Het is een kringloop die nooit stopt, en de timing verandert elk jaar met de regen. Zie de maanden hieronder als richtlijn, niet als dienstregeling. Voordat je boekt, kijken we waar de kuddes zijn en stellen we kampen in de buurt voor.",
+    tableAria: "Migratie per maand", cols: ["Maand", "Waar de kuddes meestal zijn", "Wat er gebeurt"],
+    months: [
+      ["Januari", "Zuidelijke Serengeti en Ndutu", "De kuddes strijken neer op de kortgrasvlaktes in het zuiden. Het kalven begint."],
+      ["Februari", "Zuidelijke Serengeti en Ndutu", "Het hoogtepunt van het kalfseizoen. Veel actie van roofdieren rond de kuddes."],
+      ["Maart", "Zuidelijke Serengeti en Ndutu", "Het kalven gaat door. De kalveren worden sterker en de kuddes beginnen zich te verzamelen."],
+      ["April", "Op weg naar het noordwesten door de centrale Serengeti", "De lange regens. De kuddes verlaten de vlaktes en verspreiden zich. Rustig en groen."],
+      ["Mei", "Centrale en westelijke Serengeti", "Lange rijen gnoes op weg. De bronsttijd begint."],
+      ["Juni", "Westelijke corridor", "De kuddes bereiken de Grumeti-rivier, en de eerste oversteken kunnen plaatsvinden."],
+      ["Juli", "Westelijke en noordelijke Serengeti", "De meeste kuddes trekken naar het noorden. Eind van de maand kunnen de oversteken van de Mara-rivier beginnen."],
+      ["Augustus", "Noordelijke Serengeti", "Het seizoen van de oversteken van de Mara-rivier. Een deel van de kuddes trekt naar de Maasai Mara in Kenia."],
+      ["September", "Noordelijke Serengeti", "De oversteken gaan door, heen en weer over de Mara-rivier."],
+      ["Oktober", "Noordelijke Serengeti", "De kuddes beginnen naar het zuiden te trekken nu de korte regens naderen."],
+      ["November", "Oostelijke en centrale Serengeti", "De korte regens brengen vers gras, en de kuddes trekken naar het zuiden."],
+      ["December", "Zuidelijke Serengeti en Ndutu", "De kuddes komen terug op de zuidelijke vlaktes, klaar om te kalven."],
+    ] as M[],
+    sections: [
+      ["Kalfseizoen: januari tot maart", "Op de kortgrasvlaktes van de zuidelijke Serengeti en rond Ndutu wordt binnen een paar weken een enorm aantal kalveren geboren. Leeuwen, cheeta's en hyena's volgen de kuddes, dus het is een van de beste tijden van het jaar voor roofdieren. Het is ook rustiger en goedkoper dan de piek van juli tot oktober."],
+      ["Rivieroversteken: juni tot oktober", "Eerst is rond juni de Grumeti-rivier in de westelijke corridor aan de beurt. Vanaf ongeveer juli bereiken de kuddes de Mara-rivier in het uiterste noorden, waar de beroemde oversteken plaatsvinden. Het noorden ligt ver van Arusha, dus we plannen daar minstens twee nachten, of een vlucht."],
+      ["De rest van het jaar", "In april en mei maken de lange regens het park groen en verspreiden de kuddes zich over de centrale en westelijke Serengeti. In november en december trekken ze weer naar het zuiden. Dit zijn de rustigste maanden, en de vaste bewoners van de centrale Serengeti zijn er het hele jaar."],
+    ],
+    see: `Lees ook onze <a href="/parks/serengeti-national-park">gids over de Serengeti</a> en <a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">de beste reistijd voor Tanzania</a>.`,
+    want: "Wil je de kuddes zien?", south: "Kampen voor het kalfseizoen (Ndutu)", central: "Kampen in de centrale Serengeti", all: "Alle lodges en kampen waarmee we werken", samples: "Voorbeeldsafari's in de Serengeti",
+    facts: [["Kalveren", "Ongeveer januari tot maart, zuiden en Ndutu"], ["Grumeti-oversteken", "Rond juni, westelijke corridor"], ["Mara-oversteken", "Ongeveer juli tot oktober, noorden"], ["Waar we zouden slapen", "Dicht bij de kuddes, waar die in die maand ook zijn"]] as [string, string][],
+    faqs: [
+      { q: "Wat is de beste maand om de Grote Migratie te zien?", a: "Voor rivieroversteken juli tot september in de noordelijke Serengeti. Voor het kalfseizoen en roofdieren januari tot maart in het zuiden, rond Ndutu." },
+      { q: "Kun je een rivieroversteek garanderen?", a: "Nee. De kuddes kunnen uren of dagen op de oever wachten, en soms keren ze om. Met twee of drie nachten in het noorden heb je een goede kans." },
+      { q: "Waar vindt de Grote Migratie plaats?", a: "In het ecosysteem van de Serengeti, dat bestaat uit Nationaal Park Serengeti, de Ngorongoro Conservation Area rond Ndutu en de Maasai Mara in Kenia." },
+    ],
+  },
+  de: {
+    title: "Große Migration in der Serengeti: Ratgeber nach Monaten",
+    desc: "Wo die Große Migration in jedem Monat meist ist, von der Kalbungszeit in Ndutu bis zu den Überquerungen des Mara-Flusses, und wo Sie übernachten, um sie zu erleben. Ein Ratgeber unseres Safariteams in Arusha.",
+    crumb: "Große Migration", h1: "Die Große Migration nach Monaten",
+    lede: "Weit über eine Million Gnus ziehen jedes Jahr mit Zebras und Gazellen durch die Serengeti, immer dem Regen nach. Hier sehen Sie, wo sie meist sind, damit Sie Ihren Monat und Ihre Camps wählen können.",
+    alt: "Herden in den Ebenen der Serengeti, vom Sitz des Guides aus gesehen",
+    intro: "Die Migration ist kein einzelnes Ereignis. Sie ist ein Kreislauf, der nie aufhört, und der Zeitpunkt ändert sich jedes Jahr mit dem Regen. Sehen Sie die Monate unten als Orientierung, nicht als Fahrplan. Vor Ihrer Buchung prüfen wir, wo die Herden sind, und schlagen Camps in ihrer Nähe vor.",
+    tableAria: "Migration nach Monaten", cols: ["Monat", "Wo die Herden meist sind", "Was passiert"],
+    months: [
+      ["Januar", "Südliche Serengeti und Ndutu", "Die Herden lassen sich auf den Kurzgrasebenen im Süden nieder. Die Kalbungszeit beginnt."],
+      ["Februar", "Südliche Serengeti und Ndutu", "Höhepunkt der Kalbungszeit. Viel Aktivität der Raubtiere rund um die Herden."],
+      ["März", "Südliche Serengeti und Ndutu", "Die Kalbungszeit geht weiter. Die Kälber werden kräftiger, und die Herden beginnen sich zu sammeln."],
+      ["April", "Unterwegs nach Nordwesten durch die zentrale Serengeti", "Die große Regenzeit. Die Herden verlassen die Ebenen und verteilen sich. Ruhig und grün."],
+      ["Mai", "Zentrale und westliche Serengeti", "Lange Kolonnen von Gnus auf Wanderschaft. Die Brunft beginnt."],
+      ["Juni", "Westlicher Korridor", "Die Herden erreichen den Grumeti-Fluss, und die ersten Überquerungen sind möglich."],
+      ["Juli", "Westliche und nördliche Serengeti", "Die meisten Herden ziehen nach Norden. Gegen Ende des Monats können die Überquerungen des Mara-Flusses beginnen."],
+      ["August", "Nördliche Serengeti", "Zeit der Mara-Überquerungen. Ein Teil der Herden zieht in die Maasai Mara in Kenia."],
+      ["September", "Nördliche Serengeti", "Die Überquerungen gehen weiter, hin und her über den Mara-Fluss."],
+      ["Oktober", "Nördliche Serengeti", "Mit der nahenden kleinen Regenzeit ziehen die Herden langsam nach Süden."],
+      ["November", "Östliche und zentrale Serengeti", "Die kleine Regenzeit bringt frisches Gras, und die Herden ziehen nach Süden."],
+      ["Dezember", "Südliche Serengeti und Ndutu", "Die Herden kommen zurück in die südlichen Ebenen, bereit zum Kalben."],
+    ] as M[],
+    sections: [
+      ["Kalbungszeit: Januar bis März", "Auf den Kurzgrasebenen der südlichen Serengeti und rund um Ndutu kommen innerhalb weniger Wochen sehr viele Kälber zur Welt. Löwen, Geparden und Hyänen folgen den Herden, deshalb ist es eine der besten Zeiten des Jahres für Raubtiere. Es ist auch ruhiger und günstiger als die Hauptsaison von Juli bis Oktober."],
+      ["Flussüberquerungen: Juni bis Oktober", "Zuerst kommt um Juni der Grumeti-Fluss im westlichen Korridor. Etwa ab Juli erreichen die Herden den Mara-Fluss im äußersten Norden, wo die berühmten Überquerungen stattfinden. Der Norden ist weit von Arusha entfernt, deshalb planen wir dort mindestens zwei Nächte ein oder einen Flug."],
+      ["Der Rest des Jahres", "Im April und Mai färbt die große Regenzeit den Park grün, und die Herden verteilen sich über die zentrale und westliche Serengeti. Im November und Dezember ziehen sie wieder nach Süden. Das sind die ruhigsten Monate, und die standorttreuen Tiere der zentralen Serengeti sind das ganze Jahr da."],
+    ],
+    see: `Lesen Sie auch unseren <a href="/parks/serengeti-national-park">Serengeti-Ratgeber</a> und <a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">die beste Reisezeit für Tansania</a>.`,
+    want: "Möchten Sie die Herden sehen?", south: "Camps für die Kalbungszeit (Ndutu)", central: "Camps in der zentralen Serengeti", all: "Alle Lodges und Camps, mit denen wir arbeiten", samples: "Beispielsafaris in die Serengeti",
+    facts: [["Kalbungszeit", "Etwa Januar bis März, Süden und Ndutu"], ["Grumeti-Überquerungen", "Um Juni, westlicher Korridor"], ["Mara-Überquerungen", "Etwa Juli bis Oktober, Norden"], ["Wo wir übernachten würden", "Nah an den Herden, wo immer sie in dem Monat sind"]] as [string, string][],
+    faqs: [
+      { q: "In welchem Monat sieht man die Große Migration am besten?", a: "Für die Flussüberquerungen Juli bis September in der nördlichen Serengeti. Für die Kalbungszeit und Raubtiere Januar bis März im Süden rund um Ndutu." },
+      { q: "Kann man eine Flussüberquerung garantieren?", a: "Nein. Die Herden können stunden- oder tagelang am Ufer warten und kehren manchmal um. Mit zwei oder drei Nächten im Norden haben Sie gute Chancen." },
+      { q: "Wo findet die Große Migration statt?", a: "Im Ökosystem der Serengeti, zu dem der Serengeti-Nationalpark, das Ngorongoro-Schutzgebiet rund um Ndutu und die Maasai Mara in Kenia gehören." },
+    ],
+  },
+  fr: {
+    title: "La Grande Migration au Serengeti : le guide mois par mois",
+    desc: "Où se trouve généralement la Grande Migration chaque mois, des naissances à Ndutu aux traversées de la rivière Mara, et où dormir pour la voir. Un guide de notre équipe safari à Arusha.",
+    crumb: "Grande Migration", h1: "La Grande Migration mois par mois",
+    lede: "Bien plus d'un million de gnous, avec des zèbres et des gazelles, font chaque année le tour du Serengeti en suivant la pluie. Voici où ils se trouvent généralement, pour choisir votre mois et vos camps.",
+    alt: "Des troupeaux dans les plaines du Serengeti, vus depuis le siège du guide",
+    intro: "La migration n'est pas un événement ponctuel. C'est une boucle qui ne s'arrête jamais, et le calendrier change chaque année avec la pluie. Considérez les mois ci-dessous comme un repère, pas comme un horaire. Avant votre réservation, nous vérifions où sont les troupeaux et vous proposons des camps à proximité.",
+    tableAria: "La migration mois par mois", cols: ["Mois", "Où sont généralement les troupeaux", "Ce qui se passe"],
+    months: [
+      ["Janvier", "Sud du Serengeti et Ndutu", "Les troupeaux s'installent sur les plaines d'herbe rase du sud. Les naissances commencent."],
+      ["Février", "Sud du Serengeti et Ndutu", "Le pic des naissances. Beaucoup d'activité des prédateurs autour des troupeaux."],
+      ["Mars", "Sud du Serengeti et Ndutu", "Les naissances continuent. Les petits prennent des forces et les troupeaux commencent à se regrouper."],
+      ["Avril", "En route vers le nord-ouest par le centre du Serengeti", "La grande saison des pluies. Les troupeaux quittent les plaines et se dispersent. Calme et verdoyant."],
+      ["Mai", "Centre et ouest du Serengeti", "De longues colonnes de gnous en mouvement. Le rut commence."],
+      ["Juin", "Corridor ouest", "Les troupeaux atteignent la rivière Grumeti, et les premières traversées peuvent avoir lieu."],
+      ["Juillet", "Ouest et nord du Serengeti", "La plupart des troupeaux remontent vers le nord. Les traversées de la Mara peuvent commencer en fin de mois."],
+      ["Août", "Nord du Serengeti", "La saison des traversées de la Mara. Une partie des troupeaux passe dans le Maasai Mara, au Kenya."],
+      ["Septembre", "Nord du Serengeti", "Les traversées continuent, dans un sens puis dans l'autre."],
+      ["Octobre", "Nord du Serengeti", "Les troupeaux commencent à redescendre vers le sud à l'approche des petites pluies."],
+      ["Novembre", "Est et centre du Serengeti", "Les petites pluies apportent de l'herbe fraîche, et les troupeaux descendent vers le sud."],
+      ["Décembre", "Sud du Serengeti et Ndutu", "Les troupeaux reviennent sur les plaines du sud, prêts pour les naissances."],
+    ] as M[],
+    sections: [
+      ["La saison des naissances : de janvier à mars", "Sur les plaines d'herbe rase du sud du Serengeti et autour de Ndutu, un très grand nombre de petits naissent en quelques semaines. Lions, guépards et hyènes suivent les troupeaux : c'est l'une des meilleures périodes de l'année pour les prédateurs. C'est aussi plus calme et moins cher que la haute saison de juillet à octobre."],
+      ["Les traversées de rivières : de juin à octobre", "La rivière Grumeti, dans le corridor ouest, vient en premier, vers juin. À partir de juillet environ, les troupeaux atteignent la rivière Mara, tout au nord, où ont lieu les célèbres traversées. Le nord est loin d'Arusha, nous y prévoyons donc au moins deux nuits, ou un vol."],
+      ["Le reste de l'année", "En avril et mai, la grande saison des pluies rend le parc verdoyant et les troupeaux se dispersent dans le centre et l'ouest du Serengeti. En novembre et décembre, ils redescendent vers le sud. Ce sont les mois les plus calmes, et la faune résidente du centre du Serengeti est là toute l'année."],
+    ],
+    see: `Voir aussi notre <a href="/parks/serengeti-national-park">guide du Serengeti</a> et <a href="/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide">la meilleure période pour la Tanzanie</a>.`,
+    want: "Envie de voir les troupeaux ?", south: "Camps pour la saison des naissances (Ndutu)", central: "Camps au centre du Serengeti", all: "Tous les lodges et camps avec lesquels nous travaillons", samples: "Exemples de safaris au Serengeti",
+    facts: [["Naissances", "Environ de janvier à mars, sud et Ndutu"], ["Traversées de la Grumeti", "Vers juin, corridor ouest"], ["Traversées de la Mara", "Environ de juillet à octobre, nord"], ["Où nous logerions", "Au plus près des troupeaux, où qu'ils soient ce mois-là"]] as [string, string][],
+    faqs: [
+      { q: "Quel est le meilleur mois pour voir la Grande Migration ?", a: "Pour les traversées de rivières, de juillet à septembre dans le nord du Serengeti. Pour les naissances et les prédateurs, de janvier à mars dans le sud, autour de Ndutu." },
+      { q: "Peut-on garantir une traversée ?", a: "Non. Les troupeaux peuvent attendre des heures ou des jours sur la rive, et ils font parfois demi-tour. Deux ou trois nuits dans le nord vous donnent de bonnes chances." },
+      { q: "Où a lieu la Grande Migration ?", a: "Dans l'écosystème du Serengeti, qui comprend le parc national du Serengeti, l'aire de conservation du Ngorongoro autour de Ndutu et le Maasai Mara au Kenya." },
+    ],
+  },
+};
+const T = C[lang];
+const south = lodgesWithPages.filter((l) => l.area === "ndutu");
+const central = lodgesWithPages.filter((l) => l.area === "central-serengeti").slice(0, 3);
+const local = toursFor(lang);
+const related = tours.filter((t) => t.route.some((r) => /Serengeti/.test(r))).slice(0, 3).map((t) => local.find((x) => x.slug === t.slug)!);
+---
+<Base title={`${T.title} | Golden Dust Safaris`} description={T.desc}
+  schema={[breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "parks"), L("/parks")], [T.crumb, L("/great-migration-serengeti")]]), faqSchema(T.faqs)]}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/parks")}>{w(lang, "parks")}</a> / <a href={L("/parks/serengeti-national-park")}>Serengeti</a></nav>
+      <h1>{T.h1}</h1>
+      <p class="lede measure">{T.lede}</p>
+      <img class="gp__hero" src="/images/gallery/guide-view-gazelles-serengeti.webp" alt={T.alt} width="1200" height="600" />
+      <div class="gp__body">
+        <div class="prose">
+          <p>{T.intro}</p>
+          <div class="mt" role="region" aria-label={T.tableAria} tabindex="0">
+            <table>
+              <thead><tr>{T.cols.map((c) => <th scope="col">{c}</th>)}</tr></thead>
+              <tbody>{T.months.map(([m, wh, t]) => <tr><th scope="row">{m}</th><td>{wh}</td><td>{t}</td></tr>)}</tbody>
+            </table>
+          </div>
+          {T.sections.map(([h, p]) => <><h2>{h}</h2><p>{p}</p></>)}
+          <p set:html={localizeLinks(lang, T.see)} />
+        </div>
+        <GuideAside facts={T.facts} title={T.want} />
+      </div>
+    </div>
+  </article>
+  {south.length > 0 && (
+    <section class="section section--white">
+      <div class="wrap">
+        <h2>{T.south}</h2>
+        <div class="gp__grid">{south.map((l) => <LodgeCard lodge={l} />)}</div>
+        {central.length > 0 && <><h2 style="margin-top:2.5rem">{T.central}</h2><div class="gp__grid">{central.map((l) => <LodgeCard lodge={l} />)}</div></>}
+        <p style="margin-top:1.5rem"><a href={L("/lodges")}>{T.all}</a></p>
+      </div>
+    </section>
+  )}
+  <section class="section">
+    <div class="wrap">
+      <h2>{T.samples}</h2>
+      <div class="gp__grid">{related.map((t) => <TourRow tour={t} />)}</div>
+    </div>
+  </section>
+  <section class="section section--white"><div class="wrap measure"><Faq items={T.faqs} /></div></section>
+</Base>
+<style>
+  .mt { overflow-x: auto; }
+  .mt th[scope="row"] { font-family: var(--display); font-weight: 600; white-space: nowrap; }
+</style>

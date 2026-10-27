@@ -1,58 +1,9 @@
 ---
-import Base from "../../layouts/Base.astro";
-import LodgeCard from "../../components/LodgeCard.astro";
-import GuideAside from "../../components/GuideAside.astro";
-import { lodgesWithPages, lodgeUrl, AREAS, TIER_TEXT, type PartnerLodge } from "../../data/lodges";
-import { parks, parkUrl } from "../../data/parks";
-import { breadcrumbs } from "../../lib/schema";
-import { waLink } from "../../lib/site";
-
+import View from "../../views/Lodge.astro";
+import { lodgesWithPages } from "../../data/lodges";
 export function getStaticPaths() {
-  return lodgesWithPages.map((l) => ({ params: { slug: l.slug }, props: { lodge: l } }));
+  const slugs = lodgesWithPages.map((l) => l.slug);
+  return slugs.map((slug) => ({ params: { slug } }));
 }
-const { lodge: l } = Astro.props as { lodge: PartnerLodge };
-const area = AREAS[l.area];
-const park = parks.find((p) => p.slug === area.park)!;
-const nearby = lodgesWithPages.filter((x) => x.area === l.area && x.slug !== l.slug).slice(0, 6);
-const where = l.area === "ndutu" ? "Ndutu, on the edge of the southern Serengeti" : area.name;
-const facts: [string, string][] = [["Area", area.name], ["Style", l.tier], ["Park guide", park.name]];
 ---
-<Base title={`${l.name}, ${area.name} | Safari Lodge Photos | Golden Dust Safaris`}
-  description={`${l.name} in ${where}: photos, style (${l.tier}) and how to include it in a private Tanzania safari with Golden Dust Safaris.`}
-  schema={[breadcrumbs([["Home", "/"], ["Lodges", "/lodges"], [l.name, lodgeUrl(l)]])]}>
-  <article class="section">
-    <div class="wrap">
-      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/lodges">Lodges</a> / <a href={parkUrl(park)}>{area.name}</a></nav>
-      <h1>{l.name}</h1>
-      <p><span class={`tier tier--${l.tier.toLowerCase()}`}>{l.tier}</span> · {where}</p>
-      <div class="ph">
-        {l.photos.slice(0, 5).map((src, i) => <img src={src} alt={`${l.name}, photo ${i + 1}`} loading={i ? "lazy" : "eager"} width="900" height="600" class={i === 0 ? "ph__main" : ""} />)}
-      </div>
-      <div class="gp__body">
-        <div class="prose">
-          <p>{l.name} is one of the camps and lodges we work with in {where}. In our safari styles it counts as <strong>{l.tier}</strong>: {TIER_TEXT[l.tier]}.</p>
-          {l.inPlanner
-            ? <p>It's in our <a href="/planner">itinerary planner</a>, so you can add it to your route and see the price for your dates straight away, with park fees, your vehicle and guide included.</p>
-            : <p>Want to stay here? <a href={waLink(`Hi Golden Dust Safaris, I'd like a price for a safari staying at ${l.name}.`)} target="_blank" rel="noopener">Message us on WhatsApp</a> and we'll price it for your dates.</p>}
-          <h2>About {area.name}</h2>
-          <p>{park.lede} Read our <a href={parkUrl(park)}>{park.name} guide</a> for the best time to go and how long to stay.</p>
-        </div>
-        <GuideAside facts={facts} />
-      </div>
-    </div>
-  </article>
-  {nearby.length > 0 && (
-    <section class="section section--white">
-      <div class="wrap">
-        <h2>Other lodges in {area.name}</h2>
-        <div class="gp__grid">{nearby.map((x) => <LodgeCard lodge={x} />)}</div>
-      </div>
-    </section>
-  )}
-</Base>
-<style>
-  .ph { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1.5rem 0 2rem; }
-  .ph img { width: 100%; height: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 8px; background: var(--line); }
-  .ph .ph__main { grid-column: span 2; grid-row: span 2; }
-  @media (max-width: 700px) { .ph { grid-template-columns: repeat(2, 1fr); } }
-</style>
+<View slug={Astro.params.slug} />

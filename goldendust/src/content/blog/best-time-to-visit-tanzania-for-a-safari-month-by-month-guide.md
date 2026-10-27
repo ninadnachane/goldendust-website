@@ -45,7 +45,7 @@ The short rains are lighter and patchier. You might get a hard shower in the aft
 
 **April–May:** Long rains, rough roads, some lodges closed. Cheap, quiet and great for birders, but not our first choice for a first trip.
 
-**June–July:** The dry season starts concentrating the animals. The [Great Migration in Tanzania](/) moves north towards the Grumeti River. Conditions get better across the Serengeti, Tarangire and Ngorongoro.
+**June–July:** The dry season starts concentrating the animals. The [Great Migration in Tanzania](/great-migration-serengeti) moves north towards the Grumeti River. Conditions get better across the Serengeti, Tarangire and Ngorongoro.
 
 **August–October:** The peak. River crossings in the northern Serengeti, dry and cool weather, full camps and the highest prices. Book early.
 

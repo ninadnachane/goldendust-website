@@ -2,12 +2,40 @@
   "version": "0.2",
   "language": "en-GB,en",
   "import": [
-    "@cspell/dict-en-gb/cspell-ext.json"
+    "@cspell/dict-en-gb/cspell-ext.json",
+    "@cspell/dict-nl-nl/cspell-ext.json",
+    "@cspell/dict-de-de/cspell-ext.json",
+    "@cspell/dict-fr-fr/cspell-ext.json"
   ],
   "ignoreRegExpList": [
     "/GD-\\d+/g",
     "/\\b[A-Z0-9]{2,}\\b/g",
     "/[^\\x00-\\u024f\\s]+/gu"
+  ],
+  "overrides": [
+    {
+      "filename": [
+        "**/.spellcheck/nl/**",
+        "**/.spellcheck/nl.txt"
+      ],
+      "language": "nl,en-GB,en",
+      "allowCompoundWords": true
+    },
+    {
+      "filename": [
+        "**/.spellcheck/de/**",
+        "**/.spellcheck/de.txt"
+      ],
+      "language": "de,en-GB,en",
+      "allowCompoundWords": true
+    },
+    {
+      "filename": [
+        "**/.spellcheck/fr/**",
+        "**/.spellcheck/fr.txt"
+      ],
+      "language": "fr,en-GB,en"
+    }
   ],
   "words": [
     "Ajinkya",
@@ -77,6 +105,38 @@
     "Katikati",
     "Magadi",
     "Mto",
-    "Mbu"
+    "Mbu",
+    "Nederlands",
+    "Français",
+    "Safarianbieter",
+    "Safariurlaub",
+    "Kratergebühr",
+    "Safarianbieters",
+    "Kalbungszeit",
+    "Routenkarte",
+    "Safarifahrzeugs",
+    "Safarianbietern",
+    "Kraterstraße",
+    "Paviantrupps",
+    "Calderen",
+    "Pirschfahrten",
+    "Pirschfahrt",
+    "Luxuslodges",
+    "Leopardenbaum",
+    "gastfreundlichsten",
+    "Kraterwänden",
+    "Fleecejacke",
+    "tansanischen",
+    "tansanische",
+    "Safarigäste",
+    "Gelbfieberrisiko",
+    "Luxuslodge",
+    "Safarigruppen",
+    "massaï",
+    "kenyane",
+    "colobes",
+    "Ngorongorokrater",
+    "lodgepagina",
+    "Gazellenherde"
   ]
 }

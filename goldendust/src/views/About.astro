@@ -1,0 +1,137 @@
+---
+import Base from "../layouts/Base.astro";
+import WaButton from "../components/WaButton.astro";
+import { orgSchema, breadcrumbs } from "../lib/schema";
+import { site } from "../lib/site";
+import { langOf, lp, localizeLinks } from "../i18n";
+import { w } from "../i18n/common";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const ig = `<a href="${site.instagram}" target="_blank" rel="noopener">Instagram (${site.instagramHandle})</a>`;
+// Paragraphs are HTML so links can sit inside them; site links get the language prefix automatically.
+const T = {
+  en: {
+    title: "About Us | Local Tanzania Safari Company in Arusha | Golden Dust Safaris",
+    desc: "We're a local Tanzania safari company in Arusha. Serengeti safari tours, family safaris and Tanzania safari holidays across all 22 national parks, including Ruaha and Katavi.",
+    h1: "About Golden Dust Safaris",
+    lede: "We're a small, local Tanzania safari company based in Arusha. Tanzania is home for us, and showing it to people properly is what we love doing.",
+    intro: "We're a TALA-registered operator. There's no agency in the middle, so when you book with us, your money goes into your safari, not into a chain of commissions.",
+    sections: [
+      ["Two guides, not a hundred", [
+        "This is our biggest plus. We don't work with a hundred guides. We have two. When you book a safari with us, your trip is planned by the same guide who travels with you, and he's the one who picks you up at the airport. <a href=\"/meet-your-guide\">Meet Joshua</a>.",
+        "So you know what the experience will be like before you even book. You've already spoken to the person who'll be with you every day, deciding where you go, when you leave camp and how long you stay with a pride of lions. Most companies don't work this way: you'd normally meet your guide for the first time on the morning of day one.",
+        "We don't believe in volume. We're a small company, and we only take as many bookings as our two guides can handle.",
+      ]],
+      ["More than the famous three parks", [
+        "Almost everyone hears the same three names: the Serengeti, Ngorongoro Crater and Tarangire. They're famous for good reason, and our Serengeti safari tours are still the trips we run most. But Tanzania has 22 national parks, and some of the most memorable ones are the quiet ones. Ruaha is wild and vast with far fewer vehicles. Katavi is one of the most remote places you can go on safari in Africa. If one of them suits you better, we'll tell you.",
+      ]],
+      ["Safaris for families, couples and first-timers", [
+        "A family safari in Tanzania needs a different pace from a photography trip or a honeymoon. Shorter drives, the right lodges, a guide who's great with kids. We plan around who's coming, not around a fixed package. Whether it's a short Serengeti and Ngorongoro trip or a longer Tanzania safari holiday across several parks, every itinerary starts from a conversation.",
+      ]],
+    ],
+    howH: "How we like to work",
+    how: ["We usually start with a call to understand what you want and why Tanzania is calling you.", "We tell you honestly which parks are worth it for you, and which ones you can skip.", "You get a full cost breakdown, so you know exactly what you're paying for.", "Real photos of our vehicles, not stock images.", "Direct WhatsApp contact with your guide, who is also the one planning your trip.", "Got a quote from another company? Send it over and we'll give you our honest opinion, even if you end up booking with them."],
+    outro: `Want to see what our trips really look like? Follow us on ${ig}, or read what <a href="/#rv-h">our guests say</a>.`,
+    hello: "Say hello on WhatsApp", examples: "See example safaris",
+  },
+  nl: {
+    title: "Over ons | Lokaal safaribedrijf in Arusha, Tanzania | Golden Dust Safaris",
+    desc: "We zijn een lokaal safaribedrijf in Arusha. Safari's in de Serengeti, gezinssafari's en safarireizen in Tanzania door alle 22 nationale parken, ook Ruaha en Katavi.",
+    h1: "Over Golden Dust Safaris",
+    lede: "We zijn een klein, lokaal safaribedrijf in Arusha, Tanzania. Tanzania is ons thuis, en het mensen goed laten zien is wat we het liefst doen.",
+    intro: "We zijn geregistreerd bij TALA. Er zit geen reisbureau tussen, dus als je bij ons boekt, gaat je geld naar je safari en niet naar een keten van commissies.",
+    sections: [
+      ["Twee gidsen, geen honderd", [
+        "Dit is ons grootste voordeel. We werken niet met honderd gidsen. We hebben er twee. Als je bij ons een safari boekt, wordt je reis gepland door dezelfde gids die met je meereist, en hij is ook degene die je ophaalt van het vliegveld. <a href=\"/meet-your-guide\">Maak kennis met Joshua</a>.",
+        "Zo weet je hoe de reis zal zijn voordat je boekt. Je hebt al gesproken met de persoon die elke dag bij je is en beslist waar je naartoe gaat, wanneer je het kamp verlaat en hoelang je bij een troep leeuwen blijft. Bij de meeste bedrijven werkt dat niet zo: daar ontmoet je je gids pas op de ochtend van de eerste dag.",
+        "We geloven niet in volume. We zijn een klein bedrijf en nemen alleen zoveel boekingen aan als onze twee gidsen aankunnen.",
+      ]],
+      ["Meer dan de drie bekende parken", [
+        "Bijna iedereen hoort dezelfde drie namen: de Serengeti, de Ngorongorokrater en Tarangire. Ze zijn niet voor niets beroemd, en onze safari's in de Serengeti zijn nog steeds de reizen die we het vaakst doen. Maar Tanzania heeft 22 nationale parken, en sommige van de mooiste zijn de rustige. Ruaha is wild en uitgestrekt, met veel minder voertuigen. Katavi is een van de afgelegenste safaribestemmingen van Afrika. Past een van die parken beter bij je, dan zeggen we het.",
+      ]],
+      ["Safari's voor gezinnen, stellen en wie voor het eerst gaat", [
+        "Een gezinssafari in Tanzania vraagt om een ander tempo dan een fotoreis of een huwelijksreis. Kortere ritten, de juiste lodges, een gids die goed is met kinderen. We plannen rond wie er meegaat, niet rond een vast pakket. Of het nu een korte reis naar de Serengeti en Ngorongoro is of een langere safarivakantie door meerdere parken: elke reis begint met een gesprek.",
+      ]],
+    ],
+    howH: "Zo werken we graag",
+    how: ["Meestal beginnen we met een gesprek om te begrijpen wat je wilt en waarom Tanzania je roept.", "We vertellen je eerlijk welke parken voor jou de moeite waard zijn en welke je kunt overslaan.", "Je krijgt een volledig overzicht van de kosten, dus je weet precies waarvoor je betaalt.", "Echte foto's van onze voertuigen, geen stockfoto's.", "Direct contact via WhatsApp met je gids, die ook je reis plant.", "Een offerte van een ander bedrijf gekregen? Stuur hem door, dan geven we je ons eerlijke oordeel, ook als je uiteindelijk bij hen boekt."],
+    outro: `Wil je zien hoe onze reizen er echt uitzien? Volg ons op ${ig}, of lees wat <a href="/#rv-h">onze gasten zeggen</a>.`,
+    hello: "Zeg hallo via WhatsApp", examples: "Bekijk voorbeeldsafari's",
+  },
+  de: {
+    title: "Über uns | Safarianbieter aus Arusha, Tansania | Golden Dust Safaris",
+    desc: "Wir sind ein einheimischer Safarianbieter in Arusha. Serengeti-Safaris, Familiensafaris und Safarireisen durch alle 22 Nationalparks Tansanias, auch Ruaha und Katavi.",
+    h1: "Über Golden Dust Safaris",
+    lede: "Wir sind ein kleiner, einheimischer Safarianbieter in Arusha, Tansania. Tansania ist unser Zuhause, und es Menschen richtig zu zeigen, ist das, was wir am liebsten tun.",
+    intro: "Wir sind bei TALA registriert. Es gibt keine Agentur dazwischen: Wenn Sie bei uns buchen, fließt Ihr Geld in Ihre Safari und nicht in eine Kette von Provisionen.",
+    sections: [
+      ["Zwei Guides, nicht hundert", [
+        "Das ist unser größter Vorteil. Wir arbeiten nicht mit hundert Guides. Wir haben zwei. Wenn Sie eine Safari bei uns buchen, plant derselbe Guide Ihre Reise, der Sie auch begleitet, und er holt Sie am Flughafen ab. <a href=\"/meet-your-guide\">Lernen Sie Joshua kennen</a>.",
+        "So wissen Sie schon vor der Buchung, wie die Reise sein wird. Sie haben bereits mit der Person gesprochen, die jeden Tag bei Ihnen ist und entscheidet, wohin Sie fahren, wann Sie das Camp verlassen und wie lange Sie bei einem Löwenrudel bleiben. Bei den meisten Anbietern ist das anders: Dort treffen Sie Ihren Guide erst am Morgen des ersten Tages.",
+        "Wir setzen nicht auf Masse. Wir sind ein kleines Unternehmen und nehmen nur so viele Buchungen an, wie unsere zwei Guides bewältigen können.",
+      ]],
+      ["Mehr als die drei berühmten Parks", [
+        "Fast alle hören dieselben drei Namen: die Serengeti, der Ngorongoro-Krater und der Tarangire. Sie sind zu Recht berühmt, und Serengeti-Safaris sind nach wie vor die Reisen, die wir am häufigsten machen. Aber Tansania hat 22 Nationalparks, und einige der eindrucksvollsten sind die ruhigen. Ruaha ist wild und weit, mit viel weniger Fahrzeugen. Katavi gehört zu den abgelegensten Safarizielen Afrikas. Wenn einer davon besser zu Ihnen passt, sagen wir es Ihnen.",
+      ]],
+      ["Safaris für Familien, Paare und Erstreisende", [
+        "Eine Familiensafari in Tansania braucht ein anderes Tempo als eine Fotoreise oder Flitterwochen. Kürzere Fahrten, die richtigen Lodges, ein Guide, der gut mit Kindern kann. Wir planen nach den Mitreisenden, nicht nach einem festen Paket. Ob kurze Reise in die Serengeti und zum Ngorongoro oder längerer Safariurlaub durch mehrere Parks: Jede Reise beginnt mit einem Gespräch.",
+      ]],
+    ],
+    howH: "So arbeiten wir",
+    how: ["Meist beginnen wir mit einem Gespräch, um zu verstehen, was Sie sich wünschen und warum Tansania Sie ruft.", "Wir sagen Ihnen ehrlich, welche Parks sich für Sie lohnen und welche Sie auslassen können.", "Sie bekommen eine vollständige Kostenaufstellung und wissen genau, wofür Sie bezahlen.", "Echte Fotos unserer Fahrzeuge, keine Archivbilder.", "Direkter WhatsApp-Kontakt mit Ihrem Guide, der auch Ihre Reise plant.", "Sie haben ein Angebot eines anderen Anbieters? Schicken Sie es uns, und wir sagen Ihnen ehrlich unsere Meinung, auch wenn Sie am Ende dort buchen."],
+    outro: `Möchten Sie sehen, wie unsere Reisen wirklich aussehen? Folgen Sie uns auf ${ig}, oder lesen Sie, <a href="/#rv-h">was unsere Gäste sagen</a>.`,
+    hello: "Hallo sagen per WhatsApp", examples: "Beispielsafaris ansehen",
+  },
+  fr: {
+    title: "À propos | Agence de safari locale à Arusha, Tanzanie | Golden Dust Safaris",
+    desc: "Nous sommes une agence de safari locale basée à Arusha. Safaris au Serengeti, safaris en famille et voyages dans les 22 parcs nationaux de Tanzanie, y compris Ruaha et Katavi.",
+    h1: "À propos de Golden Dust Safaris",
+    lede: "Nous sommes une petite agence de safari locale basée à Arusha, en Tanzanie. La Tanzanie, c'est chez nous, et la faire découvrir comme il se doit est ce que nous aimons le plus.",
+    intro: "Nous sommes enregistrés auprès de la TALA. Il n'y a pas d'intermédiaire : quand vous réservez avec nous, votre argent va à votre safari, pas à une chaîne de commissions.",
+    sections: [
+      ["Deux guides, pas cent", [
+        "C'est notre plus grand atout. Nous ne travaillons pas avec cent guides. Nous en avons deux. Quand vous réservez un safari avec nous, votre voyage est préparé par le guide qui vous accompagnera, et c'est lui qui vient vous chercher à l'aéroport. <a href=\"/meet-your-guide\">Faites connaissance avec Joshua</a>.",
+        "Vous savez donc à quoi ressemblera l'expérience avant même de réserver. Vous avez déjà parlé avec la personne qui sera avec vous chaque jour et qui décide où aller, quand quitter le camp et combien de temps rester devant une troupe de lions. La plupart des agences ne fonctionnent pas ainsi : en général, vous rencontrez votre guide le matin du premier jour.",
+        "Nous ne croyons pas au volume. Nous sommes une petite entreprise, et nous n'acceptons que le nombre de réservations que nos deux guides peuvent assurer.",
+      ]],
+      ["Bien plus que les trois parcs célèbres", [
+        "Presque tout le monde entend les trois mêmes noms : le Serengeti, le cratère du Ngorongoro et Tarangire. Leur réputation est méritée, et les safaris au Serengeti restent ceux que nous organisons le plus. Mais la Tanzanie compte 22 parcs nationaux, et certains des plus marquants sont les plus tranquilles. Ruaha est sauvage et immense, avec bien moins de véhicules. Katavi est l'un des endroits les plus reculés d'Afrique pour un safari. Si l'un d'eux vous convient mieux, nous vous le dirons.",
+      ]],
+      ["Des safaris pour les familles, les couples et les premiers voyages", [
+        "Un safari en famille en Tanzanie demande un autre rythme qu'un voyage photo ou une lune de miel. Des trajets plus courts, les bons lodges, un guide à l'aise avec les enfants. Nous organisons le voyage autour des voyageurs, pas autour d'un forfait figé. Court séjour au Serengeti et au Ngorongoro ou long voyage à travers plusieurs parcs : chaque itinéraire commence par une conversation.",
+      ]],
+    ],
+    howH: "Notre façon de travailler",
+    how: ["Nous commençons généralement par un appel pour comprendre ce que vous voulez et pourquoi la Tanzanie vous attire.", "Nous vous disons honnêtement quels parcs valent le coup pour vous, et lesquels vous pouvez éviter.", "Vous recevez le détail complet des coûts, pour savoir exactement ce que vous payez.", "De vraies photos de nos véhicules, pas des images de banque d'images.", "Un contact direct sur WhatsApp avec votre guide, qui prépare aussi votre voyage.", "Vous avez reçu un devis d'une autre agence ? Envoyez-le-nous, nous vous donnerons un avis honnête, même si vous réservez finalement chez eux."],
+    outro: `Envie de voir à quoi ressemblent vraiment nos voyages ? Suivez-nous sur ${ig}, ou lisez <a href="/#rv-h">ce que disent nos voyageurs</a>.`,
+    hello: "Dites-nous bonjour sur WhatsApp", examples: "Voir des exemples de safaris",
+  },
+}[lang];
+---
+<Base title={T.title} description={T.desc} schema={[orgSchema, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "about"), L("/about")]])]}>
+  <section class="section">
+    <div class="wrap about">
+      <h1>{T.h1}</h1>
+      <p class="lede">{T.lede}</p>
+      <div class="measure">
+      <p>{T.intro}</p>
+      {T.sections.map(([h, ps]) => <><h2>{h}</h2>{(ps as string[]).map((x) => <p set:html={localizeLinks(lang, x)} />)}</>)}
+      <h2>{T.howH}</h2>
+      <ul>{T.how.map((x) => <li>{x}</li>)}</ul>
+      <p set:html={localizeLinks(lang, T.outro)} />
+      <div class="about__cta">
+        <WaButton label={T.hello} />
+        <a href={L("/tanzania-safari-packages")} class="btn btn--ghost">{T.examples}</a>
+      </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about h2 { margin-top: 2.2rem; font-size: var(--step-2); }
+  .about ul { padding-left: 1.2rem; }
+  .about li { margin-bottom: 0.45rem; }
+  .about__cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+</style>

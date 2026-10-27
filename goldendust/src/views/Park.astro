@@ -1,0 +1,87 @@
+---
+import Base from "../layouts/Base.astro";
+import TourRow from "../components/TourRow.astro";
+import LodgeCard from "../components/LodgeCard.astro";
+import GuideAside from "../components/GuideAside.astro";
+import Faq from "../components/Faq.astro";
+import { parksFor, parkUrl } from "../data/parks";
+import { lodgesIn } from "../data/lodges";
+import { tours, toursFor } from "../data/tours";
+import { breadcrumbs, faqSchema } from "../lib/schema";
+import { site } from "../lib/site";
+import { langOf, lp, localizeLinks } from "../i18n";
+import { w } from "../i18n/common";
+
+const { slug } = Astro.props as { slug: string };
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const parks = parksFor(lang);
+const p = parks.find((x) => x.slug === slug)!;
+const url = L(parkUrl(p));
+const withPhotos = lodgesIn(...p.areas).filter((l) => l.photos.length);
+const campsites = lodgesIn(...p.areas).filter((l) => !l.photos.length && l.tier === "Budget");
+const localTours = toursFor(lang);
+const related = tours.filter((t) => t.route.some((r) => p.tourRoute.includes(r))).slice(0, 3).map((t) => localTours.find((x) => x.slug === t.slug)!);
+const others = parks.filter((x) => x.slug !== p.slug);
+const T = {
+  en: { budget: "Budget option:", lodges: `Camps and lodges in ${p.name}`, allLodges: "All the lodges and camps we work with", samples: `Sample safaris that include ${p.name}`, allSamples: "See all sample safaris", or: "or", own: "plan your own", others: "Other parks", migration: "The Great Migration, month by month" },
+  nl: { budget: "Budgetoptie:", lodges: `Kampen en lodges in ${p.name}`, allLodges: "Alle lodges en kampen waarmee we werken", samples: `Voorbeeldsafari's met ${p.name}`, allSamples: "Bekijk alle voorbeeldsafari's", or: "of", own: "plan je eigen reis", others: "Andere parken", migration: "De Grote Migratie per maand" },
+  de: { budget: "Budget-Option:", lodges: `Camps und Lodges: ${p.name}`, allLodges: "Alle Lodges und Camps, mit denen wir arbeiten", samples: `Beispielsafaris mit ${p.name}`, allSamples: "Alle Beispielsafaris ansehen", or: "oder", own: "planen Sie Ihre eigene", others: "Weitere Parks", migration: "Die Große Migration nach Monaten" },
+  fr: { budget: "Option économique :", lodges: `Camps et lodges : ${p.name}`, allLodges: "Tous les lodges et camps avec lesquels nous travaillons", samples: `Exemples de safaris avec ${p.name}`, allSamples: "Voir tous les exemples de safaris", or: "ou", own: "créez le vôtre", others: "Autres parcs", migration: "La Grande Migration mois par mois" },
+}[lang];
+const place = {
+  "@context": "https://schema.org", "@type": "TouristAttraction", name: p.name, description: p.description,
+  url: site.url + url, image: site.url + p.hero, address: { "@type": "PostalAddress", addressCountry: "TZ" },
+};
+const schema: object[] = [place, breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "parks"), L("/parks")], [p.name, url]])];
+if (p.faqs.length) schema.push(faqSchema(p.faqs));
+---
+<Base title={`${p.seoTitle} | Golden Dust Safaris`} description={p.description} schema={schema}>
+  <article class="section">
+    <div class="wrap">
+      <nav class="gp__crumbs" aria-label="Breadcrumb"><a href={L("/")}>{w(lang, "home")}</a> / <a href={L("/parks")}>{w(lang, "parks")}</a></nav>
+      <h1>{p.h1}</h1>
+      <p class="lede measure">{p.lede}</p>
+      <img class="gp__hero" src={p.hero} alt={p.heroAlt} width="1200" height="600" />
+      <div class="gp__body">
+        <div class="prose">
+          {p.sections.map((s) => (<><h2>{s.h}</h2>{s.p.map((t) => <p set:html={localizeLinks(lang, t)} />)}</>))}
+          {campsites.length > 0 && <p>{T.budget} {campsites.map((c) => c.name).join(", ")}.</p>}
+        </div>
+        <GuideAside facts={p.facts} />
+      </div>
+    </div>
+  </article>
+
+  {withPhotos.length > 0 && (
+    <section class="section section--white">
+      <div class="wrap">
+        <h2>{T.lodges}</h2>
+        <div class="gp__grid">{withPhotos.map((l) => <LodgeCard lodge={l} />)}</div>
+        <p style="margin-top:1.5rem"><a href={L("/lodges")}>{T.allLodges}</a></p>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <h2>{T.samples}</h2>
+        <div class="gp__grid">{related.map((t) => <TourRow tour={t} />)}</div>
+        <p style="margin-top:1.5rem"><a href={L("/tanzania-safari-packages")}>{T.allSamples}</a> {T.or} <a href={L("/planner")}>{T.own}</a>.</p>
+      </div>
+    </section>
+  )}
+
+  {p.faqs.length > 0 && <section class="section"><div class="wrap measure"><Faq items={p.faqs} /></div></section>}
+
+  <section class="section section--white">
+    <div class="wrap">
+      <h2>{T.others}</h2>
+      <ul class="others">{others.map((o) => <li><a href={L(parkUrl(o))}>{o.name}</a></li>)}<li><a href={L("/great-migration-serengeti")}>{T.migration}</a></li></ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .others { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; }
+</style>

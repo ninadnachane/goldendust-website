@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 690" role="img" aria-label="Routenkarte: Arusha nach Tarangire nach Ngorongoro-Krater nach Arusha">
+<style>
+  text { font-family: Montserrat, "Helvetica Neue", Arial, sans-serif; }
+  .pk { font-size: 15px; font-weight: 600; fill: #5f6b33; letter-spacing: 0.04em; text-anchor: middle; }
+  .wt { font-size: 14px; font-style: italic; fill: #5b7f92; text-anchor: middle; }
+  .ct { font-size: 13px; fill: #8a7b66; letter-spacing: 0.25em; text-anchor: middle; }
+  .town { font-size: 13px; fill: #6b5d4b; }
+  .sl { font-size: 17px; font-weight: 700; fill: #2e241b; paint-order: stroke; stroke: #faf7f0; stroke-width: 5px; stroke-linejoin: round; }
+  .num { font-size: 13px; font-weight: 700; fill: #fff; text-anchor: middle; }
+  .stop circle { fill: #c89a4b; stroke: #fff; stroke-width: 3; }
+  .note { font-size: 12px; fill: #8a7b66; }
+</style>
+<rect width="800" height="690" fill="#faf7f0"/>
+<path d="M-165 -165 C-130.2 -264.0 11.7 -126.5 44 -99 C76.3 -71.5 27.5 -31.2 28.6 0 C29.7 31.2 52.8 62.3 50.6 88 C48.4 113.7 19.8 128.3 15.4 154 C11.0 179.7 27.9 212.7 24.2 242 C20.5 271.3 4.8 298.8 -6.6 330 C-18.0 361.2 -17.6 401.5 -44 429 C-70.4 456.5 -144.8 594.0 -165 495 C-185.2 396.0 -199.8 -66.0 -165 -165 Z" fill="#d6e6ee"/>
+<g fill="#d6e6ee"><ellipse cx="301.4" cy="499.4" rx="13.2" ry="48.4" transform="rotate(35 301.4 499.4)"/><ellipse cx="499.4" cy="226.6" rx="15.400000000000002" ry="48.4" transform="rotate(10 499.4 226.6)"/><ellipse cx="462" cy="499.4" rx="11" ry="41.8" transform="rotate(8 462 499.4)"/></g>
+<path d="M37.4 -77 L847 363" stroke="#b8a98f" stroke-width="2" stroke-dasharray="7 6" fill="none"/>
+<g stroke-width="2" stroke-linejoin="round">
+  <path d="M220 33 C245.7 23.8 309.1 22.0 330 44 C350.9 66.0 349.1 126.5 345.4 165 C341.7 203.5 319.7 243.8 308 275 C296.3 306.2 289.7 328.2 275 352 C260.3 375.8 241.3 412.5 220 418 C198.7 423.5 156.6 405.2 147.4 385 C138.2 364.8 173.1 321.9 165 297 C156.9 272.1 121.0 250.8 99 235.4 C77.0 220.0 42.2 218.2 33 204.6 C23.8 191.0 23.8 163.2 44 154 C64.2 144.8 132.0 158.8 154 149.6 C176.0 140.4 165.0 118.4 176 99 C187.0 79.6 194.3 42.2 220 33 Z" fill="#e3e8cc" stroke="#b7c08a"/>
+  <path d="M319 275 C348.3 271.3 412.5 298.8 440 319 C467.5 339.2 484.0 372.2 484 396 C484.0 419.8 460.2 447.3 440 462 C419.8 476.7 390.5 485.8 363 484 C335.5 482.2 297.0 465.7 275 451 C253.0 436.3 232.8 414.3 231 396 C229.2 377.7 249.3 361.2 264 341 C278.7 320.8 289.7 278.7 319 275 Z" fill="#ebeed8" stroke="#c4cba0"/>
+  <path d="M462 550 C471.9 540.8 511.5 529.8 528 539 C544.5 548.2 557.3 579.3 561 605 C564.7 630.7 559.2 674.7 550 693 C540.8 711.3 517.0 722.3 506 715 C495.0 707.7 490.2 669.2 484 649 C477.8 628.8 472.3 610.5 468.6 594 C464.9 577.5 452.1 559.2 462 550 Z" fill="#e3e8cc" stroke="#b7c08a"/>
+  <path d="M433.4 446.6 C437.8 439.3 457.6 441.5 464.2 455.4 C470.8 469.3 475.2 514.1 473 530.2 C470.8 546.3 456.9 557.3 451 552.2 C445.1 547.1 440.7 517.0 437.8 499.4 C434.9 481.8 429.0 453.9 433.4 446.6 Z" fill="#e3e8cc" stroke="#b7c08a"/>
+</g>
+<circle cx="402.6" cy="402.6" r="22" fill="#dfe6c2" stroke="#a9b479" stroke-width="2"/>
+<text class="pk" x="191.4" y="132">SERENGETI-</text><text class="pk" x="191.4" y="150">NATIONALPARK</text>
+<text class="pk" x="301.4" y="422.4">NGORONGORO-</text><text class="pk" x="301.4" y="440.4">SCHUTZGEBIET</text>
+<text class="pk" x="521.4" y="649">TARANGIRE</text><text class="pk" x="367.4" y="539">LAKE MANYARA</text>
+<text class="wt" x="42" y="275">Victoriasee</text><text class="wt" x="241.39999999999998" y="529.4">Eyasisee</text><text class="wt" x="559.4" y="226.6">Natronsee</text>
+<text class="ct" x="583" y="110">K E N I A</text><text class="ct" x="660" y="605">T A N S A N I A</text>
+<circle cx="730.4" cy="457.6" r="5" fill="#8a7b66"/><text class="town" x="722.4" y="477.6" text-anchor="middle">Flughafen Kilimanjaro</text>
+<path d="M644.6 444.4 C620.4 466.4 539.7 583.4 499.4 576.4 C459.1 569.4 378.4 424.6 402.6 402.6 C426.8 380.6 604.3 437.4 644.6 444.4" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M644.6 444.4 C620.4 466.4 539.7 583.4 499.4 576.4 C459.1 569.4 378.4 424.6 402.6 402.6 C426.8 380.6 604.3 437.4 644.6 444.4" fill="none" stroke="#c89a4b" stroke-width="4" stroke-dasharray="10 7" stroke-linecap="round" stroke-linejoin="round"/>
+<g class="stop"><circle cx="644.6" cy="444.4" r="13"/><text class="num" x="644.6" y="448.9">1</text>
+      <text class="sl" x="624.6" y="449.4" text-anchor="end">Arusha</text></g><g class="stop"><circle cx="499.4" cy="576.4" r="13"/><text class="num" x="499.4" y="580.9">2</text>
+      <text class="sl" x="519.4" y="581.4" text-anchor="start">Tarangire</text></g><g class="stop"><circle cx="402.6" cy="402.6" r="13"/><text class="num" x="402.6" y="407.1">3</text>
+      <text class="sl" x="422.6" y="407.6" text-anchor="start">Ngorongoro-Krater</text></g>
+<g transform="translate(24 24)">
+  <rect width="200" height="40" rx="20" fill="#fff" stroke="#e5dccb"/>
+  <text x="100" y="26" font-size="16" font-weight="600" fill="#2e241b" text-anchor="middle">3 Tage · 2 Nächte</text>
+</g>
+<text class="note" x="784" y="676" text-anchor="end">Karte ungefähr · Golden Dust Safaris</text>
+</svg>

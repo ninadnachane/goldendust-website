@@ -1,8 +1,17 @@
-// Draws a route map for every sample safari into public/images/maps/<slug>.svg.
+// Draws a route map for every sample safari into public/images/maps/<slug>.svg,
+// and the Dutch, German and French versions into public/images/maps/<lang>/<slug>.svg.
 // Usage: node --import tsx scripts/make-maps.mjs
 // The park outlines are simplified (approximate), drawn from rough coordinates, so the maps say "Map is approximate".
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tours } from "../src/data/tours.ts";
+import { place } from "../src/i18n/common.ts";
+
+const MAP_TEXT = {
+  en: { np: ["SERENGETI", "NATIONAL PARK"], nca: ["NGORONGORO", "CONSERVATION AREA"], tar: "TARANGIRE", lm: "LAKE MANYARA", victoria: "Lake Victoria", eyasi: "Lake Eyasi", natron: "Lake Natron", kenya: "K E N Y A", tz: "T A N Z A N I A", airport: "Kilimanjaro Airport", pill: (d, n) => `${d} days · ${n} nights`, note: "Map is approximate · Golden Dust Safaris", aria: "Route map", to: " to " },
+  nl: { np: ["NATIONAAL PARK", "SERENGETI"], nca: ["NGORONGORO", "CONSERVATION AREA"], tar: "TARANGIRE", lm: "LAKE MANYARA", victoria: "Victoriameer", eyasi: "Eyasimeer", natron: "Natronmeer", kenya: "K E N I A", tz: "T A N Z A N I A", airport: "Kilimanjaro Airport", pill: (d, n) => `${d} dagen · ${n} nachten`, note: "Kaart bij benadering · Golden Dust Safaris", aria: "Routekaart", to: " naar " },
+  de: { np: ["SERENGETI-", "NATIONALPARK"], nca: ["NGORONGORO-", "SCHUTZGEBIET"], tar: "TARANGIRE", lm: "LAKE MANYARA", victoria: "Victoriasee", eyasi: "Eyasisee", natron: "Natronsee", kenya: "K E N I A", tz: "T A N S A N I A", airport: "Flughafen Kilimanjaro", pill: (d, n) => `${d} Tage · ${n} Nächte`, note: "Karte ungefähr · Golden Dust Safaris", aria: "Routenkarte", to: " nach " },
+  fr: { np: ["PARC NATIONAL", "DU SERENGETI"], nca: ["AIRE DE CONSERVATION", "DU NGORONGORO"], tar: "TARANGIRE", lm: "LAC MANYARA", victoria: "Lac Victoria", eyasi: "Lac Eyasi", natron: "Lac Natron", kenya: "K E N Y A", tz: "T A N Z A N I E", airport: "Aéroport du Kilimandjaro", pill: (d, n) => `${d} jours · ${n} nuits`, note: "Carte approximative · Golden Dust Safaris", aria: "Carte de l'itinéraire", to: " à " },
+};
 
 const W = 800, H = 690, K = 220; // px per degree
 const LON0 = 33.75, LAT0 = -1.35;
@@ -38,7 +47,8 @@ const places = {
 };
 const label = (t, p, dx = 0, dy = 0, cls = "pk") => { const [x, y] = xy(p); return `<text class="${cls}" x="${x + dx}" y="${y + dy}">${t}</text>`; };
 
-function svg(t) {
+function svg(t, lang = "en") {
+  const M = MAP_TEXT[lang];
   const stops = t.route.map((r) => places[r]).filter(Boolean);
   const pts = stops.map(xy);
   // smooth line through the stops (Catmull-Rom → Bézier)
@@ -54,10 +64,10 @@ function svg(t) {
     if (seen.has(key)) return ""; seen.set(key, i + 1);
     const left = x > 640;
     return `<g class="stop"><circle cx="${x}" cy="${y}" r="13"/><text class="num" x="${x}" y="${y + 4.5}">${i + 1}</text>
-      <text class="sl" x="${x + (left ? -20 : 20)}" y="${y + 5}" text-anchor="${left ? "end" : "start"}">${r}</text></g>`;
+      <text class="sl" x="${x + (left ? -20 : 20)}" y="${y + 5}" text-anchor="${left ? "end" : "start"}">${place(lang, r)}</text></g>`;
   }).join("");
   const days = t.nights + 1;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Route map: ${t.route.join(" to ")}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${M.aria}: ${t.route.map((r) => place(lang, r)).join(M.to)}">
 <style>
   text { font-family: Montserrat, "Helvetica Neue", Arial, sans-serif; }
   .pk { font-size: 15px; font-weight: 600; fill: #5f6b33; letter-spacing: 0.04em; text-anchor: middle; }
@@ -80,24 +90,29 @@ function svg(t) {
   <path d="${poly(parks.manyara)}" fill="#e3e8cc" stroke="#b7c08a"/>
 </g>
 ${(() => { const [x, y] = xy([35.58, -3.18]); return `<circle cx="${x}" cy="${y}" r="${0.1 * K}" fill="#dfe6c2" stroke="#a9b479" stroke-width="2"/>`; })()}
-${label("SERENGETI", [34.62, -1.95])}${label("NATIONAL PARK", [34.62, -1.95], 0, 18)}
-${label("NGORONGORO", [35.12, -3.27])}${label("CONSERVATION AREA", [35.12, -3.27], 0, 18)}
-${label("TARANGIRE", [36.12, -4.3])}${label("LAKE MANYARA", [35.42, -3.8])}
-${label("Lake Victoria", [33.85, -2.6], 20, 0, "wt")}${label("Lake Eyasi", [35.12, -3.62], -60, 30, "wt")}${label("Lake Natron", [36.02, -2.38], 60, 0, "wt")}
-${label("K E N Y A", [36.4, -1.85], 0, 0, "ct")}${label("T A N Z A N I A", [36.75, -4.1], 0, 0, "ct")}
-${(() => { const [x, y] = xy([37.07, -3.43]); return `<circle cx="${x}" cy="${y}" r="5" fill="#8a7b66"/><text class="town" x="${x - 8}" y="${y + 20}" text-anchor="middle">Kilimanjaro Airport</text>`; })()}
+${label(M.np[0], [34.62, -1.95])}${label(M.np[1], [34.62, -1.95], 0, 18)}
+${label(M.nca[0], [35.12, -3.27])}${label(M.nca[1], [35.12, -3.27], 0, 18)}
+${label(M.tar, [36.12, -4.3])}${label(M.lm, [35.42, -3.8])}
+${label(M.victoria, [33.85, -2.6], 20, 0, "wt")}${label(M.eyasi, [35.12, -3.62], -60, 30, "wt")}${label(M.natron, [36.02, -2.38], 60, 0, "wt")}
+${label(M.kenya, [36.4, -1.85], 0, 0, "ct")}${label(M.tz, [36.75, -4.1], 0, 0, "ct")}
+${(() => { const [x, y] = xy([37.07, -3.43]); return `<circle cx="${x}" cy="${y}" r="5" fill="#8a7b66"/><text class="town" x="${x - 8}" y="${y + 20}" text-anchor="middle">${M.airport}</text>`; })()}
 <path d="${d}" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
 <path d="${d}" fill="none" stroke="#c89a4b" stroke-width="4" stroke-dasharray="10 7" stroke-linecap="round" stroke-linejoin="round"/>
 ${marks}
 <g transform="translate(24 24)">
-  <rect width="170" height="40" rx="20" fill="#fff" stroke="#e5dccb"/>
-  <text x="85" y="26" font-size="16" font-weight="600" fill="#2e241b" text-anchor="middle">${days} days · ${t.nights} nights</text>
+  <rect width="${lang === "en" ? 170 : 200}" height="40" rx="20" fill="#fff" stroke="#e5dccb"/>
+  <text x="${lang === "en" ? 85 : 100}" y="26" font-size="16" font-weight="600" fill="#2e241b" text-anchor="middle">${M.pill(days, t.nights)}</text>
 </g>
-<text class="note" x="${W - 16}" y="${H - 14}" text-anchor="end">Map is approximate · Golden Dust Safaris</text>
+<text class="note" x="${W - 16}" y="${H - 14}" text-anchor="end">${M.note}</text>
 </svg>`;
 }
 
 const out = new URL("../public/images/maps/", import.meta.url);
 mkdirSync(out, { recursive: true });
 for (const t of tours) writeFileSync(new URL(`${t.slug}.svg`, out), svg(t));
-console.log(`Wrote ${tours.length} maps.`);
+for (const lang of ["nl", "de", "fr"]) {
+  const dir = new URL(`${lang}/`, out);
+  mkdirSync(dir, { recursive: true });
+  for (const t of tours) writeFileSync(new URL(`${t.slug}.svg`, dir), svg(t, lang));
+}
+console.log(`Wrote ${tours.length} maps in 4 languages.`);

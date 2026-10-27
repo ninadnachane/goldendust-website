@@ -1,0 +1,62 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { img } from "../lib/site";
+import Faq from "../components/Faq.astro";
+import { faqsFor } from "../data/faqs";
+import { faqSchema } from "../lib/schema";
+import { langOf, lp, LOCALE } from "../i18n";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+// posts in this language live in src/content/blog/<lang>/; the English ones sit directly in src/content/blog/
+const all = await getCollection("blog");
+const slugOf = (id: string) => id.split("/").pop()!;
+const posts = all
+  .filter((p) => !p.id.includes("/"))
+  .map((en) => (lang === "en" ? en : all.find((p) => p.id === `${lang}/${en.id}`) ?? en))
+  .sort((a, b) => +b.data.pubDate - +a.data.pubDate);
+const fmt = (d: Date) => d.toLocaleDateString(LOCALE[lang], { day: "numeric", month: "long", year: "numeric" });
+const faqs = faqsFor(lang);
+const T = {
+  en: { title: "Tanzania Safari Guides: Costs, Seasons & Parks", desc: "Honest Tanzania safari planning guides from a local Arusha operator: what a safari costs, the best time to go, and how to choose between parks and safari styles.", h1: "Our safari blog", lede: "Straight answers to the questions we get every day from travelers planning a Tanzania safari.", min: "min read" },
+  nl: { title: "Safarigidsen voor Tanzania: kosten, seizoenen en parken", desc: "Eerlijke gidsen voor het plannen van een safari in Tanzania, van een lokaal bedrijf uit Arusha: wat een safari kost, de beste reistijd en hoe je kiest tussen parken en safaristijlen.", h1: "Onze safariblog", lede: "Eerlijke antwoorden op de vragen die we elke dag krijgen van reizigers die een safari in Tanzania plannen.", min: "min. lezen" },
+  de: { title: "Safari-Ratgeber für Tansania: Kosten, Reisezeit und Parks", desc: "Ehrliche Ratgeber zur Planung einer Safari in Tansania von einem einheimischen Anbieter aus Arusha: was eine Safari kostet, die beste Reisezeit und wie Sie zwischen Parks und Safari-Stilen wählen.", h1: "Unser Safari-Blog", lede: "Klare Antworten auf die Fragen, die uns Reisende jeden Tag zur Planung einer Safari in Tansania stellen.", min: "Min. Lesezeit" },
+  fr: { title: "Guides safari en Tanzanie : prix, saisons et parcs", desc: "Des guides honnêtes pour préparer un safari en Tanzanie, par une agence locale d'Arusha : le prix d'un safari, la meilleure période et comment choisir entre les parcs et les styles de safari.", h1: "Notre blog safari", lede: "Des réponses claires aux questions que nous posent chaque jour les voyageurs qui préparent un safari en Tanzanie.", min: "min de lecture" },
+}[lang];
+---
+<Base title={`${T.title} | Golden Dust Safaris`} description={T.desc} schema={[faqSchema(faqs)]}>
+  <section class="section">
+    <div class="wrap">
+      <h1>{T.h1}</h1>
+      <p class="lede">{T.lede}</p>
+      <div class="list">
+        {posts.map((p) => (
+          <article class="item">
+            <a href={L(`/post/${slugOf(p.id)}`)} class="thumb"><img src={img(p.data.image, 600)} alt={p.data.imageAlt} loading="lazy" width="600" height="320" /></a>
+            <div>
+              <h2><a href={L(`/post/${slugOf(p.id)}`)}>{p.data.title}</a></h2>
+              <p class="muted">{p.data.description}</p>
+              <p class="meta">{fmt(p.data.updatedDate)} · {p.data.minutes} {T.min}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="section section--white">
+    <div class="wrap"><Faq items={faqs} /></div>
+  </section>
+</Base>
+
+<style>
+  .list { display: grid; gap: 2rem; margin-top: 2.5rem; max-width: 56rem; }
+  .item { display: grid; grid-template-columns: 16rem 1fr; gap: 1.6rem; align-items: start; }
+  .thumb img { border-radius: 8px; aspect-ratio: 15 / 8; object-fit: cover; width: 100%; background: var(--line); }
+  h2 { font-size: var(--step-1); margin-bottom: 0.4rem; }
+  h2 a { color: var(--ink); text-decoration: none; }
+  h2 a:hover { color: var(--green); text-decoration: underline; }
+  .item p { margin: 0 0 0.4rem; }
+  .meta { font-size: 0.85rem; color: var(--ink-2); }
+  @media (max-width: 640px) { .item { grid-template-columns: 1fr; gap: 0.8rem; } }
+</style>

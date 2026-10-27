@@ -3,13 +3,22 @@
 // Add photos in src/data/gallery.ts.
 import { gallery } from "../data/gallery";
 import { img } from "../lib/site";
+import { langOf } from "../i18n";
+const lang = langOf(Astro.url);
+const T = {
+  en: { car: "Safari photos", of: (i: number, n: number) => `Photo ${i} of ${n}`, prev: "Previous photo", next: "Next photo" },
+  nl: { car: "Safarifoto's", of: (i: number, n: number) => `Foto ${i} van ${n}`, prev: "Vorige foto", next: "Volgende foto" },
+  de: { car: "Safarifotos", of: (i: number, n: number) => `Foto ${i} von ${n}`, prev: "Vorheriges Foto", next: "Nächstes Foto" },
+  fr: { car: "Photos de safari", of: (i: number, n: number) => `Photo ${i} sur ${n}`, prev: "Photo précédente", next: "Photo suivante" },
+}[lang];
+const alt = (p: (typeof gallery)[number]) => ({ en: p.alt, nl: p.altNl, de: p.altDe, fr: p.altFr }[lang] ?? p.alt);
 const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
 ---
-<div class="gal" aria-roledescription="carousel" aria-label="Safari photos">
+<div class="gal" aria-roledescription="carousel" aria-label={T.car}>
   <div class="gal__track" tabindex="0" data-track>
     {gallery.map((p, i) => (
-      <figure class="gal__slide" aria-label={`Photo ${i + 1} of ${gallery.length}`}>
-        <img src={src(p.src)} alt={p.alt} width="1600" height="1067" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} style={`object-position: ${p.focus ?? "50% 50%"};${p.flip ? " transform: scaleX(-1);" : ""}`} />
+      <figure class="gal__slide" aria-label={T.of(i + 1, gallery.length)}>
+        <img src={src(p.src)} alt={alt(p)} width="1600" height="1067" loading={i === 0 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} style={`object-position: ${p.focus ?? "50% 50%"};${p.flip ? " transform: scaleX(-1);" : ""}`} />
       </figure>
     ))}
   </div>
@@ -19,10 +28,10 @@ const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
         {gallery.map((_, i) => <span class:list={["gal__dot", i === 0 && "is-on"]}></span>)}
       </div>
       <div class="gal__btns">
-        <button type="button" data-dir="-1" aria-label="Previous photo">
+        <button type="button" data-dir="-1" aria-label={T.prev}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
         </button>
-        <button type="button" data-dir="1" aria-label="Next photo">
+        <button type="button" data-dir="1" aria-label={T.next}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
         </button>
       </div>
