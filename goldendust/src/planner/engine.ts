@@ -247,8 +247,11 @@ const SIZE: Record<string, number> = { single: 1, double: 2, triple: 3 };
 const describeRooms = (rooms: Record<string, number>, p: RatePeriod) =>
   Object.entries(rooms).map(([k, v]) => `${v} ${k} (${v * SIZE[k]} × ${money(p[k as "single" | "double" | "triple"])} pp)`).join(" + ");
 
+// A stay in the Ngorongoro (crater rim) area always includes the crater game drive.
+export const CRATER_AREA = "ngorongoro";
+export const craterIncluded = (stops: { areaId: string }[]) => stops.some((s) => s.areaId === CRATER_AREA);
 export function chosenAddons(cfg: Config, q: QuoteRequest): Addon[] {
-  const ids = new Set([...(q.addons || []), ...(q.crater ? ["crater"] : [])]);
+  const ids = new Set([...(q.addons || []), ...(q.crater || craterIncluded(q.stops || []) ? ["crater"] : [])]);
   return (cfg.addons || []).filter((a) => a.active && ids.has(a.id));
 }
 

@@ -103,7 +103,7 @@ import { site, waLink } from "../lib/site";
 </Base>
 
 <script>
-  import { tripCategories, stopNights, lodgeProblem, imageUrl, type Category } from "../planner/engine";
+  import { tripCategories, stopNights, lodgeProblem, imageUrl, craterIncluded, type Category } from "../planner/engine";
   type Opt = {
     settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
     categories: { id: string; name: string; blurb: string }[];
@@ -390,8 +390,20 @@ import { site, waLink } from "../lib/site";
     if (win) win.location.href = url; else window.location.href = url;
   }
   const mini = (html: string) => { $("[data-mini]").innerHTML = html; };
+  // a night at Ngorongoro always includes the crater game drive: tick it and lock it
+  let craterForced = false;
+  function syncCrater() {
+    const el = root.querySelector<HTMLInputElement>('[data-addon][value="crater"]');
+    if (!el) return;
+    const must = craterIncluded(st.stops);
+    if (must && !el.disabled) { el.checked = true; el.disabled = true; craterForced = true; }
+    else if (!must && el.disabled) { el.disabled = false; if (craterForced) el.checked = false; craterForced = false; }
+    el.closest(".addon")?.classList.toggle("is-included", must);
+    st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
+  }
   function update() {
     if (O && st.stops.length && sigOf(offer()) !== offerSig) renderWhere();
+    syncCrater();
     renderPeople(); renderTrip(); renderSteps();
     const send = $<HTMLButtonElement>("[data-send]");
     const price = $("[data-price]");
@@ -510,7 +522,7 @@ import { site, waLink } from "../lib/site";
     if (O.addons?.length) {
       $("[data-addons]").hidden = false;
       const per = (a: NonNullable<Opt["addons"]>[number]) => a.per === "vehicle" ? "per vehicle" : a.per === "booking" ? "per group" : a.rateChild && a.rateChild !== a.rate ? `pp · child $${a.rateChild.toLocaleString("en-US")}` : "pp";
-      $("[data-addon-list]").innerHTML = O.addons.map((a) => `<label class="addon" ${a.blurb ? `title="${esc(a.blurb)}"` : ""}><input type="checkbox" value="${esc(a.id)}" data-addon><span class="addon__t"><strong>${esc(a.name)}</strong>${a.blurb ? `<small>${esc(a.blurb)}</small>` : ""}</span><span class="addon__r">+$${a.rate.toLocaleString("en-US")}<small>${per(a)}</small></span></label>`).join("");
+      $("[data-addon-list]").innerHTML = O.addons.map((a) => `<label class="addon" ${a.blurb ? `title="${esc(a.blurb)}"` : ""}><input type="checkbox" value="${esc(a.id)}" data-addon><span class="addon__t"><strong>${esc(a.name)}</strong>${a.id === "crater" ? `<em class="addon__inc">Included with your night at Ngorongoro</em>` : ""}${a.blurb ? `<small>${esc(a.blurb)}</small>` : ""}</span><span class="addon__r">+$${a.rate.toLocaleString("en-US")}<small>${per(a)}</small></span></label>`).join("");
       root.querySelectorAll<HTMLInputElement>("[data-addon]").forEach((el) => el.addEventListener("change", () => {
         st.addons = [...root.querySelectorAll<HTMLInputElement>("[data-addon]:checked")].map((x) => x.value);
         update();
@@ -579,6 +591,9 @@ import { site, waLink } from "../lib/site";
   .pl .onus { display: flex; gap: 0.5rem; align-items: center; margin: 0 0 0.7rem; padding: 0.6rem 0.85rem; background: var(--tint); border: 1px solid var(--gold); border-radius: 10px; font-weight: 600; }
   .pl .onus .onus__star { color: var(--gold); }
   .pl .sum__trip li .onus-tag { display: inline-block; justify-self: start; width: max-content; margin: 0.15rem 0 0; padding: 0.05rem 0.5rem; border-radius: 999px; background: var(--gold); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; vertical-align: 0.1em; }
+  .pl .addon__inc { display: none; font-style: normal; font-size: 0.78rem; font-weight: 700; color: var(--gold); }
+  .pl .addon.is-included .addon__inc { display: block; }
+  .pl .addon.is-included { cursor: default; }
   .pl .stop__none { margin: 0.6rem 0 0; color: var(--ink-2); font-size: 0.92rem; }
   .pl .addons { margin-top: 1.2rem; }
   .pl .addons[hidden] { display: none; }

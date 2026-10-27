@@ -34,7 +34,9 @@ test("total = (park fees + others × 1.10) × 1.07, matches a hand calculation",
   const meals = 2 * 15 + 10;
   assert.equal(q.totals.park, round(park));
   assert.equal(q.totals.others, round(acc + transport + meals));
-  assert.equal(q.totals.total, round((park + (acc + transport + meals) * 1.1) * 1.07));
+  const crater = 295; // a Ngorongoro night always includes the crater game drive (park fee: no admin fee, no margin)
+  assert.equal(q.totals.extras, crater);
+  assert.equal(q.totals.total, round(round((park + (acc + transport + meals) * 1.1) * 1.07) + crater));
 });
 
 test("guest categories always add up exactly to the total", () => {
@@ -83,8 +85,8 @@ test("NCA transit: one day per crossing between east and Serengeti without an NC
   assert.equal(line(quote(cfg, east, TODAY), /transit/).length, 0);
 });
 
-test("Ngorongoro Crater is a separate choice: crater fee per vehicle, plus an NCA day only if needed", () => {
-  assert.equal(line(quote(cfg, trip(), TODAY), /Crater game drive/).length, 0);
+test("Ngorongoro Crater: crater fee per vehicle, plus an NCA day only if needed", () => {
+  assert.equal(line(quote(cfg, trip(), TODAY), /Crater game drive/).length, 1, "included with the Ngorongoro night");
   assert.equal(sumOf(quote(cfg, trip({ crater: true }), TODAY), /Crater game drive/), 295);
   assert.equal(sumOf(quote(cfg, trip({ crater: true, adults: 8, childAges: [] }), TODAY), /Crater game drive/), 590);
   // east-only trip + crater → one extra NCA entry day
@@ -99,9 +101,9 @@ test("add-ons: priced per person (children at child rate), per vehicle or per bo
   const q = quote(cfg, trip({ addons: ["balloon", "bush-breakfast"] }), TODAY);
   assert.equal(sumOf(q, /Balloon/), round(2 * 599 + 1 * 599));
   assert.equal(sumOf(q, /Bush breakfast/), round(2 * 45 + 1 * 25));
-  assert.equal(q.totals.extras, round(3 * 599 + 115));
+  assert.equal(q.totals.extras, round(3 * 599 + 115 + 295), "balloon + breakfast + the crater drive that comes with the Ngorongoro night");
   assert.equal(q.totals.park, base.totals.park, "extras are not park fees");
-  assert.equal(q.priced.extras, round(q.totals.extras * 1.02), "2% add-on admin fee, no margin");
+  assert.equal(q.priced.extras, round((q.totals.extras - 295) * 1.02 + 295), "2% add-on admin fee (none on the crater park fee), no margin");
   // crater chosen through the add-on list works like the old yes/no
   assert.equal(quote(cfg, trip({ addons: ["crater"] }), TODAY).totals.total, quote(cfg, trip({ crater: true }), TODAY).totals.total);
   // unknown or switched-off add-ons are ignored
@@ -256,7 +258,7 @@ test("public add-on rates include only the add-on admin fee, no margin", () => {
 test("add-ons get no margin and only the add-on admin fee", () => {
   const base = quote(cfg, trip(), TODAY);
   const withBf = quote(cfg, { ...trip(), addons: ["bush-breakfast"] }, TODAY);
-  const cost = withBf.totals.extras;
+  const cost = withBf.totals.extras - base.totals.extras;
   assert.equal(withBf.totals.margin, base.totals.margin);
   assert.equal(withBf.totals.addonFee, Math.round(cost * cfg.settings.addonAdminPct) / 100);
   assert.equal(Math.round((withBf.totals.total - base.totals.total) * 100), Math.round(cost * (1 + cfg.settings.addonAdminPct / 100) * 100));
@@ -268,4 +270,11 @@ test("lodge photos from the Accommodations folder are matched by name; admin pho
   for (const l of defaultConfig.lodges.filter((x) => x.category !== "budget")) assert.ok(lodgeImages(l).length > 0, l.name);
   assert.deepEqual(lodgeImages({ name: "Ngorongoro Crater Camp (A&K Sanctuary)", images: ["abc"] }), ["abc"]);
   assert.match(lodgeImages({ name: "Ang'ata Tarangire Camp" })[0], /^lodges\/ang-ata-tarangire-camp\/01\.webp$/);
+});
+
+test("a night at Ngorongoro always includes the crater game drive", () => {
+  const withRim = quote(cfg, trip(), TODAY); // trip() has a Ngorongoro night
+  assert.ok(withRim.lines.some((l) => /Crater game drive/.test(l.label)));
+  const noRim = trip({ totalNights: 5, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-comfort" }, { areaId: "central-serengeti", nights: 3, lodgeId: "central-serengeti-comfort" }] });
+  assert.ok(!quote(cfg, noRim, TODAY).lines.some((l) => /Crater game drive/.test(l.label)));
 });
