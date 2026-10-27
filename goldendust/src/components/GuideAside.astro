@@ -5,10 +5,10 @@ import { w } from "../i18n/common";
 interface Props { facts?: [string, string][]; title?: string }
 const lang = langOf(Astro.url);
 const T = {
-  en: { title: "Planning a safari?", text: "Talk to our guides in Arusha, or price your own route in the planner.", open: "Open the itinerary planner" },
-  nl: { title: "Een safari plannen?", text: "Praat met onze gidsen in Arusha, of bereken de prijs van je eigen route in de reisplanner.", open: "Open de reisplanner" },
-  de: { title: "Planen Sie eine Safari?", text: "Sprechen Sie mit unseren Guides in Arusha, oder berechnen Sie Ihre eigene Route im Reiseplaner.", open: "Reiseplaner öffnen" },
-  fr: { title: "Vous préparez un safari ?", text: "Parlez à nos guides à Arusha, ou calculez le prix de votre itinéraire dans le planificateur.", open: "Ouvrir le planificateur" },
+  en: { title: "Planning a safari?", text: "Talk to our guides in Arusha, or price your own route in the planner.", open: "Open the itinerary planner", cost: "What does a Tanzania safari cost?" },
+  nl: { title: "Een safari plannen?", text: "Praat met onze gidsen in Arusha, of bereken de prijs van je eigen route in de reisplanner.", open: "Open de reisplanner", cost: "Wat kost een safari in Tanzania?" },
+  de: { title: "Planen Sie eine Safari?", text: "Sprechen Sie mit unseren Guides in Arusha, oder berechnen Sie Ihre eigene Route im Reiseplaner.", open: "Reiseplaner öffnen", cost: "Was kostet eine Safari in Tansania?" },
+  fr: { title: "Vous préparez un safari ?", text: "Parlez à nos guides à Arusha, ou calculez le prix de votre itinéraire dans le planificateur.", open: "Ouvrir le planificateur", cost: "Combien coûte un safari en Tanzanie ?" },
 }[lang];
 const { facts = [], title = T.title } = Astro.props;
 ---
@@ -17,4 +17,5 @@ const { facts = [], title = T.title } = Astro.props;
   <p><strong>{title}</strong> {T.text}</p>
   <WaButton label={w(lang, "askWa")} />
   <a class="btn btn--ghost" href={lp(lang, "/planner")}>{T.open}</a>
+  <p class="gp__cost"><a href={lp(lang, "/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown")}>{T.cost}</a></p>
 </aside>

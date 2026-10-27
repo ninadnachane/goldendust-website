@@ -1,9 +1,9 @@
 ---
-title: "Was kostet eine Safari in Tansania? Die komplette Kostenaufstellung"
-seoTitle: "Was kostet eine Safari in Tansania? Komplette Kostenübersicht"
-description: "Was eine Safari in Tansania wirklich kostet: Parkgebühren, Unterkunft, Transport, Verpflegung und Tipps, wie Sie eine unvergessliche Reise im Rahmen Ihres Budgets planen."
+title: "Was kostet eine Safari in Tansania? Echte Preise für 2027"
+seoTitle: "Was kostet eine Safari in Tansania? Echte Preise pro Tag und Reise (2027)"
+description: "Eine Privatsafari in Tansania kostet etwa $300 bis $1.500 pro Person und Tag. Echte Preise für 2027 für Safaris von 3 bis 7 Tagen, Parkgebühren und Leistungen, von einem Anbieter aus Arusha."
 pubDate: 2026-06-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "gallery/guide-view-gazelles-serengeti.webp"
 imageAlt: "Unser Guide beobachtet vom Safarifahrzeug aus Gazellen in der Serengeti"
 minutes: 7

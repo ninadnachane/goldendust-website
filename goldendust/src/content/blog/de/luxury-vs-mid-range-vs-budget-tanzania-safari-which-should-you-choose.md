@@ -1,9 +1,9 @@
 ---
 title: "Luxus, Mittelklasse oder Budget: Welche Safari in Tansania passt zu Ihnen?"
-seoTitle: "Luxus- oder Budget-Safari in Tansania: Was passt zu Ihnen?"
-description: "Luxus-, Mittelklasse- und Budget-Safaris in Tansania im Vergleich: Kosten, Unterkünfte, Erlebnisse, damit Sie die Safari wählen, die zu Ihrem Reisestil passt."
+seoTitle: "Luxus, Mittelklasse oder Budget-Safari in Tansania: echte Kosten im Vergleich"
+description: "Budget ab etwa $300, Mittelklasse $450 bis $800, Luxus ab $800 pro Person und Tag. Was Sie in jeder Kategorie wirklich bekommen, von einem einheimischen Anbieter aus Arusha."
 pubDate: 2026-07-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "blog/sunset-acacia.webp"
 imageAlt: "Sonnenuntergang über Akazien auf einer Safari in Tansania"
 minutes: 6

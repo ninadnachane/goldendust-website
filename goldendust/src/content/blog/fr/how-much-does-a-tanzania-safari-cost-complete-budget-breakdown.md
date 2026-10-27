@@ -1,9 +1,9 @@
 ---
-title: "Combien coûte un safari en Tanzanie ? Le détail complet du budget"
-seoTitle: "Combien coûte un safari en Tanzanie ? Le budget détaillé"
-description: "Le vrai prix d'un safari en Tanzanie : droits d'entrée des parcs, hébergement, transport, repas et conseils pour préparer un voyage inoubliable sans dépasser votre budget."
+title: "Combien coûte un safari en Tanzanie ? Les vrais prix pour 2027"
+seoTitle: "Prix d'un safari en Tanzanie : les vrais tarifs par jour et par voyage (2027)"
+description: "Un safari privé en Tanzanie coûte environ 300 à 1 500 $ par personne et par jour. Les vrais prix 2027 pour des safaris de 3 à 7 jours, les droits d'entrée et ce qui est inclus, par une agence locale d'Arusha."
 pubDate: 2026-06-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "gallery/guide-view-gazelles-serengeti.webp"
 imageAlt: "Notre guide observe des gazelles depuis le véhicule de safari dans le Serengeti"
 minutes: 7

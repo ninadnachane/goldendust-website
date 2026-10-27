@@ -1,9 +1,9 @@
 ---
-title: "Wat kost een safari in Tanzania? Het volledige kostenoverzicht"
-seoTitle: "Wat kost een safari in Tanzania? Volledig kostenoverzicht"
-description: "Ontdek wat een safari in Tanzania echt kost: parkkosten, accommodatie, vervoer, maaltijden en tips om een onvergetelijke reis binnen je budget te plannen."
+title: "Wat kost een safari in Tanzania? Echte prijzen voor 2027"
+seoTitle: "Wat kost een safari in Tanzania? Echte prijzen per dag en per reis (2027)"
+description: "Een privésafari in Tanzania kost ongeveer $300 tot $1.500 per persoon per dag. Echte prijzen voor 2027 voor safari's van 3 tot 7 dagen, parkkosten en wat er inbegrepen is, van een lokaal bedrijf uit Arusha."
 pubDate: 2026-06-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "gallery/guide-view-gazelles-serengeti.webp"
 imageAlt: "Onze gids kijkt vanuit het safarivoertuig naar gazellen in de Serengeti"
 minutes: 7

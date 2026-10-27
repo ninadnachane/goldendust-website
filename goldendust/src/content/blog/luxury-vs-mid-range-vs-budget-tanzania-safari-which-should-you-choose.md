@@ -1,9 +1,9 @@
 ---
 title: "Luxury vs Mid-Range vs Budget Tanzania Safari: Which Should You Choose?"
-seoTitle: "Luxury vs Budget Tanzania Safari: Which Option Is Best?"
-description: "Compare luxury, mid-range, and budget Tanzania safari options. Discover costs, accommodations, experiences, and choose the perfect safari for your travel style."
+seoTitle: "Luxury vs Mid-Range vs Budget Safari in Tanzania: Real Costs Compared"
+description: "Budget from about $300, mid-range $450 to $800, luxury $800+ per person per day. What you really get at each level on a Tanzania safari, from a local Arusha operator."
 pubDate: 2026-07-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "blog/sunset-acacia.webp"
 imageAlt: "Sunset over acacia trees on a Tanzania safari"
 minutes: 6

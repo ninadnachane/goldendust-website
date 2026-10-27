@@ -1,9 +1,9 @@
 ---
 title: "Safari de luxe, intermédiaire ou économique en Tanzanie : que choisir ?"
-seoTitle: "Safari de luxe ou économique en Tanzanie : que choisir ?"
-description: "Comparez les safaris de luxe, intermédiaires et économiques en Tanzanie : prix, hébergements, expériences, pour choisir le safari qui correspond à votre façon de voyager."
+seoTitle: "Safari de luxe, intermédiaire ou économique en Tanzanie : les vrais coûts comparés"
+description: "Économique dès 300 $ environ, intermédiaire 450 à 800 $, luxe 800 $ et plus par personne et par jour. Ce que vous obtenez vraiment à chaque niveau, par une agence locale d'Arusha."
 pubDate: 2026-07-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "blog/sunset-acacia.webp"
 imageAlt: "Coucher de soleil sur les acacias lors d'un safari en Tanzanie"
 minutes: 6

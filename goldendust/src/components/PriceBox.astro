@@ -1,0 +1,34 @@
+---
+// "Quick answer" box with the real prices of our sample safaris, shown at the top of the
+// safari-cost articles. Prices come from src/data/tours.ts, so they stay up to date.
+import { toursFor, fromPrice, tourUrl } from "../data/tours";
+import { langOf, lp, usdFor } from "../i18n";
+import { tierName } from "../i18n/common";
+const lang = langOf(Astro.url);
+const tours = [...toursFor(lang)].sort((a, b) => a.nights - b.nights || fromPrice(a) - fromPrice(b));
+const T = {
+  en: { h: "The quick answer", p: "A private safari in Tanzania costs roughly $300 to $1,500+ per person per day, including park fees, your own vehicle and guide, accommodation and meals. These are the real 2027 prices of our sample safaris:", cols: ["Safari", "Style", "From, per person"], days: (n: number) => `${n} days`, note: "Per person for 2 adults sharing (the family safari: 2 adults and 2 children). Bigger groups pay less each.", own: "Price your own route in the planner" },
+  nl: { h: "Het korte antwoord", p: "Een privésafari in Tanzania kost ongeveer $300 tot $1.500+ per persoon per dag, inclusief parkkosten, eigen voertuig en gids, accommodatie en maaltijden. Dit zijn de echte prijzen voor 2027 van onze voorbeeldsafari's:", cols: ["Safari", "Stijl", "Vanaf, per persoon"], days: (n: number) => `${n} dagen`, note: "Per persoon voor 2 volwassenen op een gedeelde kamer (de gezinssafari: 2 volwassenen en 2 kinderen). Met een grotere groep betaal je minder per persoon.", own: "Bereken je eigen route in de reisplanner" },
+  de: { h: "Die kurze Antwort", p: "Eine Privatsafari in Tansania kostet etwa $300 bis $1.500+ pro Person und Tag, inklusive Parkgebühren, eigenem Fahrzeug mit Guide, Unterkunft und Mahlzeiten. Das sind die echten Preise 2027 unserer Beispielsafaris:", cols: ["Safari", "Stil", "Ab, pro Person"], days: (n: number) => `${n} Tage`, note: "Pro Person bei 2 Erwachsenen im Doppelzimmer (Familiensafari: 2 Erwachsene und 2 Kinder). Größere Gruppen zahlen weniger pro Person.", own: "Eigene Route im Reiseplaner berechnen" },
+  fr: { h: "La réponse rapide", p: "Un safari privé en Tanzanie coûte environ 300 à 1 500 $ et plus par personne et par jour, droits d'entrée, véhicule et guide privés, hébergement et repas compris. Voici les vrais prix 2027 de nos exemples de safaris :", cols: ["Safari", "Style", "À partir de, par pers."], days: (n: number) => `${n} jours`, note: "Par personne, pour 2 adultes en chambre partagée (le safari en famille : 2 adultes et 2 enfants). Plus le groupe est grand, moins chacun paie.", own: "Calculer votre itinéraire dans le planificateur" },
+}[lang];
+---
+<aside class="pb">
+  <p class="pb__h">{T.h}</p>
+  <p>{T.p}</p>
+  <table>
+    <thead><tr>{T.cols.map((c) => <th scope="col">{c}</th>)}</tr></thead>
+    <tbody>{tours.map((t) => <tr><td><a href={lp(lang, tourUrl(t))}>{T.days(t.nights + 1)}: {t.shortName}</a></td><td>{tierName(lang, t.tier)}</td><td><strong>{usdFor(lang, fromPrice(t))}</strong></td></tr>)}</tbody>
+  </table>
+  <p class="pb__note">{T.note} <a href={lp(lang, "/planner")}>{T.own}</a>.</p>
+</aside>
+<style>
+  .pb { background: var(--surface); border: 2px solid var(--gold); border-radius: 12px; padding: 1.2rem 1.3rem; margin: 0 0 2rem; }
+  .pb__h { font-family: var(--display); font-weight: 600; font-size: 1.1rem; margin: 0 0 0.4rem; }
+  .pb p { margin: 0 0 0.8rem; }
+  .pb table { width: 100%; border-collapse: collapse; font-size: 0.93rem; margin: 0 0 0.8rem; }
+  .pb th { text-align: left; font-family: var(--display); font-size: 0.8rem; color: var(--ink-2); padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--line); }
+  .pb td { padding: 0.45rem 0.4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .pb td:last-child, .pb th:last-child { text-align: right; white-space: nowrap; }
+  .pb__note { font-size: 0.85rem; color: var(--ink-2); margin: 0 !important; }
+</style>

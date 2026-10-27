@@ -134,3 +134,4 @@ p { margin: 0 0 1em; }
 .gp__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
 @media (max-width: 960px) { .gp__body { grid-template-columns: 1fr; } .gp__facts { position: static; } .gp__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .gp__grid { grid-template-columns: 1fr; } }
+.gp__cost { margin: 0.9rem 0 0; font-size: 0.9rem; text-align: center; }

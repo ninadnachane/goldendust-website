@@ -1,9 +1,9 @@
 ---
-title: "How Much Does a Tanzania Safari Cost? Complete Budget Breakdown"
-seoTitle: "How Much Does a Tanzania Safari Cost? Full Budget Breakdown"
-description: "Discover the full cost of a Tanzania safari, covering park fees, lodging, transport, meals, and tips to plan an unforgettable adventure within budget."
+title: "How Much Does a Tanzania Safari Cost? Real Prices for 2027"
+seoTitle: "Tanzania Safari Cost 2027: Real Prices per Day and per Trip"
+description: "A private Tanzania safari costs about $300 to $1,500 per person per day. Real 2027 prices for 3 to 7 day safaris, park fees and what's included, from a local Arusha operator."
 pubDate: 2026-06-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "gallery/guide-view-gazelles-serengeti.webp"
 imageAlt: "Our guide watching gazelles from the safari vehicle in the Serengeti"
 minutes: 7

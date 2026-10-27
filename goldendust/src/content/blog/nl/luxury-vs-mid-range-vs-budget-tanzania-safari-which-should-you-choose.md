@@ -1,9 +1,9 @@
 ---
 title: "Luxe, middenklasse of budget: welke safari in Tanzania kies je?"
-seoTitle: "Luxe of budgetsafari in Tanzania: wat past bij jou?"
-description: "Vergelijk luxe, middenklasse en budgetsafari's in Tanzania: kosten, accommodatie, beleving, en kies de safari die bij jouw manier van reizen past."
+seoTitle: "Luxe, middenklasse of budgetsafari in Tanzania: echte kosten vergeleken"
+description: "Budget vanaf ongeveer $300, middenklasse $450 tot $800, luxe vanaf $800 per persoon per dag. Wat je echt krijgt op elk niveau, van een lokaal safaribedrijf uit Arusha."
 pubDate: 2026-07-08
-updatedDate: 2026-10-18
+updatedDate: 2026-10-27
 image: "blog/sunset-acacia.webp"
 imageAlt: "Zonsondergang boven acacia's tijdens een safari in Tanzania"
 minutes: 6
