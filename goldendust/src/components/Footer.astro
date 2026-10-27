@@ -20,29 +20,29 @@ const T = {
 const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
 ---
 <footer class="ftr">
+  <!-- All links stay in the page for Google; on phones each group folds away so the footer stays short. -->
+  <div class="wrap ftr__top">
+    <p class="ftr__name">{site.name}</p>
+    <p class="ftr__tag">{T.tag}</p>
+    <p class="ftr__contact"><a href={waLink()} target="_blank" rel="noopener">WhatsApp {site.phoneDisplay}</a><a href={site.instagram} target="_blank" rel="noopener">Instagram {site.instagramHandle}</a></p>
+  </div>
   <div class="wrap ftr__grid">
-    <div>
-      <p class="ftr__name">{site.name}</p>
-      <p>{T.tag}</p>
-      <p><a href={waLink()} target="_blank" rel="noopener">WhatsApp {site.phoneDisplay}</a><br />
-      <a href={site.instagram} target="_blank" rel="noopener">Instagram {site.instagramHandle}</a></p>
-    </div>
-    {!hideTours && <div>
-      <p class="ftr__h">{w(lang, "samples")}</p>
-      <ul><li><a href={L("/tanzania-safari-packages")}>{T.all}</a></li>{tours.map((t) => <li><a href={L(tourUrl(t))}>{T.day(t.nights + 1)} {t.shortName} ({tierName(lang, t.tier)})</a></li>)}</ul>
-    </div>}
-    <div>
-      <p class="ftr__h">{T.explore}</p>
-      <ul>
+    {!hideTours && <details class="ftr__sec ftr__sec--wide" open data-ftr>
+      <summary class="ftr__h">{w(lang, "samples")}</summary>
+      <ul class="ftr__cols"><li><a href={L("/tanzania-safari-packages")}>{T.all}</a></li>{tours.map((t) => <li><a href={L(tourUrl(t))}>{T.day(t.nights + 1)} {t.shortName} ({tierName(lang, t.tier)})</a></li>)}</ul>
+    </details>}
+    <details class="ftr__sec" open data-ftr>
+      <summary class="ftr__h">{T.explore}</summary>
+      <ul class="ftr__cols">
         {parks.map((p) => <li><a href={L(parkUrl(p))}>{p.name}</a></li>)}
         <li><a href={L("/great-migration-serengeti")}>{T.migration}</a></li>
         <li><a href={L("/lodges")}>{T.lodges}</a></li>
         {themes.map((t) => <li><a href={L(themeUrl(t))}>{t.name}</a></li>)}
       </ul>
-    </div>
-    <div>
-      <p class="ftr__h">{T.plan}</p>
-      <ul>
+    </details>
+    <details class="ftr__sec" open data-ftr>
+      <summary class="ftr__h">{T.plan}</summary>
+      <ul class="ftr__cols">
         <li><a href={L("/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown")}>{T.cost}</a></li>
         <li><a href={L("/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide")}>{T.best}</a></li>
         <li><a href={L("/post/serengeti-vs-ngorongoro-which-safari-experience-is-right-for-you")}>{T.vs}</a></li>
@@ -58,22 +58,50 @@ const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
         <li><a href={L("/meet-your-guide")}>{w(lang, "meetGuide")}</a></li>
         {hideTours && <li><a href={L("/tanzania-safari-packages")} class="ftr__quiet">{T.itins}</a></li>}
       </ul>
-    </div>
+    </details>
   </div>
   <div class="wrap ftr__base">© {year} {site.name}, Arusha, Tanzania · <a href="#" data-ck-open>{T.cookies}</a></div>
 </footer>
 
+<script>
+  // phones: start with the link groups folded (they're still in the page for search engines)
+  const small = window.matchMedia("(max-width: 700px)");
+  document.querySelectorAll<HTMLDetailsElement>("[data-ftr]").forEach((d) => {
+    if (small.matches) d.open = false;
+    // wider screens: the groups always stay open
+    d.querySelector("summary")?.addEventListener("click", (e) => { if (!small.matches) e.preventDefault(); });
+  });
+</script>
+
 <style>
-  .ftr { background: var(--dark); color: #d8cdbd; padding: 3.5rem 0 1.5rem; font-size: 0.95rem; }
-  .ftr a { color: var(--ivory); }
-  .ftr a:hover { color: var(--gold); }
-  .ftr__grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 2.5rem; }
-  .ftr__name { font-family: var(--serif); font-weight: 600; font-size: 1.45rem; color: var(--gold); }
-  .ftr__quiet { opacity: 0.6; font-size: 0.88rem; }
-  .ftr__h { font-family: var(--display); font-weight: 600; color: var(--gold); }
+  .ftr { background: var(--dark); color: #d8cdbd; padding: 2.2rem 0 1.2rem; font-size: 0.86rem; line-height: 1.45; }
+  .ftr a { color: var(--ivory); text-decoration: none; }
+  .ftr a:hover { color: var(--gold); text-decoration: underline; }
+  .ftr__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 1.4rem; padding-bottom: 1.2rem; margin-bottom: 1.4rem; border-bottom: 1px solid #4a3c2e; }
+  .ftr__top p { margin: 0; }
+  .ftr__name { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; color: var(--gold); }
+  .ftr__contact { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin-left: auto !important; }
+  .ftr__grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 1.5rem 2.5rem; }
+  .ftr__h { font-family: var(--display); font-weight: 600; color: var(--gold); margin-bottom: 0.6rem; list-style: none; cursor: default; }
+  .ftr__h::-webkit-details-marker { display: none; }
+  .ftr__cols { columns: 2; column-gap: 1.5rem; }
+  .ftr__quiet { opacity: 0.6; }
   ul { list-style: none; padding: 0; margin: 0; }
-  li { margin-bottom: 0.45rem; }
-  .ftr__base { border-top: 1px solid #4a3c2e; margin-top: 2.5rem; padding-top: 1.2rem; font-size: 0.85rem; color: #a8997f; }
-  @media (max-width: 1000px) { .ftr__grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 600px) { .ftr__grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+  li { margin-bottom: 0.3rem; break-inside: avoid; }
+  .ftr__base { border-top: 1px solid #4a3c2e; margin-top: 1.4rem; padding-top: 1rem; font-size: 0.8rem; color: #a8997f; }
+  @media (max-width: 1100px) {
+    .ftr__grid { grid-template-columns: 1fr 1fr; }
+    .ftr__sec--wide { grid-column: 1 / -1; }
+    .ftr__sec--wide .ftr__cols { columns: 3; }
+  }
+  @media (max-width: 700px) {
+    .ftr__grid { grid-template-columns: 1fr; gap: 0; }
+    .ftr__sec--wide .ftr__cols, .ftr__cols { columns: 2; }
+    .ftr__contact { margin-left: 0 !important; }
+    .ftr__sec { border-bottom: 1px solid #4a3c2e; }
+    .ftr__h { cursor: pointer; margin: 0; padding: 0.8rem 0; display: flex; justify-content: space-between; }
+    .ftr__h::after { content: "+"; color: var(--ivory); font-weight: 400; }
+    .ftr__sec[open] .ftr__h::after { content: "–"; }
+    .ftr__sec[open] .ftr__cols { padding-bottom: 0.9rem; }
+  }
 </style>
