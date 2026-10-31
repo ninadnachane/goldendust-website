@@ -477,5 +477,320 @@
   ],
   "minChildAge": 6,
   "insidePark": true
+ },
+ {
+  "id": "canopy-wilderness-camp",
+  "name": "Canopy Wilderness Camp",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "11-01",
+    "to": "05-31",
+    "single": 130,
+    "double": 120,
+    "triple": 105,
+    "child": 60
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-30",
+    "single": 150,
+    "double": 132,
+    "triple": 112,
+    "child": 66
+   }
+  ],
+  "minChildAge": 3,
+  "insidePark": true
+ },
+ {
+  "id": "canopy-migration-camp",
+  "name": "Canopy Migration Camp",
+  "areaId": "ndutu",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Calving Season",
+    "from": "12-01",
+    "to": "04-30",
+    "single": 225,
+    "double": 173,
+    "triple": 163,
+    "child": 86.5
+   }
+  ],
+  "minChildAge": 3,
+  "insidePark": true
+ },
+ {
+  "id": "lamai-migration-camp",
+  "name": "Lamai Migration Camp",
+  "areaId": "north-serengeti",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Migration Season",
+    "from": "06-01",
+    "to": "10-20",
+    "single": 225,
+    "double": 173,
+    "triple": 163,
+    "child": 86.5
+   }
+  ],
+  "minChildAge": 3,
+  "insidePark": true
+ },
+ {
+  "id": "tanzania-bush-camps-central-serengeti",
+  "name": "Tanzania Bush Camps Central Serengeti",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "01-01",
+    "to": "02-29",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "High Season",
+    "from": "12-16",
+    "to": "12-31",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "Low Season",
+    "from": "03-01",
+    "to": "05-31",
+    "single": 190,
+    "double": 150,
+    "triple": 140,
+    "child": 75
+   },
+   {
+    "season": "Low Season",
+    "from": "11-01",
+    "to": "12-15",
+    "single": 190,
+    "double": 150,
+    "triple": 140,
+    "child": 75
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "tanzania-bush-camps-korongo",
+  "name": "Tanzania Bush Camps Korongo",
+  "areaId": "tarangire",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "01-01",
+    "to": "02-29",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "High Season",
+    "from": "07-01",
+    "to": "10-31",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "High Season",
+    "from": "12-16",
+    "to": "12-31",
+    "single": 200,
+    "double": 160,
+    "triple": 150,
+    "child": 80
+   },
+   {
+    "season": "Low Season",
+    "from": "03-01",
+    "to": "05-31",
+    "single": 190,
+    "double": 140,
+    "triple": 130,
+    "child": 70
+   },
+   {
+    "season": "Low Season",
+    "from": "11-01",
+    "to": "12-15",
+    "single": 190,
+    "double": 140,
+    "triple": 130,
+    "child": 70
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "tanzania-bush-camps-ndutu",
+  "name": "Tanzania Bush Camps Ndutu",
+  "areaId": "ndutu",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Calving Season",
+    "from": "12-01",
+    "to": "03-31",
+    "single": 230,
+    "double": 190,
+    "triple": 180,
+    "child": 95
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "tanzania-bush-camps-mara-river",
+  "name": "Tanzania Bush Camps Mara River",
+  "areaId": "north-serengeti",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Migration Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 230,
+    "double": 190,
+    "triple": 180,
+    "child": 95
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "safari-haven-tarangire",
+  "name": "Safari Haven Tarangire",
+  "areaId": "tarangire",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Low Season",
+    "from": "01-01",
+    "to": "03-31",
+    "single": 180,
+    "double": 120,
+    "triple": 120,
+    "child": 60
+   },
+   {
+    "season": "Low Season",
+    "from": "11-01",
+    "to": "12-31",
+    "single": 180,
+    "double": 120,
+    "triple": 120,
+    "child": 60
+   },
+   {
+    "season": "Green Season",
+    "from": "04-01",
+    "to": "05-31",
+    "single": 180,
+    "double": 100,
+    "triple": 100,
+    "child": 50
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 220,
+    "double": 150,
+    "triple": 150,
+    "child": 75
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "safari-haven-serengeti",
+  "name": "Safari Haven Serengeti",
+  "areaId": "central-serengeti",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "Low Season",
+    "from": "01-01",
+    "to": "03-31",
+    "single": 180,
+    "double": 120,
+    "triple": 120,
+    "child": 60
+   },
+   {
+    "season": "Low Season",
+    "from": "11-01",
+    "to": "12-31",
+    "single": 180,
+    "double": 120,
+    "triple": 120,
+    "child": 60
+   },
+   {
+    "season": "Green Season",
+    "from": "04-01",
+    "to": "05-31",
+    "single": 180,
+    "double": 100,
+    "triple": 100,
+    "child": 50
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 220,
+    "double": 150,
+    "triple": 150,
+    "child": 75
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
  }
 ]

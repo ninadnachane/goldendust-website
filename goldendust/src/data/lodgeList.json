@@ -298,5 +298,60 @@
   "name": "Lake Masek Tented Lodge",
   "area": "ndutu",
   "tier": "Luxury"
+ },
+ {
+  "name": "Canopy Wilderness Camp",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Canopy Migration Camp",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Lamai Migration Camp",
+  "area": "north-serengeti",
+  "tier": "Premium"
+ },
+ {
+  "name": "Tanzania Bush Camps Central Serengeti",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Tanzania Bush Camps Korongo",
+  "area": "tarangire",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Tanzania Bush Camps Ndutu",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Tanzania Bush Camps Mara River",
+  "area": "north-serengeti",
+  "tier": "Premium"
+ },
+ {
+  "name": "Safari Haven Tarangire",
+  "area": "tarangire",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Safari Haven Serengeti",
+  "area": "central-serengeti",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Safari Haven Migration Camp (Ndutu)",
+  "area": "ndutu",
+  "tier": "Premium"
+ },
+ {
+  "name": "Safari Haven Migration Camp (Kogatende)",
+  "area": "north-serengeti",
+  "tier": "Premium"
  }
 ]

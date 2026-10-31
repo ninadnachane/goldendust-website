@@ -180,7 +180,9 @@ test("real lodge data: valid, Arusha night at the fixed rate, Karatu has no park
   assert.equal(line(q, /Karatu/).filter((l) => l.group === "park").length, 0);
   const opts = publicOptions(defaultConfig);
   assert.equal(opts.arrivalPriced, true);
-  assert.ok(!opts.areas.some((a) => a.id === "north-serengeti"), "areas without lodges are hidden");
+  const withLodges = new Set(defaultConfig.lodges.filter((l) => l.active !== false).map((l) => l.areaId));
+  assert.ok(opts.areas.every((a) => withLodges.has(a.id)), "areas without lodges are hidden");
+  assert.ok(opts.areas.some((a) => a.id === "north-serengeti"), "North Serengeti has camps now");
 });
 
 test("park fees are the same in every season", () => {

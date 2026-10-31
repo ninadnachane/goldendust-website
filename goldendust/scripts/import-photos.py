@@ -20,6 +20,9 @@ OVERRIDE = {
   "andBeyond Lake Manyara Tree Lodge - Manyara": "&Beyond Lake Manyara",
   "Rhotia Valley Tented Lodge - Karatu": "Rhotia Valley Simba Lodge",
   "Nasikia Mobile Migration Camp - Ndutu": "Nasikia Ndutu",
+  "Tanzania Bush Camp Tarangire": "Tanzania Bush Camps Korongo",
+  "Safari Haven Migration Camp - Ndutu": "Safari Haven Migration Camp (Ndutu)",
+  "Safari Haven Migration Camp - Kogatende": "Safari Haven Migration Camp (Kogatende)",
 }
 def match(folder):
     if folder in OVERRIDE: return OVERRIDE[folder]

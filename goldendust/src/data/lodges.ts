@@ -6,7 +6,7 @@ import planner from "../planner/lodges.data.json";
 import { lodgeImages, imageUrl, nameKey } from "../planner/engine";
 import type { Tier } from "./tours";
 
-export type AreaId = "lake-manyara" | "tarangire" | "karatu" | "ngorongoro" | "central-serengeti" | "western-serengeti" | "ndutu";
+export type AreaId = "lake-manyara" | "tarangire" | "karatu" | "ngorongoro" | "central-serengeti" | "western-serengeti" | "north-serengeti" | "ndutu";
 export const AREAS: Record<AreaId, { name: string; park: string }> = {
   tarangire: { name: "Tarangire", park: "tarangire-national-park" },
   "lake-manyara": { name: "Lake Manyara", park: "lake-manyara-national-park" },
@@ -14,9 +14,10 @@ export const AREAS: Record<AreaId, { name: string; park: string }> = {
   ngorongoro: { name: "Ngorongoro", park: "ngorongoro-crater" },
   "central-serengeti": { name: "Central Serengeti", park: "serengeti-national-park" },
   "western-serengeti": { name: "Western Serengeti", park: "serengeti-national-park" },
+  "north-serengeti": { name: "North Serengeti", park: "serengeti-national-park" },
   ndutu: { name: "Ndutu", park: "serengeti-national-park" },
 };
-export const AREA_ORDER: AreaId[] = ["tarangire", "lake-manyara", "karatu", "ngorongoro", "ndutu", "central-serengeti", "western-serengeti"];
+export const AREA_ORDER: AreaId[] = ["tarangire", "lake-manyara", "karatu", "ngorongoro", "ndutu", "central-serengeti", "western-serengeti", "north-serengeti"];
 
 export type PartnerLodge = { slug: string; name: string; area: AreaId; tier: Tier; photos: string[]; inPlanner: boolean };
 

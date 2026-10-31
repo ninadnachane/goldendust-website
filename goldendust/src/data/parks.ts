@@ -57,7 +57,7 @@ export const parks: Park[] = [
         "You can camp in a public campsite, stay in a comfortable tented camp, or choose one of the luxury camps. Below are the camps and lodges we work with. The prices in our planner include them, so you can compare them for your dates.",
       ] },
     ],
-    areas: ["central-serengeti", "western-serengeti", "ndutu"],
+    areas: ["central-serengeti", "western-serengeti", "north-serengeti", "ndutu"],
     tourRoute: ["Serengeti", "Central Serengeti", "Western Serengeti"],
     faqs: [
       { q: "How many days do you need in the Serengeti?", a: "Two full days, so three nights, is a good minimum. One night means you arrive in the afternoon and leave the next morning, and you spend most of your time driving." },
