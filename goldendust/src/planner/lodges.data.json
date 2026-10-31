@@ -792,5 +792,45 @@
   ],
   "minChildAge": 5,
   "insidePark": true
+ },
+ {
+  "id": "safari-haven-migration-camp-ndutu",
+  "name": "Safari Haven Migration Camp (Ndutu)",
+  "areaId": "ndutu",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Migration Season",
+    "from": "12-15",
+    "to": "03-31",
+    "single": 270,
+    "double": 180,
+    "triple": 170,
+    "child": 90
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
+ },
+ {
+  "id": "safari-haven-migration-camp-kogatende",
+  "name": "Safari Haven Migration Camp (Kogatende)",
+  "areaId": "north-serengeti",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "Migration Season",
+    "from": "12-15",
+    "to": "03-31",
+    "single": 280,
+    "double": 190,
+    "triple": 180,
+    "child": 95
+   }
+  ],
+  "minChildAge": 5,
+  "insidePark": true
  }
 ]
