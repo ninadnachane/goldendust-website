@@ -109,6 +109,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
 </Base>
 
 <script>
+  import credits from "../data/photoCredits.json";
   import { tripCategories, stopNights, lodgeProblem, imageUrl, craterIncluded, type Category } from "../planner/engine";
   type Opt = {
     settings: { leadDays: number; childMinAge: number; childMaxAge: number; minTotalNights: number; maxTotalNights: number; maxGuests: number };
@@ -287,7 +288,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
         <div class="gv__top"><div><span class="gv__tag">${esc(catName(l.category))}</span><strong>${esc(l.name)}</strong>${l.description ? `<p>${esc(l.description)}</p>` : ""}</div>
           <button type="button" class="gv__x" data-gv-close aria-label="${esc(t("close"))}">✕</button></div>
         <div class="gv__stage">
-          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="${esc(imageUrl(im))}" alt="${esc(t("photoOf", { l: l.name, k: k + 1, n }))}" ${k > 1 ? 'loading="lazy"' : ""}></figure>`).join("") : `<figure class="gv__empty"><span>${esc(t(l.category === "budget" ? "soonCamp" : "soonLodge"))}</span></figure>`}</div>
+          <div class="gv__track" tabindex="0">${l.images.length ? l.images.map((im, k) => `<figure><img src="${esc(imageUrl(im))}" alt="${esc(t("photoOf", { l: l.name, k: k + 1, n }))}" ${k > 1 ? 'loading="lazy"' : ""}>${(credits as Record<string, { by: string; license: string; source: string }>)[im] ? `<figcaption class="gv__credit"><a href="${esc((credits as any)[im].source)}" target="_blank" rel="noopener">${esc((credits as any)[im].by)}</a>, ${esc((credits as any)[im].license)}</figcaption>` : ""}</figure>`).join("") : `<figure class="gv__empty"><span>${esc(t(l.category === "budget" ? "soonCamp" : "soonLodge"))}</span></figure>`}</div>
           ${n > 1 ? `<button type="button" class="gv__nav gv__prev" data-gv="-1" aria-label="${esc(t("prevPhoto"))}">‹</button><button type="button" class="gv__nav gv__next" data-gv="1" aria-label="${esc(t("nextPhoto"))}">›</button>` : ""}
         </div>
         <div class="gv__bottom">${n > 1 ? `<span class="gv__dots">${l.images.map((_, k) => `<i class="${k === 0 ? "on" : ""}"></i>`).join("")}</span><span class="gv__count" data-gv-count>1 / ${n}</span>` : "<span></span>"}
@@ -659,6 +660,9 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
   .pl .cal__grid button:disabled { color: #c9bfb1; cursor: default; text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.12); }
   .pl .cal__note { margin: 0.5rem 0 0; font-size: 0.78rem; color: var(--ink-2); text-align: center; }
   .pl .gv__tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e9cf9c; margin-right: 0.6rem; }
+  .pl .gv__track figure { position: relative; }
+  .pl .gv__credit { position: absolute; right: 0.5rem; bottom: 0.4rem; font-size: 0.7rem; color: #fff; background: rgba(0,0,0,0.45); padding: 0.1rem 0.4rem; border-radius: 4px; }
+  .pl .gv__credit a { color: inherit; }
   .pl .gv__empty { display: grid; place-items: center; padding: 2rem; text-align: center; color: #e9dfcf; }
   .pl .gv__empty span { max-width: 26rem; line-height: 1.5; }
   .pl .lodge { position: relative; display: flex; flex-direction: column; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }

@@ -373,6 +373,10 @@
   "lodges/out-in-africa-serengeti-camp/01.webp",
   "lodges/out-in-africa-serengeti-camp/02.webp"
  ],
+ "public campsite ngorongoro": [
+  "lodges/simba-public-campsite-ngorongoro/01.webp",
+  "lodges/simba-public-campsite-ngorongoro/02.webp"
+ ],
  "rhotia valley simba lodge": [
   "lodges/rhotia-valley-simba-lodge/01.webp",
   "lodges/rhotia-valley-simba-lodge/02.webp",
@@ -500,6 +504,10 @@
  ],
  "shuhudia camp": [
   "lodges/shuhudia-camp/01.webp"
+ ],
+ "simba public campsite ngorongoro": [
+  "lodges/simba-public-campsite-ngorongoro/01.webp",
+  "lodges/simba-public-campsite-ngorongoro/02.webp"
  ],
  "sound of silence serengeti tented camp": [
   "lodges/sound-of-silence-serengeti-tented-camp/01.webp",
