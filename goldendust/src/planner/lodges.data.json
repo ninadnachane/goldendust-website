@@ -822,8 +822,8 @@
   "periods": [
    {
     "season": "Migration Season",
-    "from": "12-15",
-    "to": "03-31",
+    "from": "06-01",
+    "to": "10-31",
     "single": 280,
     "double": 190,
     "triple": 180,
