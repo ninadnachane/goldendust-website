@@ -832,5 +832,79 @@
   ],
   "minChildAge": 5,
   "insidePark": true
+ },
+ {
+  "id": "angata-ngorongoro-camp",
+  "name": "Ang'ata Ngorongoro Camp",
+  "areaId": "ngorongoro",
+  "category": "premium",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "12-10",
+    "to": "03-31",
+    "single": 390,
+    "double": 272.5,
+    "triple": 221.6667,
+    "child": 190.75
+   },
+   {
+    "season": "Low Season",
+    "from": "04-01",
+    "to": "06-14",
+    "single": 350,
+    "double": 207.5,
+    "triple": 178.3333,
+    "child": 145.25
+   },
+   {
+    "season": "High Season",
+    "from": "06-15",
+    "to": "09-14",
+    "single": 390,
+    "double": 272.5,
+    "triple": 221.6667,
+    "child": 190.75
+   },
+   {
+    "season": "Low Season",
+    "from": "09-15",
+    "to": "12-09",
+    "single": 350,
+    "double": 207.5,
+    "triple": 178.3333,
+    "child": 145.25
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "angata-migration-camp",
+  "name": "Ang'ata Migration Camp",
+  "areaId": "ndutu",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "Low Season",
+    "from": "12-01",
+    "to": "12-09",
+    "single": 330,
+    "double": 207.5,
+    "triple": 178.3333,
+    "child": 145.25
+   },
+   {
+    "season": "High Season",
+    "from": "12-10",
+    "to": "03-31",
+    "single": 365,
+    "double": 282.5,
+    "triple": 225,
+    "child": 197.75
+   }
+  ],
+  "insidePark": true
  }
 ]
