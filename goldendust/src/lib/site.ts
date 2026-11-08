@@ -3,6 +3,7 @@ export const site = {
   url: "https://www.goldendustsafaris.com",
   whatsapp: "255695751445",
   gaId: "G-MT3FE7H1QK", // Google Analytics 4, loaded only after the visitor accepts cookies
+  gtmId: "GTM-THBKJFLT", // Google Tag Manager (Google Ads), loaded only after the visitor accepts cookies
   phoneDisplay: "+255 695 751 445",
   instagram: "https://www.instagram.com/goldendustsafaris/",
   instagramHandle: "@goldendustsafaris",

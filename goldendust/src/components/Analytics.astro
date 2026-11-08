@@ -1,14 +1,15 @@
 ---
-// Google Analytics 4 with a cookie banner. Nothing is loaded or stored by Google until the visitor accepts.
-// The choice is kept in localStorage ("gd_consent"); the footer link "Cookie settings" opens the banner again.
+// Google Analytics 4 and Google Tag Manager (Google Ads) with a cookie banner. Nothing is loaded or stored by Google until the visitor accepts.
+// The choice is kept in localStorage ("gd_consent_v2"; v2 since the banner now covers ads too, so earlier choices are asked again);
+// the footer link "Cookie settings" opens the banner again.
 // Other scripts can call window.gdTrack(eventName, params) — it does nothing without consent.
 import { site } from "../lib/site";
 import { langOf } from "../i18n";
 const T = {
-  en: { aria: "Cookie choice", p: "We use Google Analytics cookies to see how visitors use our website, so we can improve it. No ads, and we don't sell your data.", yes: "Accept", no: "Decline" },
-  nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics om te zien hoe bezoekers onze website gebruiken, zodat we hem kunnen verbeteren. Geen advertenties, en we verkopen je gegevens niet.", yes: "Accepteren", no: "Weigeren" },
-  de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics, um zu sehen, wie Besucher unsere Website nutzen, damit wir sie verbessern können. Keine Werbung, und wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", no: "Ablehnen" },
-  fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics pour voir comment les visiteurs utilisent notre site et l'améliorer. Pas de publicité, et nous ne vendons pas vos données.", yes: "Accepter", no: "Refuser" },
+  en: { aria: "Cookie choice", p: "We use cookies from Google Analytics and Google Ads to see how visitors use our website and which of our ads work, so we can improve both. We don't sell your data.", yes: "Accept", no: "Decline" },
+  nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics en Google Ads om te zien hoe bezoekers onze website gebruiken en welke van onze advertenties werken, zodat we beide kunnen verbeteren. We verkopen je gegevens niet.", yes: "Accepteren", no: "Weigeren" },
+  de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics und Google Ads, um zu sehen, wie Besucher unsere Website nutzen und welche unserer Anzeigen funktionieren, damit wir beides verbessern können. Wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", no: "Ablehnen" },
+  fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics et Google Ads pour voir comment les visiteurs utilisent notre site et lesquelles de nos annonces fonctionnent, afin d'améliorer les deux. Nous ne vendons pas vos données.", yes: "Accepter", no: "Refuser" },
 }[langOf(Astro.url)];
 ---
 <div class="ck" data-ck hidden role="region" aria-label={T.aria}>
@@ -18,9 +19,9 @@ const T = {
     <button type="button" class="btn btn--ghost" data-ck-no>{T.no}</button>
   </div>
 </div>
-<script is:inline define:vars={{ id: site.gaId }}>
+<script is:inline define:vars={{ id: site.gaId, gtmId: site.gtmId }}>
   (function () {
-    var KEY = "gd_consent", loaded = false;
+    var KEY = "gd_consent_v2", loaded = false;
     var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
     var set = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
     window.dataLayer = window.dataLayer || [];
@@ -29,10 +30,15 @@ const T = {
     gtag("consent", "default", { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", analytics_storage: "denied" });
     function load() {
       if (loaded || !id) return; loaded = true;
-      gtag("consent", "update", { analytics_storage: "granted" });
+      gtag("consent", "update", { analytics_storage: "granted", ad_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" });
       var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
       document.head.appendChild(s);
       gtag("js", new Date()); gtag("config", id, { anonymize_ip: true });
+      if (gtmId) {
+        window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var g = document.createElement("script"); g.async = true; g.src = "https://www.googletagmanager.com/gtm.js?id=" + gtmId;
+        document.head.appendChild(g);
+      }
     }
     window.gdTrack = function (name, params) { if (loaded) gtag("event", name, params || {}); };
     var box, show = function () { box && (box.hidden = false); };
