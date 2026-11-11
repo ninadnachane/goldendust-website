@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 
 const fails = [];
 const must = (cond, msg) => { if (!cond) fails.push(msg); };
+const sitemap0 = () => readdirSync("dist").filter((f) => f.startsWith("sitemap")).map((f) => read(`dist/${f}`)).join("");
 const read = (f) => (existsSync(f) ? readFileSync(f, "utf8") : "");
 
 for (const page of ["index", "about", "how-it-works", "blog", "planner", "admin", "admin/login", "itinerary", "404", "tanzania-safari-packages"])
@@ -14,10 +15,12 @@ for (const f of readdirSync("src/content/blog").filter((x) => x.endsWith(".md"))
 const home = read("dist/index.html");
 must(home.includes("<h1"), "homepage has no headline");
 must(home.includes("/planner"), "homepage doesn't link to the planner");
+for (const p of ["planner", "nl/planner", "de/planner", "fr/planner"]) must(!read(`dist/${p}.html`).includes('name="robots" content="noindex'), `/${p} must be indexable (it should rank for "Tanzania safari planner")`);
+must(sitemap0().includes("goldendustsafaris.com/planner<"), "sitemap must list /planner");
 
 const sitemap = readdirSync("dist").filter((f) => f.startsWith("sitemap")).map((f) => read(`dist/${f}`)).join("");
 must(sitemap.includes("goldendustsafaris.com"), "sitemap missing");
-for (const p of ["/admin", "/planner", "/itinerary"]) must(!sitemap.includes(`goldendustsafaris.com${p}<`) && !sitemap.includes(`goldendustsafaris.com${p}.html`), `sitemap must not list ${p}`);
+for (const p of ["/admin", "/itinerary"]) must(!sitemap.includes(`goldendustsafaris.com${p}<`) && !sitemap.includes(`goldendustsafaris.com${p}.html`), `sitemap must not list ${p}`);
 
 for (const p of ["admin", "admin/login"]) {
   const html = read(`dist/${p}.html`);
@@ -45,17 +48,17 @@ for (const p of english) {
     const real = [...html.matchAll(/href="(\/[^"]*)"(\s+hreflang=)?/g)].filter((m) => !m[2]).map((m) => m[1])
       .filter((h) => !h.startsWith(`/${l}/`) && h !== `/${l}` && !h.startsWith(`/${l}#`) && !/^\/(images|media|api|_astro|admin)\b/.test(h));
     must(real.length === 0, `/${l}/${p} links to English pages: ${[...new Set(real)].slice(0, 3).join(", ")}`);
-    if (!/(planner|itinerary)$/.test(p)) {
+    if (!/itinerary$/.test(p)) {
       for (const x of ["en", ...LANGS]) must(html.includes(`hreflang="${x}"`), `/${l}/${p} has no hreflang link for ${x}`);
     }
   }
-  if (!/(planner|itinerary)$/.test(p)) must(en.includes('hreflang="x-default"'), `/${p} has no x-default hreflang link`);
+  if (!/itinerary$/.test(p)) must(en.includes('hreflang="x-default"'), `/${p} has no x-default hreflang link`);
 }
 for (const l of LANGS) for (const t of ["Golden Dust Safaris"]) must(read(`dist/${l}.html`).includes(t), `/${l} home page looks empty`);
 must(read("dist/nl.html").includes("Privésafari") || read("dist/nl.html").includes("privésafari"), "/nl home page isn't in Dutch");
 must(read("dist/de.html").includes("Privatsafari"), "/de home page isn't in German");
 must(read("dist/fr.html").includes("Safaris privés"), "/fr home page isn't in French");
-for (const l of LANGS) for (const page of ["planner", "itinerary"]) must(!sitemap.includes(`goldendustsafaris.com/${l}/${page}<`), `sitemap must not list /${l}/${page}`);
+for (const l of LANGS) for (const page of ["itinerary"]) must(!sitemap.includes(`goldendustsafaris.com/${l}/${page}<`), `sitemap must not list /${l}/${page}`);
 must(/hreflang="nl"/.test(sitemap), "sitemap has no language links");
 
 if (fails.length) { console.error("Build checks failed:\n- " + fails.join("\n- ")); process.exit(1); }

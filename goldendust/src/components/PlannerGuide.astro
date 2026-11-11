@@ -1,0 +1,43 @@
+---
+// Readable section under the planner: how it works, sample prices, FAQ and links to the guides.
+import PriceBox from "./PriceBox.astro";
+import Faq from "./Faq.astro";
+import { langOf, lp } from "../i18n";
+import { PLANNER_GUIDE } from "../i18n/plannerGuide";
+const lang = langOf(Astro.url);
+const G = PLANNER_GUIDE[lang];
+const links: [string, string][] = [
+  ["/post/how-much-does-a-tanzania-safari-cost-complete-budget-breakdown", G.links.cost],
+  ["/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide", G.links.best],
+  ["/great-migration-serengeti", G.links.migration],
+  ["/parks/serengeti-national-park", G.links.serengeti],
+  ["/parks/ngorongoro-crater", G.links.ngorongoro],
+  ["/parks/tarangire-national-park", G.links.tarangire],
+];
+---
+<section class="section section--white pg">
+  <div class="wrap">
+    <h2>{G.h}</h2>
+    <p class="pg__intro">{G.intro}</p>
+    <ol class="pg__steps">
+      {G.steps.map((s) => <li><h3>{s.h}</h3><p>{s.p}</p></li>)}
+    </ol>
+    <div class="pg__prices"><PriceBox /></div>
+    <Faq items={G.faqs} heading={G.faqH} />
+    <h2 class="pg__more">{G.moreH}</h2>
+    <ul class="pg__links">
+      {links.map(([href, label]) => <li><a href={lp(lang, href)}>{label}</a></li>)}
+    </ul>
+  </div>
+</section>
+<style>
+  .pg h2 { margin: 0 0 0.8rem; }
+  .pg__intro { max-width: 44rem; margin: 0 0 1.6rem; }
+  .pg__steps { list-style: none; padding: 0; margin: 0 0 2rem; display: grid; gap: 1rem 1.6rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .pg__steps h3 { font-size: 1.05rem; margin: 0 0 0.3rem; }
+  .pg__steps p { margin: 0; color: var(--ink-2); }
+  .pg__prices { max-width: 44rem; }
+  .pg__more { margin-top: 2.4rem !important; }
+  .pg__links { padding-left: 1.1rem; margin: 0; columns: 2 16rem; }
+  .pg__links li { margin: 0 0 0.4rem; }
+</style>

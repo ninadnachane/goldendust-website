@@ -1,6 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import WaButton from "../components/WaButton.astro";
+import PlannerGuide from "../components/PlannerGuide.astro";
+import { faqSchema } from "../lib/schema";
+import { PLANNER_GUIDE } from "../i18n/plannerGuide";
 import { site, waLink } from "../lib/site";
 import { langOf, LOCALE } from "../i18n";
 import { PLANNER_TEXT, AREA_TEXT, CATEGORY_TEXT, ADDON_TEXT } from "../i18n/planner";
@@ -12,7 +15,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
 <Base
   title={`${P.title} | Golden Dust Safaris`}
   description={P.desc}
-  noindex
+  schema={[faqSchema(PLANNER_GUIDE[lang].faqs)]}
 >
   <section class="section pl" data-planner data-wa={site.whatsapp} data-i18n={i18n}>
     <div class="wrap">
@@ -106,6 +109,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
       </div>
     </div>
   </section>
+  <PlannerGuide />
 </Base>
 
 <script>

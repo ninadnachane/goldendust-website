@@ -10,8 +10,8 @@ type Pair = [string, string];
 export type PlannerText = Record<string, string | Pair | string[]>;
 
 const en = {
-  title: "Safari Itinerary Planner", desc: "Build your own Tanzania safari itinerary: choose your dates, comfort level, parks and lodges, and see the price instantly with a full cost breakdown.",
-  h1: "Plan your safari",
+  title: "Tanzania Safari Planner: Build and Price Your Own Trip", desc: "Plan your Tanzania safari online: choose your dates, parks and camps and see the real price per person straight away, with park fees, vehicle and guide included.",
+  h1: "Tanzania safari planner",
   lede: ["We encourage you to ", "connect with us", " to plan your safari: a conversation with your guide is the best way to get it right. But if you're sure about the details and want to plan it yourself, this tool can help. Pick your dates and parks, choose from every camp and lodge, and see the price update as you go, with nothing hidden. When it looks right, send it to us and your guide takes it from there."],
   s1: "Who's travelling?", s2: "When?", s3: "Where to, and where to stay?", change: "Change", next: "Continue",
   adultsL: "Adults", childrenL: "Children", fewerAdults: "Fewer adults", moreAdults: "More adults", fewerChildren: "Fewer children", moreChildren: "More children",
@@ -58,8 +58,8 @@ const en = {
 export type PlannerKey = keyof typeof en;
 
 const nl: Record<PlannerKey, string | Pair | string[]> = {
-  title: "Reisplanner voor je safari", desc: "Stel je eigen safari in Tanzania samen: kies je data, comfortniveau, parken en lodges, en zie meteen de prijs met een volledig overzicht van de kosten.",
-  h1: "Plan je safari",
+  title: "Safariplanner Tanzania: stel je reis samen en zie de prijs", desc: "Plan je safari in Tanzania online: kies je data, parken en kampen en zie meteen de echte prijs per persoon, inclusief parkkosten, voertuig en gids.",
+  h1: "Safariplanner voor Tanzania",
   lede: ["We raden je aan om ", "contact met ons op te nemen", " om je safari te plannen: een gesprek met je gids is de beste manier om alles goed te krijgen. Maar weet je precies wat je wilt en plan je liever zelf, dan helpt deze tool je. Kies je data en parken, kies uit alle kampen en lodges, en zie de prijs meteen meebewegen, zonder verborgen kosten. Ziet het er goed uit? Stuur het ons, dan neemt je gids het vanaf daar over."],
   s1: "Wie reist er mee?", s2: "Wanneer?", s3: "Waarheen, en waar overnacht je?", change: "Wijzigen", next: "Verder",
   adultsL: "Volwassenen", childrenL: "Kinderen", fewerAdults: "Minder volwassenen", moreAdults: "Meer volwassenen", fewerChildren: "Minder kinderen", moreChildren: "Meer kinderen",
@@ -104,8 +104,8 @@ const nl: Record<PlannerKey, string | Pair | string[]> = {
 };
 
 const de: Record<PlannerKey, string | Pair | string[]> = {
-  title: "Safari-Reiseplaner", desc: "Stellen Sie Ihre eigene Safari in Tansania zusammen: Wählen Sie Reisedaten, Komfort, Parks und Lodges und sehen Sie sofort den Preis mit vollständiger Kostenaufstellung.",
-  h1: "Planen Sie Ihre Safari",
+  title: "Tansania-Safariplaner: Reise selbst planen und Preis sehen", desc: "Planen Sie Ihre Safari in Tansania online: Reisedaten, Parks und Camps wählen und sofort den echten Preis pro Person sehen, inklusive Parkgebühren, Fahrzeug und Guide.",
+  h1: "Tansania-Safariplaner",
   lede: ["Wir empfehlen Ihnen, ", "mit uns Kontakt aufzunehmen", ", um Ihre Safari zu planen: Ein Gespräch mit Ihrem Guide ist der beste Weg, alles richtig zu machen. Wenn Sie aber genau wissen, was Sie möchten, und lieber selbst planen, hilft Ihnen dieses Tool. Wählen Sie Reisedaten und Parks, wählen Sie aus allen Camps und Lodges, und sehen Sie, wie sich der Preis laufend anpasst, ohne versteckte Kosten. Wenn alles passt, schicken Sie es uns, und Ihr Guide übernimmt."],
   s1: "Wer reist mit?", s2: "Wann?", s3: "Wohin, und wo übernachten?", change: "Ändern", next: "Weiter",
   adultsL: "Erwachsene", childrenL: "Kinder", fewerAdults: "Weniger Erwachsene", moreAdults: "Mehr Erwachsene", fewerChildren: "Weniger Kinder", moreChildren: "Mehr Kinder",
@@ -150,8 +150,8 @@ const de: Record<PlannerKey, string | Pair | string[]> = {
 };
 
 const fr: Record<PlannerKey, string | Pair | string[]> = {
-  title: "Planificateur de safari", desc: "Composez votre propre safari en Tanzanie : choisissez vos dates, votre niveau de confort, les parcs et les lodges, et voyez le prix tout de suite avec le détail complet des coûts.",
-  h1: "Préparez votre safari",
+  title: "Planificateur de safari en Tanzanie : composez et chiffrez votre voyage", desc: "Préparez votre safari en Tanzanie en ligne : choisissez vos dates, parcs et camps et voyez tout de suite le vrai prix par personne, parcs, véhicule et guide compris.",
+  h1: "Planificateur de safari en Tanzanie",
   lede: ["Nous vous encourageons à ", "nous contacter", " pour préparer votre safari : une conversation avec votre guide est le meilleur moyen de bien faire les choses. Mais si vous savez ce que vous voulez et préférez organiser vous-même, cet outil peut vous aider. Choisissez vos dates et vos parcs, parmi tous nos camps et lodges, et voyez le prix évoluer au fil de vos choix, sans rien de caché. Quand tout vous convient, envoyez-le-nous et votre guide prend le relais."],
   s1: "Qui voyage ?", s2: "Quand ?", s3: "Où aller, et où dormir ?", change: "Modifier", next: "Continuer",
   adultsL: "Adultes", childrenL: "Enfants", fewerAdults: "Moins d'adultes", moreAdults: "Plus d'adultes", fewerChildren: "Moins d'enfants", moreChildren: "Plus d'enfants",
