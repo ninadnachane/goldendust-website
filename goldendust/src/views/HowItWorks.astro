@@ -88,6 +88,46 @@ const T = {
       ["Retour à la fin", "Après le safari, nous vous conduisons à l'aéroport ou à votre hôtel."],
     ],
   },
+  it: {
+    title: "Come funziona: organizzare un safari in Tanzania con noi | Golden Dust Safaris",
+    desc: "Come funziona organizzare un safari privato in Tanzania con Golden Dust Safaris: dal primo messaggio su WhatsApp all'accoglienza in aeroporto, la prima notte gratuita e la partenza verso i parchi.",
+    h1: "Come organizziamo il tuo safari",
+    lede: "Ogni viaggiatore è diverso, per questo ogni safari è costruito sui tuoi interessi, sul tuo budget e sul livello di comfort che cerchi. Ecco cosa succede, passo dopo passo.",
+    beforeH: "Prima della partenza", arriveH: "All'arrivo", key: "Il passo più importante", btn: "Inizia con un messaggio su WhatsApp",
+    before: [
+      ["Scrivici su WhatsApp", "Raccontaci le date di viaggio, quante persone siete, il budget e cosa ti piacerebbe vedere. Niente moduli di contatto, niente attese per una risposta via email."],
+      ["Ci sentiamo al telefono", "Parliamo per capire perché vuoi fare questo viaggio e un safari, e tutto quello che speri di vivere. Poi ti diamo il nostro parere sincero su parchi, stagioni e su dove il tuo budget rende di più.", "key"],
+      ["Ricevi il tuo programma su misura", "Un itinerario giorno per giorno basato sulle tue preferenze, con il dettaglio completo dei costi, così vedi esattamente cosa stai pagando."],
+      ["Confronta liberamente", "Hai un preventivo di un'altra agenzia? Mandacelo e ti daremo un parere sincero."],
+    ],
+    arrival: [
+      ["Ti accogliamo in aeroporto", "Il nostro team ti aspetta all'aeroporto del Kilimangiaro o di Arusha con un cartello con il tuo nome."],
+      ["Il soggiorno prima del safari lo offriamo noi", "Ci occupiamo del transfer e della notte ad Arusha prima del safari."],
+      ["Briefing con la tua guida", "La guida ti spiega i giorni che ti aspettano e risponde alle tue domande."],
+      ["Inizia il safari", "La guida passa a prenderti in hotel la mattina."],
+      ["Rientro alla fine", "Dopo il safari ti accompagniamo in aeroporto o in hotel."],
+    ],
+  },
+  es: {
+    title: "Cómo funciona: planear un safari en Tanzania con nosotros | Golden Dust Safaris",
+    desc: "Cómo funciona planear un safari privado en Tanzania con Golden Dust Safaris, desde tu primer mensaje de WhatsApp hasta la recogida en el aeropuerto, tu primera noche gratis y la salida hacia los parques.",
+    h1: "Cómo planeamos tu safari",
+    lede: "Cada viajero es diferente, así que cada safari se construye en torno a tus intereses, tu presupuesto y el nivel de comodidad que buscas. Esto es lo que pasa, paso a paso.",
+    beforeH: "Antes de viajar", arriveH: "Cuando llegas", key: "Lo más importante", btn: "Empieza con un mensaje de WhatsApp",
+    before: [
+      ["Escríbenos por WhatsApp", "Cuéntanos tus fechas, cuántos sois, tu presupuesto y lo que te encantaría ver. Sin formularios de contacto ni esperas por un correo."],
+      ["Hablamos por teléfono", "Hablamos para entender por qué quieres viajar y hacer un safari, y todo lo que esperas del viaje. Después te damos nuestra opinión sincera sobre parques, temporadas y dónde rinde más tu dinero.", "key"],
+      ["Recibe tu plan de safari a medida", "Un itinerario día a día basado en tus preferencias, con el desglose completo de costes para que veas exactamente qué estás pagando."],
+      ["Compara con libertad", "¿Tienes un presupuesto de otra empresa? Envíanoslo y te daremos una opinión sincera."],
+    ],
+    arrival: [
+      ["Te recibimos en el aeropuerto", "Nuestro equipo te espera en el aeropuerto del Kilimanjaro o de Arusha con un cartel con tu nombre."],
+      ["La estancia antes del safari corre de nuestra cuenta", "Nos encargamos de tu traslado y de tu noche en Arusha antes del safari."],
+      ["Reunión informativa con tu guía", "Tu guía te explica los días que te esperan y responde a tus preguntas."],
+      ["Empieza tu safari", "Tu guía te recoge en el hotel por la mañana."],
+      ["Traslado al final", "Después del safari te llevamos al aeropuerto o a tu hotel."],
+    ],
+  },
 }[lang];
 ---
 <Base title={T.title} description={T.desc} schema={[breadcrumbs([[w(lang, "home"), L("/")], [w(lang, "how"), L("/how-it-works")]])]}>

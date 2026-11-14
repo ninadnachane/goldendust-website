@@ -5,7 +5,9 @@
     "@cspell/dict-en-gb/cspell-ext.json",
     "@cspell/dict-nl-nl/cspell-ext.json",
     "@cspell/dict-de-de/cspell-ext.json",
-    "@cspell/dict-fr-fr/cspell-ext.json"
+    "@cspell/dict-fr-fr/cspell-ext.json",
+    "@cspell/dict-it-it/cspell-ext.json",
+    "@cspell/dict-es-es/cspell-ext.json"
   ],
   "ignoreRegExpList": [
     "/GD-\\d+/g",
@@ -35,9 +37,44 @@
         "**/.spellcheck/fr.txt"
       ],
       "language": "fr,en-GB,en"
+    },
+    {
+      "filename": [
+        "**/.spellcheck/it/**",
+        "**/.spellcheck/it.txt"
+      ],
+      "language": "it,en-GB,en"
+    },
+    {
+      "filename": [
+        "**/.spellcheck/es/**",
+        "**/.spellcheck/es.txt"
+      ],
+      "language": "es,en-GB,en"
     }
   ],
   "words": [
+    "Italiano",
+    "Español",
+    "Guepardo",
+    "guepardo",
+    "guepardos",
+    "babuinos",
+    "descárgalo",
+    "microbús",
+    "colobos",
+    "colobi",
+    "masái",
+    "fotogénico",
+    "antipalúdicos",
+    "antipalúdicas",
+    "tendati",
+    "tendato",
+    "Kilimangiaro",
+    "cafro",
+    "mogani",
+    "antipioggia",
+    "burrocacao",
     "Krishnappa",
     "NiaNuru",
     "Nuru",

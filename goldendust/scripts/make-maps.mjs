@@ -1,5 +1,5 @@
 // Draws a route map for every sample safari into public/images/maps/<slug>.svg,
-// and the Dutch, German and French versions into public/images/maps/<lang>/<slug>.svg.
+// and the Dutch, German, French, Italian and Spanish versions into public/images/maps/<lang>/<slug>.svg.
 // Usage: node --import tsx scripts/make-maps.mjs
 // The park outlines are simplified (approximate), drawn from rough coordinates, so the maps say "Map is approximate".
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -11,6 +11,8 @@ const MAP_TEXT = {
   nl: { np: ["NATIONAAL PARK", "SERENGETI"], nca: ["NGORONGORO", "CONSERVATION AREA"], tar: "TARANGIRE", lm: "LAKE MANYARA", victoria: "Victoriameer", eyasi: "Eyasimeer", natron: "Natronmeer", kenya: "K E N I A", tz: "T A N Z A N I A", airport: "Kilimanjaro Airport", pill: (d, n) => `${d} dagen · ${n} nachten`, note: "Kaart bij benadering · Golden Dust Safaris", aria: "Routekaart", to: " naar " },
   de: { np: ["SERENGETI-", "NATIONALPARK"], nca: ["NGORONGORO-", "SCHUTZGEBIET"], tar: "TARANGIRE", lm: "LAKE MANYARA", victoria: "Victoriasee", eyasi: "Eyasisee", natron: "Natronsee", kenya: "K E N I A", tz: "T A N S A N I A", airport: "Flughafen Kilimanjaro", pill: (d, n) => `${d} Tage · ${n} Nächte`, note: "Karte ungefähr · Golden Dust Safaris", aria: "Routenkarte", to: " nach " },
   fr: { np: ["PARC NATIONAL", "DU SERENGETI"], nca: ["AIRE DE CONSERVATION", "DU NGORONGORO"], tar: "TARANGIRE", lm: "LAC MANYARA", victoria: "Lac Victoria", eyasi: "Lac Eyasi", natron: "Lac Natron", kenya: "K E N Y A", tz: "T A N Z A N I E", airport: "Aéroport du Kilimandjaro", pill: (d, n) => `${d} jours · ${n} nuits`, note: "Carte approximative · Golden Dust Safaris", aria: "Carte de l'itinéraire", to: " à " },
+  it: { np: ["PARCO NAZIONALE", "DEL SERENGETI"], nca: ["AREA DI CONSERVAZIONE", "DI NGORONGORO"], tar: "TARANGIRE", lm: "LAGO MANYARA", victoria: "Lago Vittoria", eyasi: "Lago Eyasi", natron: "Lago Natron", kenya: "K E N Y A", tz: "T A N Z A N I A", airport: "Aeroporto del Kilimangiaro", pill: (d, n) => `${d} giorni · ${n} notti`, note: "Mappa approssimativa · Golden Dust Safaris", aria: "Mappa del percorso", to: " a " },
+  es: { np: ["PARQUE NACIONAL", "DEL SERENGETI"], nca: ["ÁREA DE CONSERVACIÓN", "DEL NGORONGORO"], tar: "TARANGIRE", lm: "LAGO MANYARA", victoria: "Lago Victoria", eyasi: "Lago Eyasi", natron: "Lago Natron", kenya: "K E N I A", tz: "T A N Z A N I A", airport: "Aeropuerto del Kilimanjaro", pill: (d, n) => `${d} días · ${n} noches`, note: "Mapa aproximado · Golden Dust Safaris", aria: "Mapa de la ruta", to: " a " },
 };
 
 const W = 800, H = 690, K = 220; // px per degree
@@ -110,9 +112,9 @@ ${marks}
 const out = new URL("../public/images/maps/", import.meta.url);
 mkdirSync(out, { recursive: true });
 for (const t of tours) writeFileSync(new URL(`${t.slug}.svg`, out), svg(t));
-for (const lang of ["nl", "de", "fr"]) {
+for (const lang of ["nl", "de", "fr", "it", "es"]) {
   const dir = new URL(`${lang}/`, out);
   mkdirSync(dir, { recursive: true });
   for (const t of tours) writeFileSync(new URL(`${t.slug}.svg`, dir), svg(t, lang));
 }
-console.log(`Wrote ${tours.length} maps in 4 languages.`);
+console.log(`Wrote ${tours.length} maps in 6 languages.`);

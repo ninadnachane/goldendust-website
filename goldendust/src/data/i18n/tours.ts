@@ -1,10 +1,10 @@
-// Dutch, German and French text for the sample safaris (src/data/tours.ts).
+// Dutch, German, French, Italian and Spanish text for the sample safaris (src/data/tours.ts).
 // Prices aren't written here: "{from}" is replaced with the lowest price per person, so when the
 // prices in tours.ts change, these pages follow automatically.
 import type { Day } from "../tours";
 
 export type TourText = { shortName: string; travellers: string; seoTitle: string; description: string; summary: string; stay: string; days: Day[] };
-type Lang3 = "nl" | "de" | "fr";
+type Lang3 = "nl" | "de" | "fr" | "it" | "es";
 
 // ---------- Nederlands ----------
 const nlArrival: Day = { title: "Aankomst in Arusha", text: "We halen je op van Kilimanjaro Airport of het vliegveld van Arusha en brengen je naar je hotel. 's Avonds vertelt je gids wat je de komende dagen kunt verwachten en beantwoordt hij al je vragen.", overnight: "Hotel in Arusha (je eerste nacht is van ons)" };
@@ -17,6 +17,14 @@ const deCrater = (from: string): Day => ({ title: "Ngorongoro-Krater, dann zurü
 // ---------- Français ----------
 const frArrival: Day = { title: "Arrivée à Arusha", text: "Nous venons vous chercher à l'aéroport du Kilimandjaro ou d'Arusha et vous conduisons à votre hôtel. Le soir, votre guide vous présente les jours à venir et répond à vos questions.", overnight: "Hôtel à Arusha (la première nuit est offerte)" };
 const frCrater = (from: string): Day => ({ title: "Cratère du Ngorongoro, puis retour à Arusha", text: `Départ matinal ${from} vers le cratère du Ngorongoro. Au fond du cratère, vous passez la matinée en safari, avec de bonnes chances de voir des rhinocéros noirs, des lions et de grands troupeaux de buffles et de zèbres. Après un pique-nique, nous rentrons à Arusha ou à l'aéroport.`, overnight: "" });
+
+// ---------- Italiano ----------
+const itArrival: Day = { title: "Arrivo ad Arusha", text: "Ti veniamo a prendere all'aeroporto del Kilimangiaro o di Arusha e ti accompagniamo in hotel. La sera la tua guida ti racconta cosa ti aspetta nei prossimi giorni e risponde alle tue domande.", overnight: "Hotel ad Arusha (la prima notte la offriamo noi)" };
+const itCrater = (from: string): Day => ({ title: "Cratere di Ngorongoro e ritorno ad Arusha", text: `Partenza di buon mattino ${from} verso il cratere di Ngorongoro. Sul fondo del cratere passi la mattinata in game drive, con buone probabilità di vedere rinoceronti neri, leoni e grandi mandrie di bufali e zebre. Dopo un pranzo al sacco rientriamo ad Arusha o in aeroporto.`, overnight: "" });
+
+// ---------- Español ----------
+const esArrival: Day = { title: "Llegada a Arusha", text: "Te recogemos en el aeropuerto del Kilimanjaro o de Arusha y te llevamos a tu hotel. Por la tarde, tu guía te cuenta qué te espera en los próximos días y responde a tus preguntas.", overnight: "Hotel en Arusha (tu primera noche corre de nuestra cuenta)" };
+const esCrater = (from: string): Day => ({ title: "Cráter del Ngorongoro y vuelta a Arusha", text: `Salimos temprano ${from} hacia el cráter del Ngorongoro. En el fondo del cráter pasas la mañana de safari, con buenas probabilidades de ver rinocerontes negros, leones y grandes manadas de búfalos y cebras. Después de un almuerzo de picnic volvemos a Arusha o al aeropuerto.`, overnight: "" });
 
 export const TOURS_I18N: Record<Lang3, Record<string, TourText>> = {
   nl: {
@@ -310,6 +318,200 @@ export const TOURS_I18N: Record<Lang3, Record<string, TourText>> = {
         { title: "En route vers le Serengeti", text: "À travers les hauts plateaux du Ngorongoro jusqu'aux plaines du Serengeti, avec un safari en chemin jusqu'à votre camp au centre du Serengeti.", overnight: "Arukore Simba Camp" },
         { title: "Serengeti central", text: "Une journée entière de safari au centre du Serengeti, avec retour au camp quand vous le souhaitez.", overnight: "Arukore Simba Camp" },
         frCrater("depuis le Serengeti")],
+    },
+  },
+  it: {
+    "tarangire-ngorongoro-safari-3-days-budget": {
+      shortName: "Tarangire e cratere di Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari economico di 3 giorni in Tanzania: Tarangire e cratere di Ngorongoro",
+      description: "Un breve safari privato ed economico da Arusha: una giornata a Tarangire, una notte nel campeggio pubblico e un game drive nel cratere di Ngorongoro. Da {from} a persona.",
+      summary: "Il modo più rapido per vedere due parchi molto diversi: gli elefanti e i baobab di Tarangire, poi una mattinata sul fondo del cratere di Ngorongoro.",
+      stay: "Tarangire Public Campsite",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Dopo colazione, circa due ore di strada fino a Tarangire. Una giornata intera di game drive tra i baobab e alcune delle più grandi mandrie di elefanti del nord della Tanzania, con pranzo al sacco nel parco.", overnight: "Tarangire Public Campsite" },
+        itCrater("da Tarangire")],
+    },
+    "serengeti-ngorongoro-safari-4d-3n-budget": {
+      shortName: "Campeggio nel Serengeti e a Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari economico in campeggio di 4 giorni: Serengeti e Ngorongoro",
+      description: "Safari privato in campeggio di 4 giorni da Arusha: due notti a Seronera, nel Serengeti centrale, e un game drive nel cratere. Da {from} a persona.",
+      summary: "Due notti in campeggio a Seronera, nel cuore del territorio dei grandi felini del Serengeti, e un game drive nel cratere di Ngorongoro sulla via del ritorno.",
+      stay: "Seronera Public Campsite",
+      days: [itArrival,
+        { title: "Verso il Serengeti", text: "Partiamo verso ovest attraverso gli altopiani di Ngorongoro e scendiamo nelle pianure del Serengeti, con un game drive lungo la strada fino a Seronera, al centro del parco.", overnight: "Seronera Public Campsite" },
+        { title: "Serengeti centrale", text: "Una giornata intera di game drive intorno a Seronera, famosa per leoni, leopardi e ghepardi. Puoi partire all'alba e tornare al campo per pranzo, oppure restare fuori tutto il giorno con il pranzo al sacco.", overnight: "Seronera Public Campsite" },
+        itCrater("dal Serengeti")],
+    },
+    "tarangire-serengeti-ngorongoro-safari-5d4n-budget": {
+      shortName: "Tarangire, Serengeti e Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari economico di 5 giorni in Tanzania: Tarangire, Serengeti e Ngorongoro",
+      description: "Il grande classico del nord della Tanzania a prezzo contenuto: Tarangire, due giorni nel Serengeti e il cratere di Ngorongoro, con notti in campeggi pubblici. Da {from} a persona.",
+      summary: "Il grande classico del nord a prezzo contenuto: gli elefanti di Tarangire, due giorni di grandi felini nelle pianure del Serengeti e un game drive nel cratere di Ngorongoro.",
+      stay: "Campeggi pubblici a Tarangire e nel Serengeti",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire per una giornata intera tra baobab, mandrie di elefanti e gli animali che si radunano lungo il fiume Tarangire.", overnight: "Tarangire Public Campsite" },
+        { title: "Verso il Serengeti", text: "Attraversiamo gli altopiani di Ngorongoro e scendiamo nelle pianure del Serengeti, con un game drive lungo la strada fino a Seronera.", overnight: "Seronera Public Campsite" },
+        { title: "Serengeti centrale", text: "Una giornata intera intorno a Seronera, uno dei posti migliori d'Africa per leoni, leopardi e ghepardi.", overnight: "Seronera Public Campsite" },
+        itCrater("dal Serengeti")],
+    },
+    "tarangire-ngorongoro-safari-4-days-comfort": {
+      shortName: "Tarangire e cratere di Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari di 4 giorni a Tarangire e al cratere di Ngorongoro in lodge confortevoli",
+      description: "Un safari privato di 4 giorni con calma: Tarangire, una notte tra le verdi colline di Karatu e una mattinata nel cratere di Ngorongoro, in lodge confortevoli. Da {from} a persona.",
+      summary: "Un breve safari con calma, in lodge confortevoli: una giornata a Tarangire, una notte sugli altopiani di Karatu e una partenza all'alba verso il cratere di Ngorongoro.",
+      stay: "Tarangire Simba Lodge e Karatu Simba Lodge",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire per una giornata intera di game drive tra i baobab e le grandi mandrie di elefanti.", overnight: "Tarangire Simba Lodge" },
+        { title: "Verso gli altopiani di Karatu", text: "Un game drive mattutino a Tarangire, poi un breve tragitto fino a Karatu, una zona agricola fresca e verde appena fuori dall'Area di conservazione di Ngorongoro. Il pomeriggio è libero, per riposare o fare una passeggiata.", overnight: "Karatu Simba Lodge" },
+        itCrater("da Karatu, ad appena 30 minuti dall'ingresso del cratere,")],
+    },
+    "tarangire-serengeti-ngorongoro-safari-5d4n-mid-range": {
+      shortName: "Tarangire, Serengeti e Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari di 5 giorni in Tanzania: Tarangire, Serengeti e Ngorongoro (Comfort)",
+      description: "Safari privato di 5 giorni nel nord della Tanzania, in lodge e campi tendati confortevoli: Tarangire, due giorni nel Serengeti centrale e il cratere di Ngorongoro. Da {from} a persona.",
+      summary: "Il grande classico del nord con più comfort: un lodge a Tarangire, un campo tendato nel Serengeti centrale e un game drive nel cratere l'ultimo giorno.",
+      stay: "Tarangire Simba Lodge e Sound of Silence Serengeti Tented Camp",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire per una giornata intera tra baobab, elefanti e gli animali del fiume Tarangire.", overnight: "Tarangire Simba Lodge" },
+        { title: "Verso il Serengeti", text: "Attraverso gli altopiani di Ngorongoro fino alle pianure del Serengeti, con un game drive lungo la strada fino al tuo campo nel Serengeti centrale.", overnight: "Sound of Silence Serengeti Tented Camp" },
+        { title: "Serengeti centrale", text: "Una giornata intera di game drive nel Serengeti centrale, dove vivono molti dei leoni, leopardi e ghepardi del parco.", overnight: "Sound of Silence Serengeti Tented Camp" },
+        itCrater("dal Serengeti")],
+    },
+    "family-safari-tanzania-6-days-comfort": {
+      shortName: "Safari per famiglie tra Tarangire, Serengeti e Ngorongoro", travellers: "2 adulti e 2 bambini (7 e 10 anni)",
+      seoTitle: "Safari per famiglie di 6 giorni in Tanzania: Tarangire, Serengeti e Ngorongoro",
+      description: "Un safari privato di 6 giorni con il ritmo giusto per la famiglia: Tarangire, due giorni nel Serengeti, una notte a Karatu e il cratere di Ngorongoro. Da {from} a persona.",
+      summary: "Un safari al ritmo della famiglia, con giornate di viaggio più brevi: gli elefanti di Tarangire, due notti nel Serengeti, una notte tranquilla a Karatu e il cratere sulla via del ritorno.",
+      stay: "Tarangire Simba Lodge, Anga ya Nyota Serengeti e Karatu Simba Lodge",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire. Qui gli elefanti si vedono facilmente, ed è per questo un primo parco perfetto per i bambini. Rientro al lodge in tempo per rilassarsi prima di cena.", overnight: "Tarangire Simba Lodge" },
+        { title: "Verso il Serengeti", text: "Attraversiamo gli altopiani di Ngorongoro fino al Serengeti, con soste lungo la strada perché la giornata non sembri troppo lunga.", overnight: "Anga ya Nyota Serengeti" },
+        { title: "Serengeti centrale", text: "Game drive al ritmo della tua famiglia: si parte presto, quando gli animali sono più attivi, si rientra per pranzo e una pausa, poi si esce di nuovo nel pomeriggio.", overnight: "Anga ya Nyota Serengeti" },
+        { title: "Verso Karatu", text: "Un game drive mattutino lasciando il Serengeti, poi la strada verso gli altopiani di Karatu per un pomeriggio rilassante.", overnight: "Karatu Simba Lodge" },
+        itCrater("da Karatu, ad appena 30 minuti dall'ingresso del cratere,")],
+    },
+    "tanzania-safari-7-days-premium": {
+      shortName: "Tarangire, Serengeti occidentale e centrale e Ngorongoro", travellers: "2 adulti",
+      seoTitle: "Safari Premium di 7 giorni in Tanzania: Tarangire, Serengeti e Ngorongoro",
+      description: "Un safari privato di 7 giorni in campi di fascia alta: Tarangire, il Serengeti occidentale e centrale e il cratere di Ngorongoro. Da {from} a persona.",
+      summary: "Più tempo e più Serengeti: un campo tendato a Tarangire, due notti nel Serengeti occidentale, più tranquillo, una notte nelle pianure centrali e una notte sugli altopiani di Ngorongoro.",
+      stay: "Ang'ata Tarangire Camp, Serengeti Simba Lodge, Out in Africa Serengeti Camp e Embalakai Ngorongoro",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire per una giornata intera di game drive tra baobab ed elefanti.", overnight: "Ang'ata Tarangire Camp" },
+        { title: "Verso il Serengeti occidentale", text: "Un lungo e bellissimo viaggio attraverso gli altopiani di Ngorongoro e le pianure del Serengeti fino alla parte occidentale del parco, con un game drive lungo la strada.", overnight: "Serengeti Simba Lodge" },
+        { title: "Serengeti occidentale", text: "Una giornata intera nel Serengeti occidentale, una parte più tranquilla del parco, con molti meno veicoli.", overnight: "Serengeti Simba Lodge" },
+        { title: "Serengeti centrale", text: "Game drive verso est fino al Serengeti centrale, intorno a Seronera, famoso per i grandi felini.", overnight: "Out in Africa Serengeti Camp" },
+        { title: "Verso il bordo del cratere", text: "Un'ultima mattinata nel Serengeti, poi la salita sugli altopiani di Ngorongoro per una serata tranquilla al campo.", overnight: "Embalakai Ngorongoro" },
+        { title: "Cratere di Ngorongoro e ritorno ad Arusha", text: "Discesa nel cratere di buon mattino, prima dell'arrivo della maggior parte dei veicoli, per un game drive sul fondo del cratere. Dopo un pranzo al sacco rientriamo ad Arusha o in aeroporto.", overnight: "" }],
+    },
+    "luxury-serengeti-ngorongoro-safari-5-days": {
+      shortName: "Tarangire, Serengeti e Ngorongoro di lusso", travellers: "2 adulti",
+      seoTitle: "Safari di lusso di 5 giorni in Tanzania: Tarangire, Serengeti e Ngorongoro",
+      description: "Un safari privato di lusso di 5 giorni: Olkambe Simba Lodge a Tarangire, due notti all'Arukore Simba Camp nel Serengeti e il cratere di Ngorongoro. Da {from} a persona.",
+      summary: "L'itinerario classico in versione di alta gamma: un lodge di lusso a Tarangire, un campo di lusso nel Serengeti centrale e, per finire, un game drive nel cratere.",
+      stay: "Olkambe Simba Lodge e Arukore Simba Camp",
+      days: [itArrival,
+        { title: "Parco nazionale del Tarangire", text: "Due ore di strada fino a Tarangire per una giornata intera di game drive tra baobab ed elefanti.", overnight: "Olkambe Simba Lodge" },
+        { title: "Verso il Serengeti", text: "Attraverso gli altopiani di Ngorongoro fino alle pianure del Serengeti, con un game drive lungo la strada fino al tuo campo nel Serengeti centrale.", overnight: "Arukore Simba Camp" },
+        { title: "Serengeti centrale", text: "Una giornata intera di game drive nel Serengeti centrale, con rientro al campo quando preferisci.", overnight: "Arukore Simba Camp" },
+        itCrater("dal Serengeti")],
+    },
+  },
+  es: {
+    "tarangire-ngorongoro-safari-3-days-budget": {
+      shortName: "Tarangire y el cráter del Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari económico de 3 días en Tanzania: Tarangire y el cráter del Ngorongoro",
+      description: "Un safari privado corto y económico desde Arusha: un día en Tarangire, una noche en el camping público y un safari en el cráter del Ngorongoro. Desde {from} por persona.",
+      summary: "La forma más rápida de ver dos parques muy distintos: los elefantes y baobabs de Tarangire y después una mañana en el fondo del cráter del Ngorongoro.",
+      stay: "Tarangire Public Campsite",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Después del desayuno, unas dos horas de carretera hasta Tarangire. Un día entero de safari entre baobabs y algunas de las mayores manadas de elefantes del norte de Tanzania, con almuerzo de picnic en el parque.", overnight: "Tarangire Public Campsite" },
+        esCrater("desde Tarangire")],
+    },
+    "serengeti-ngorongoro-safari-4d-3n-budget": {
+      shortName: "Camping en el Serengeti y el Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari económico de camping de 4 días: Serengeti y Ngorongoro",
+      description: "Safari privado de camping de 4 días desde Arusha: dos noches en Seronera, en el centro del Serengeti, y un safari en el cráter. Desde {from} por persona.",
+      summary: "Dos noches de camping en Seronera, en pleno territorio de los grandes felinos del Serengeti, y un safari en el cráter del Ngorongoro de camino a casa.",
+      stay: "Seronera Public Campsite",
+      days: [esArrival,
+        { title: "Hacia el Serengeti", text: "Salimos hacia el oeste por las tierras altas del Ngorongoro y bajamos a las llanuras del Serengeti, haciendo safari por el camino hasta Seronera, en el centro del parque.", overnight: "Seronera Public Campsite" },
+        { title: "Centro del Serengeti", text: "Un día entero de safari alrededor de Seronera, famoso por sus leones, leopardos y guepardos. Puedes salir al amanecer y volver al campamento a comer, o pasar todo el día fuera con un almuerzo de picnic.", overnight: "Seronera Public Campsite" },
+        esCrater("desde el Serengeti")],
+    },
+    "tarangire-serengeti-ngorongoro-safari-5d4n-budget": {
+      shortName: "Tarangire, Serengeti y Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari económico de 5 días en Tanzania: Tarangire, Serengeti y Ngorongoro",
+      description: "La gran ruta clásica del norte de Tanzania con un presupuesto ajustado: Tarangire, dos días en el Serengeti y el cráter del Ngorongoro, durmiendo en campings públicos. Desde {from} por persona.",
+      summary: "La ruta clásica del norte con presupuesto ajustado: los elefantes de Tarangire, dos días de grandes felinos en las llanuras del Serengeti y un safari en el cráter del Ngorongoro.",
+      stay: "Campings públicos en Tarangire y el Serengeti",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire para un día entero entre baobabs, manadas de elefantes y los animales que se reúnen a lo largo del río Tarangire.", overnight: "Tarangire Public Campsite" },
+        { title: "Hacia el Serengeti", text: "Cruzamos las tierras altas del Ngorongoro y bajamos a las llanuras del Serengeti, haciendo safari por el camino hasta Seronera.", overnight: "Seronera Public Campsite" },
+        { title: "Centro del Serengeti", text: "Un día entero alrededor de Seronera, uno de los mejores lugares de África para ver leones, leopardos y guepardos.", overnight: "Seronera Public Campsite" },
+        esCrater("desde el Serengeti")],
+    },
+    "tarangire-ngorongoro-safari-4-days-comfort": {
+      shortName: "Tarangire y el cráter del Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari de 4 días por Tarangire y el cráter del Ngorongoro en lodges cómodos",
+      description: "Un safari privado de 4 días sin prisas: Tarangire, una noche entre las verdes colinas de Karatu y una mañana en el cráter del Ngorongoro, en lodges cómodos. Desde {from} por persona.",
+      summary: "Un safari corto y sin prisas en lodges cómodos: un día en Tarangire, una noche en las tierras altas de Karatu y una salida temprana hacia el cráter del Ngorongoro.",
+      stay: "Tarangire Simba Lodge y Karatu Simba Lodge",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire para un día entero de safari entre baobabs y grandes manadas de elefantes.", overnight: "Tarangire Simba Lodge" },
+        { title: "Hacia las tierras altas de Karatu", text: "Un safari por la mañana en Tarangire y después un trayecto corto hasta Karatu, una zona agrícola fresca y verde justo a las afueras del Área de Conservación del Ngorongoro. La tarde es libre, para descansar o dar un paseo.", overnight: "Karatu Simba Lodge" },
+        esCrater("desde Karatu, a solo 30 minutos de la entrada del cráter,")],
+    },
+    "tarangire-serengeti-ngorongoro-safari-5d4n-mid-range": {
+      shortName: "Tarangire, Serengeti y Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari de 5 días en Tanzania: Tarangire, Serengeti y Ngorongoro (Confort)",
+      description: "Safari privado de 5 días por el norte de Tanzania en lodges y campamentos de tiendas cómodos: Tarangire, dos días en el centro del Serengeti y el cráter del Ngorongoro. Desde {from} por persona.",
+      summary: "La ruta clásica del norte con más comodidad: un lodge en Tarangire, un campamento de tiendas en el centro del Serengeti y un safari en el cráter el último día.",
+      stay: "Tarangire Simba Lodge y Sound of Silence Serengeti Tented Camp",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire para un día entero entre baobabs, elefantes y la fauna del río Tarangire.", overnight: "Tarangire Simba Lodge" },
+        { title: "Hacia el Serengeti", text: "Por las tierras altas del Ngorongoro hasta las llanuras del Serengeti, haciendo safari por el camino hasta tu campamento en el centro del Serengeti.", overnight: "Sound of Silence Serengeti Tented Camp" },
+        { title: "Centro del Serengeti", text: "Un día entero de safari en el centro del Serengeti, donde viven muchos de los leones, leopardos y guepardos del parque.", overnight: "Sound of Silence Serengeti Tented Camp" },
+        esCrater("desde el Serengeti")],
+    },
+    "family-safari-tanzania-6-days-comfort": {
+      shortName: "Safari en familia por Tarangire, Serengeti y Ngorongoro", travellers: "2 adultos y 2 niños (7 y 10 años)",
+      seoTitle: "Safari en familia de 6 días en Tanzania: Tarangire, Serengeti y Ngorongoro",
+      description: "Un safari privado de 6 días a un ritmo pensado para familias: Tarangire, dos días en el Serengeti, una noche en Karatu y el cráter del Ngorongoro. Desde {from} por persona.",
+      summary: "Un safari al ritmo de la familia, con días de carretera más cortos: los elefantes de Tarangire, dos noches en el Serengeti, una noche tranquila en Karatu y el cráter de camino a casa.",
+      stay: "Tarangire Simba Lodge, Anga ya Nyota Serengeti y Karatu Simba Lodge",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire. Aquí los elefantes son fáciles de ver, así que es un primer parque perfecto para los niños. Vuelta al lodge a tiempo para relajarse antes de la cena.", overnight: "Tarangire Simba Lodge" },
+        { title: "Hacia el Serengeti", text: "Cruzamos las tierras altas del Ngorongoro hasta el Serengeti, con paradas por el camino para que el día no se haga largo.", overnight: "Anga ya Nyota Serengeti" },
+        { title: "Centro del Serengeti", text: "Safaris al ritmo de tu familia: salida temprana, cuando los animales están más activos, vuelta para comer y descansar, y otra salida por la tarde.", overnight: "Anga ya Nyota Serengeti" },
+        { title: "Hacia Karatu", text: "Un safari por la mañana al salir del Serengeti y después carretera hasta las tierras altas de Karatu para una tarde tranquila.", overnight: "Karatu Simba Lodge" },
+        esCrater("desde Karatu, a solo 30 minutos de la entrada del cráter,")],
+    },
+    "tanzania-safari-7-days-premium": {
+      shortName: "Tarangire, oeste y centro del Serengeti y Ngorongoro", travellers: "2 adultos",
+      seoTitle: "Safari Premium de 7 días en Tanzania: Tarangire, Serengeti y Ngorongoro",
+      description: "Un safari privado de 7 días en campamentos de categoría superior: Tarangire, el oeste y el centro del Serengeti y el cráter del Ngorongoro. Desde {from} por persona.",
+      summary: "Más tiempo y más Serengeti: un campamento de tiendas en Tarangire, dos noches en el oeste del Serengeti, más tranquilo, una noche en las llanuras centrales y una noche en las tierras altas del Ngorongoro.",
+      stay: "Ang'ata Tarangire Camp, Serengeti Simba Lodge, Out in Africa Serengeti Camp y Embalakai Ngorongoro",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire para un día entero de safari entre baobabs y elefantes.", overnight: "Ang'ata Tarangire Camp" },
+        { title: "Hacia el oeste del Serengeti", text: "Un trayecto largo y precioso por las tierras altas del Ngorongoro y las llanuras del Serengeti hasta el oeste del parque, haciendo safari por el camino.", overnight: "Serengeti Simba Lodge" },
+        { title: "Oeste del Serengeti", text: "Un día entero en el oeste del Serengeti, una parte más tranquila del parque, con muchos menos vehículos.", overnight: "Serengeti Simba Lodge" },
+        { title: "Centro del Serengeti", text: "Safari hacia el este hasta el centro del Serengeti, alrededor de Seronera, famoso por sus grandes felinos.", overnight: "Out in Africa Serengeti Camp" },
+        { title: "Hacia el borde del cráter", text: "Una última mañana en el Serengeti y después subida a las tierras altas del Ngorongoro para una tarde tranquila en el campamento.", overnight: "Embalakai Ngorongoro" },
+        { title: "Cráter del Ngorongoro y vuelta a Arusha", text: "Bajada temprana al cráter, antes de que lleguen la mayoría de los vehículos, para un safari en el fondo del cráter. Después de un almuerzo de picnic volvemos a Arusha o al aeropuerto.", overnight: "" }],
+    },
+    "luxury-serengeti-ngorongoro-safari-5-days": {
+      shortName: "Tarangire, Serengeti y Ngorongoro de lujo", travellers: "2 adultos",
+      seoTitle: "Safari de lujo de 5 días en Tanzania: Tarangire, Serengeti y Ngorongoro",
+      description: "Un safari privado de lujo de 5 días: Olkambe Simba Lodge en Tarangire, dos noches en Arukore Simba Camp en el Serengeti y el cráter del Ngorongoro. Desde {from} por persona.",
+      summary: "La ruta clásica en su versión más exclusiva: un lodge de lujo en Tarangire, un campamento de lujo en el centro del Serengeti y, para terminar, un safari en el cráter.",
+      stay: "Olkambe Simba Lodge y Arukore Simba Camp",
+      days: [esArrival,
+        { title: "Parque Nacional de Tarangire", text: "Dos horas de carretera hasta Tarangire para un día entero de safari entre baobabs y elefantes.", overnight: "Olkambe Simba Lodge" },
+        { title: "Hacia el Serengeti", text: "Por las tierras altas del Ngorongoro hasta las llanuras del Serengeti, haciendo safari por el camino hasta tu campamento en el centro del Serengeti.", overnight: "Arukore Simba Camp" },
+        { title: "Centro del Serengeti", text: "Un día entero de safari en el centro del Serengeti, volviendo al campamento cuando quieras.", overnight: "Arukore Simba Camp" },
+        esCrater("desde el Serengeti")],
     },
   },
 };

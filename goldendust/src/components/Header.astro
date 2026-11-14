@@ -17,8 +17,8 @@ const isActive = (l: { href: string; match?: string[] }) =>
 const planActive = path.startsWith("/planner");
 // language links: the same page in the other language (the 404 page has no copies, so go to that language's home page)
 const other = path === "/404" ? "/" : path;
-const menu = { en: ["Open menu", "Close menu"], nl: ["Menu openen", "Menu sluiten"], de: ["Menü öffnen", "Menü schließen"], fr: ["Ouvrir le menu", "Fermer le menu"] }[lang];
-const langLabel = { en: "Language", nl: "Taal", de: "Sprache", fr: "Langue" }[lang];
+const menu = { en: ["Open menu", "Close menu"], nl: ["Menu openen", "Menu sluiten"], de: ["Menü öffnen", "Menü schließen"], fr: ["Ouvrir le menu", "Fermer le menu"], it: ["Apri il menu", "Chiudi il menu"], es: ["Abrir el menú", "Cerrar el menú"] }[lang];
+const langLabel = { en: "Language", nl: "Taal", de: "Sprache", fr: "Langue", it: "Lingua", es: "Idioma" }[lang];
 ---
 <header class="hdr" data-hdr>
   <div class="wrap hdr__in">

@@ -10,6 +10,8 @@ const T = {
   nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics en Google Ads om te zien hoe bezoekers onze website gebruiken en welke van onze advertenties werken, zodat we beide kunnen verbeteren. We verkopen je gegevens niet.", yes: "Accepteren", no: "Weigeren" },
   de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics und Google Ads, um zu sehen, wie Besucher unsere Website nutzen und welche unserer Anzeigen funktionieren, damit wir beides verbessern können. Wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", no: "Ablehnen" },
   fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics et Google Ads pour voir comment les visiteurs utilisent notre site et lesquelles de nos annonces fonctionnent, afin d'améliorer les deux. Nous ne vendons pas vos données.", yes: "Accepter", no: "Refuser" },
+  it: { aria: "Scelta dei cookie", p: "Usiamo i cookie di Google Analytics e Google Ads per capire come i visitatori usano il nostro sito e quali annunci funzionano, così da migliorarli entrambi. Non vendiamo i tuoi dati.", yes: "Accetta", no: "Rifiuta" },
+  es: { aria: "Elección de cookies", p: "Usamos cookies de Google Analytics y Google Ads para ver cómo usan los visitantes nuestra web y qué anuncios funcionan, y así mejorar ambos. No vendemos tus datos.", yes: "Aceptar", no: "Rechazar" },
 }[langOf(Astro.url)];
 ---
 <div class="ck" data-ck hidden role="region" aria-label={T.aria}>

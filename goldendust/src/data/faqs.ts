@@ -38,5 +38,17 @@ const FAQS_I18N: Record<Exclude<Lang, "en">, { q: string; a: string }[]> = {
     { q: "Pouvez-vous examiner le devis d'une autre agence de safari ?", a: "Oui, gratuitement. Envoyez-le-nous et nous vous dirons honnêtement s'il est intéressant, même si vous réservez finalement chez eux." },
     { q: "Que se passe-t-il quand j'atterris en Tanzanie ?", a: "Nous venons vous chercher à l'aéroport du Kilimandjaro ou d'Arusha et vous conduisons à votre hôtel (la nuit avant le safari est offerte), et votre guide vous présente les jours à venir. Après le safari, nous vous déposons à l'aéroport ou à votre hôtel." },
   ],
+  it: [
+    { q: "Quanto costa un safari in Tanzania con Golden Dust Safaris?", a: "I nostri safari privati partono da $800 a persona per un safari in campeggio di 4 giorni tra Serengeti e Ngorongoro (gruppo di 6). Un safari di 5 giorni tra Tarangire, Serengeti e Ngorongoro parte da $1.050 a persona in versione economica e da $1.620 in fascia media. Il prezzo a persona scende quando il gruppo cresce, perché il veicolo e la tassa del cratere si dividono." },
+    { q: "Potete creare un safari su misura invece di un pacchetto?", a: "Sì. La maggior parte dei nostri ospiti finisce con un programma su misura. Scrivici su WhatsApp le date, il budget e cosa vuoi vedere, e ti proporremo parchi e un itinerario, compresi parchi meno visitati come Ruaha e Katavi." },
+    { q: "Potete dare un'occhiata al preventivo di un'altra agenzia di safari?", a: "Sì, gratis. Mandacelo e ti diremo con sincerità se è conveniente, anche se alla fine prenoti con loro." },
+    { q: "Cosa succede quando atterro in Tanzania?", a: "Ti veniamo a prendere all'aeroporto del Kilimangiaro o di Arusha, ti accompagniamo in hotel (la notte prima del safari la offriamo noi) e la tua guida ti illustra i giorni che ti aspettano. Dopo il safari ti accompagniamo in aeroporto o in hotel." },
+  ],
+  es: [
+    { q: "¿Cuánto cuesta un safari en Tanzania con Golden Dust Safaris?", a: "Nuestros safaris privados empiezan en $800 por persona para un safari de camping de 4 días por el Serengeti y el Ngorongoro (grupo de 6). Un safari de 5 días por Tarangire, el Serengeti y el Ngorongoro empieza en $1.050 por persona en versión económica y en $1.620 en gama media. El precio por persona baja cuanto más grande es el grupo, porque se comparten el vehículo y la tasa del cráter." },
+    { q: "¿Podéis crear un safari a medida en lugar de un paquete?", a: "Sí. La mayoría de nuestros viajeros acaban con un plan a medida. Cuéntanos por WhatsApp tus fechas, tu presupuesto y lo que quieres ver, y te propondremos parques y un itinerario, incluidos parques menos visitados como Ruaha y Katavi." },
+    { q: "¿Podéis revisar el presupuesto de otra empresa de safaris?", a: "Sí, gratis. Envíanoslo y te diremos con sinceridad si está bien de precio, aunque al final reserves con ellos." },
+    { q: "¿Qué pasa cuando aterrizo en Tanzania?", a: "Te recogemos en el aeropuerto del Kilimanjaro o de Arusha, te llevamos a tu hotel (la noche antes del safari corre de nuestra cuenta) y tu guía te explica los días que te esperan. Después del safari te llevamos al aeropuerto o a tu hotel." },
+  ],
 };
 export const faqsFor = (lang: Lang) => (lang === "en" ? faqs : FAQS_I18N[lang]);

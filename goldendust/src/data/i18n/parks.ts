@@ -1,9 +1,9 @@
-// Dutch, German and French text for the park guides (src/data/parks.ts). Links inside the text
+// Dutch, German, French, Italian and Spanish text for the park guides (src/data/parks.ts). Links inside the text
 // are written without the language prefix; the page adds it.
 import type { Park } from "../parks";
 
 type ParkText = Pick<Park, "name" | "seoTitle" | "description" | "h1" | "lede" | "heroAlt" | "facts" | "sections" | "faqs">;
-type Lang3 = "nl" | "de" | "fr";
+type Lang3 = "nl" | "de" | "fr" | "it" | "es";
 
 export const PARKS_I18N: Record<Lang3, Record<string, ParkText>> = {
   nl: {
@@ -467,6 +467,314 @@ export const PARKS_I18N: Record<Lang3, Record<string, ParkText>> = {
       faqs: [
         { q: "À quelle distance se trouve Karatu du cratère du Ngorongoro ?", a: "Environ 30 minutes jusqu'à l'entrée de l'aire de conservation, puis encore 30 à 45 minutes pour monter au bord du cratère et descendre par la piste." },
         { q: "Vaut-il mieux dormir à Karatu ou sur le bord du cratère ?", a: "Le bord du cratère est plus proche et la vue est plus belle. Karatu est moins cher, plus chaud et sans droit d'entrée pour la nuit. Les deux fonctionnent très bien." },
+      ],
+    },
+  },
+  it: {
+    "serengeti-national-park": {
+      name: "Parco nazionale del Serengeti",
+      seoTitle: "Safari nel Serengeti: periodo migliore, fauna e lodge",
+      description: "Il Serengeti visto da una guida locale: dove dormire, quando andare per la Grande Migrazione e i grandi felini, le tariffe del parco e quante notti prevedere. Safari privati da Arusha.",
+      h1: "Parco nazionale del Serengeti",
+      lede: "Pianure senza fine, la Grande Migrazione e più leoni che quasi ovunque in Africa. Il Serengeti è il parco per cui viene la maggior parte dei nostri ospiti, e raramente delude.",
+      heroAlt: "Elefanti nelle ampie pianure del Serengeti",
+      facts: [["Superficie", "Circa 14.750 km²"], ["Da Arusha", "Una giornata di strada passando da Ngorongoro, oppure un breve volo"], ["Ideale per", "La Grande Migrazione, leoni, ghepardi, leopardi"], ["Il nostro consiglio", "2-3 notti, di più se segui le mandrie"], ["Ingresso", "$82,60 per adulto ogni 24 ore"]],
+      sections: [
+        { h: "Perché il Serengeti è speciale", p: [
+          "Il Serengeti è Patrimonio dell'umanità UNESCO e forma un unico ecosistema con il Maasai Mara, in Kenya. Ben più di un milione di gnu lo percorrono tutto l'anno, insieme a centinaia di migliaia di zebre e gazzelle, seguendo la pioggia e l'erba fresca. I predatori li seguono.",
+          "Quello che sorprende di più i nostri ospiti è lo spazio. Guidi per un'ora nella savana, poi arrivi a un gruppo di kopje, ammassi di rocce di granito, con un branco di leoni addormentato in cima. Non ha niente a che vedere con una riserva recintata.",
+        ] },
+        { h: "Quale parte del Serengeti?", p: [
+          "Il Serengeti centrale (Seronera) ha animali tutto l'anno, e la valle del fiume Seronera è uno dei posti migliori d'Africa per i grandi felini. Se hai due notti e nessun mese obbligato, di solito è lì che alloggiamo.",
+          "Le pianure del sud e la zona di Ndutu accolgono le mandrie per le nascite, più o meno da gennaio a marzo. Ndutu si trova appena dentro l'Area di conservazione di Ngorongoro, al margine del Serengeti.",
+          "Il corridoio occidentale segue il fiume Grumeti, che le mandrie di solito attraversano intorno a giugno. Nel Serengeti settentrionale, vicino al confine con il Kenya, gli attraversamenti del fiume Mara avvengono più o meno da luglio a ottobre. È lontano da Arusha, quindi lì prevediamo almeno due notti.",
+        ] },
+        { h: "Quando andare?", p: [
+          "Nel Serengeti non ci sono mesi sbagliati, solo mesi diversi. Da giugno a ottobre è la stagione secca: gli animali si trovano facilmente, ma è il periodo più affollato e più caro. Da gennaio a marzo è la stagione delle nascite al sud. Aprile e maggio sono la stagione delle grandi piogge: alcuni campi chiudono, ma il parco è verde, tranquillo e meno caro.",
+          "La nostra guida alla <a href=\"/great-migration-serengeti\">Grande Migrazione mese per mese</a> spiega dove si trovano di solito le mandrie, e il nostro articolo sul <a href=\"/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide\">periodo migliore per la Tanzania</a> copre anche gli altri parchi.",
+        ] },
+        { h: "Come arrivarci", p: [
+          "La maggior parte dei nostri ospiti ci arriva in auto. La strada da Arusha passa accanto al Lago Manyara e attraversa gli altopiani di Ngorongoro: il viaggio fa già parte del safari. Con gli avvistamenti lungo la strada, occupa quasi tutta la giornata. Puoi anche volare da Arusha a una delle piste del Serengeti e incontrare lì la tua guida.",
+        ] },
+        { h: "Dove dormire", p: [
+          "Puoi campeggiare in un campeggio pubblico, dormire in un campo tendato confortevole o scegliere uno dei campi di lusso. Questi sono i campi e i lodge con cui lavoriamo. Sono inclusi nei prezzi del nostro planner, così puoi confrontarli per le tue date.",
+        ] },
+      ],
+      faqs: [
+        { q: "Quanti giorni servono nel Serengeti?", a: "Due giorni interi, quindi tre notti, sono un buon minimo. Con una sola notte arrivi nel pomeriggio, riparti la mattina dopo e passi la maggior parte del tempo in strada." },
+        { q: "Si vedono i Big Five nel Serengeti?", a: "Leoni, leopardi, elefanti e bufali si vedono regolarmente. I rinoceronti invece sono rari, per questo di solito lo abbiniamo al cratere di Ngorongoro, uno dei posti migliori della Tanzania per vedere il rinoceronte nero." },
+        { q: "Il Serengeti vale la pena per un safari breve?", a: "Con meno di quattro giorni, spesso no. La strada da Arusha richiede quasi una giornata all'andata e una al ritorno. In tre giorni, Tarangire e il cratere di Ngorongoro di solito ti lasciano più tempo con gli animali." },
+      ],
+    },
+    "ngorongoro-crater": {
+      name: "Cratere di Ngorongoro",
+      seoTitle: "Safari nel cratere di Ngorongoro: fauna, tariffe e dove dormire",
+      description: "Tutto per organizzare una giornata nel cratere di Ngorongoro: cosa puoi vedere, le tariffe per scendere nel cratere, dormire sul bordo o a Karatu e il periodo migliore. Da una guida locale di Arusha.",
+      h1: "Cratere di Ngorongoro",
+      lede: "Un vulcano crollato con il fondo pieno di animali. Una giornata nel cratere di Ngorongoro è una delle migliori occasioni per vedere un rinoceronte nero in Tanzania, e si inserisce in quasi ogni safari.",
+      heroAlt: "Un veicolo da safari sul fondo del cratere di Ngorongoro",
+      facts: [["Fondo del cratere", "Circa 260 km², circa 600 m sotto il bordo"], ["Da Arusha", "Circa 3-4 ore di strada"], ["Ideale per", "Rinoceronti neri, leoni, iene, fenicotteri"], ["Il nostro consiglio", "Mezza giornata o una giornata intera sul fondo del cratere"], ["Tariffe", "$71,80 per adulto ogni 24 ore, più $295 per veicolo per scendere nel cratere"]],
+      sections: [
+        { h: "Cosa rende speciale il cratere", p: [
+          "Il cratere di Ngorongoro è una delle più grandi caldere vulcaniche intatte del mondo. Si trova nell'Area di conservazione di Ngorongoro, Patrimonio dell'umanità UNESCO. Pareti ripide circondano un fondo di praterie, paludi, foresta e un lago salato, dove molti animali vivono tutto l'anno.",
+          "Dato che la zona è piccola e aperta, in poche ore vedi moltissimo: gnu, zebre, bufali, leoni, iene maculate, elefanti e, con un po' di pazienza, rinoceronti neri. I fenicotteri vengono spesso a nutrirsi nel lago Magadi, sul fondo del cratere. A differenza della maggior parte dei parchi nazionali, nell'area di conservazione vivono famiglie masai che portano qui al pascolo il loro bestiame.",
+        ] },
+        { h: "Una giornata nel cratere", p: [
+          "Scendiamo presto per la pista del cratere, passiamo la giornata sul fondo e risaliamo nel pomeriggio. Molti ospiti fanno il cratere l'ultimo giorno del safari, sulla via del ritorno ad Arusha.",
+          "Ogni veicolo paga una tariffa per scendere sul fondo del cratere, oltre all'ingresso a persona dell'area di conservazione. Quando un viaggio nel nostro planner include una notte a Ngorongoro, il game drive nel cratere è sempre compreso.",
+        ] },
+        { h: "Bordo del cratere o Karatu?", p: [
+          "Puoi dormire sul bordo del cratere, alto sopra il fondo, oppure a <a href=\"/parks/karatu\">Karatu</a>, a circa mezz'ora dall'ingresso dell'area di conservazione. Sul bordo sei più vicino al cratere, il panorama è spettacolare e scendi presto. Karatu è meno cara e più calda, e la notte non comporta l'ingresso all'area di conservazione.",
+          "Il bordo del cratere supera i 2.000 m di altitudine, quindi le notti sono fredde tutto l'anno. Porta una giacca pesante.",
+        ] },
+        { h: "Quando andare?", p: [
+          "Il cratere è bello tutto l'anno, perché gli animali non migrano via. Da giugno a ottobre è secco e affollato. Nei mesi di pioggia è più tranquillo e molto verde. In qualsiasi mese, partire presto aiuta a evitare la folla.",
+        ] },
+        { h: "Dove dormire", p: [
+          "Questi sono i campi e i lodge sul bordo del cratere con cui lavoriamo. Il campeggio pubblico Simba, sul bordo, è l'opzione economica.",
+        ] },
+      ],
+      faqs: [
+        { q: "Si vedono i rinoceronti nel cratere di Ngorongoro?", a: "Sì. Il cratere ospita una piccola popolazione di rinoceronti neri ed è uno dei posti più affidabili della Tanzania per vederli, anche se spesso sono lontani e un avvistamento non è mai garantito." },
+        { q: "Basta una giornata per il cratere di Ngorongoro?", a: "Sì. Mezza giornata o una giornata intera sul fondo del cratere basta alla maggior parte dei viaggiatori. Dormi sul bordo o a Karatu per poter scendere presto." },
+        { q: "Quanto costa visitare il cratere di Ngorongoro?", a: "L'ingresso all'area di conservazione costa $71,80 per adulto ogni 24 ore, e ogni veicolo paga $295 per scendere nel cratere. I nostri prezzi li includono sempre entrambi." },
+      ],
+    },
+    "tarangire-national-park": {
+      name: "Parco nazionale del Tarangire",
+      seoTitle: "Safari a Tarangire: elefanti, periodo migliore e lodge",
+      description: "Tarangire è a due ore da Arusha ed è famoso per elefanti e baobab. I consigli di una guida locale: quando andare, quanto fermarsi e dove dormire.",
+      h1: "Parco nazionale del Tarangire",
+      lede: "Grandi mandrie di elefanti, baobab giganti e un fiume che attira gli animali per tutta la stagione secca. Tarangire è vicino ad Arusha ed è spesso il primo parco dei nostri safari.",
+      heroAlt: "Zebre nella savana del nord della Tanzania",
+      facts: [["Superficie", "Circa 2.850 km²"], ["Da Arusha", "Circa 2 ore di strada"], ["Ideale per", "Elefanti, baobab, uccelli"], ["Il nostro consiglio", "1-2 notti"], ["Ingresso", "$53,10 per adulto ogni 24 ore"]],
+      sections: [
+        { h: "Perché andare a Tarangire", p: [
+          "Il Parco nazionale del Tarangire prende il nome dal fiume Tarangire, che lo attraversa. Nella stagione secca, quando altrove l'acqua scarseggia, il fiume diventa una calamita: elefanti, zebre, gnu, bufali e i leoni che li cacciano vengono tutti a bere qui.",
+          "È uno dei posti migliori della Tanzania per vedere grandi mandrie di elefanti, e i suoi baobab millenari gli danno un aspetto unico. È anche un parco splendido per gli uccelli, con centinaia di specie registrate.",
+        ] },
+        { h: "Quando andare?", p: [
+          "Tarangire dà il meglio più o meno da giugno a ottobre, quando gli animali si radunano lungo il fiume. Nella stagione delle piogge molti si spostano fuori dal parco, ma resta bellissimo e verde, con molti meno veicoli.",
+        ] },
+        { h: "Quanto fermarsi?", p: [
+          "Tarangire è abbastanza vicino ad Arusha per una gita in giornata, ma una notte nel parco ti permette di essere lì presto la mattina e nel tardo pomeriggio, quando la luce e gli animali danno il meglio. Per i viaggi più lunghi spesso prevediamo due notti.",
+          "È una prima tappa perfetta: atterri, ti riposi ad Arusha e il giorno dopo a mezzogiorno stai già guardando gli elefanti.",
+        ] },
+        { h: "Dove dormire", p: [
+          "Nel parco c'è un campeggio pubblico, oltre a lodge e campi tendati dentro e ai margini del parco. Questi sono quelli con cui lavoriamo.",
+        ] },
+      ],
+      faqs: [
+        { q: "Vale la pena visitare Tarangire?", a: "Sì, soprattutto da giugno a ottobre. È a due ore da Arusha ed è uno dei migliori parchi della Tanzania per gli elefanti, quindi un'ottima prima tappa." },
+        { q: "Quanti giorni servono a Tarangire?", a: "Una notte basta per la maggior parte dei viaggi. Due notti ti permettono di allontanarti dal fiume e scoprire le zone più tranquille del parco." },
+        { q: "Tarangire o Lago Manyara?", a: "Se hai tempo solo per uno, di solito consigliamo Tarangire: è più grande, più ricco di animali e le sue mandrie di elefanti sono difficili da battere. Il Lago Manyara va bene per mezza giornata sulla strada per Ngorongoro." },
+      ],
+    },
+    "lake-manyara-national-park": {
+      name: "Parco nazionale del Lago Manyara",
+      seoTitle: "Safari al Lago Manyara: fauna, periodo migliore e lodge",
+      description: "Un piccolo parco verde ai piedi della scarpata della Rift Valley, sulla strada per Ngorongoro. Cosa si vede al Lago Manyara, quando andare e dove dormire, da una guida locale.",
+      h1: "Parco nazionale del Lago Manyara",
+      lede: "Una stretta striscia di foresta, savana e lago ai piedi della scarpata della Great Rift Valley. Il Lago Manyara è piccolo, ma in mezza giornata offre molto.",
+      heroAlt: "&Beyond Lake Manyara Tree Lodge",
+      facts: [["Posizione", "Tra la scarpata della Rift Valley e il Lago Manyara"], ["Da Arusha", "Circa 2 ore di strada"], ["Ideale per", "Foresta, babbuini, elefanti, uccelli, panorami sulla Rift Valley"], ["Il nostro consiglio", "Mezza giornata o una giornata intera"], ["Ingresso", "$59 per adulto ogni 24 ore"]],
+      sections: [
+        { h: "Com'è il Lago Manyara?", p: [
+          "Si entra attraverso una foresta alimentata da una falda sotterranea, con grandi fichi e mogani nutriti dalle sorgenti della scarpata. La attraversano gruppi di babbuini e cercopitechi blu, e gli elefanti si nutrono all'ombra.",
+          "Più avanti la foresta si apre sulla savana e sulle rive del lago, dove vivono ippopotami, bufali, giraffe e molti uccelli acquatici. In alcuni anni i fenicotteri si radunano qui in gran numero. Il parco è noto per i leoni che si arrampicano sugli alberi, ma si vedono molto meno spesso di quanto facciano pensare i racconti.",
+        ] },
+        { h: "Vale la pena?", p: [
+          "Il Lago Manyara si trova sulla strada da Arusha a Ngorongoro e al Serengeti, quindi è facile aggiungerlo per mezza giornata. È una buona scelta se hai già visto Tarangire, se ami gli uccelli o se vuoi qualcosa di diverso dalle grandi pianure. Per un viaggio breve, Tarangire di solito offre più animali.",
+        ] },
+        { h: "Quando andare?", p: [
+          "La stagione secca, da giugno a ottobre, è la migliore per i grandi animali. La stagione delle piogge è ideale per gli uccelli, e il parco è al massimo del verde.",
+        ] },
+        { h: "Dove dormire", p: [
+          "La maggior parte dei lodge si trova sulla scarpata sopra il parco o nel villaggio di Mto wa Mbu, con una bella vista sul lago. Molti ospiti dormono invece a <a href=\"/parks/karatu\">Karatu</a> e visitano Manyara lungo la strada.",
+        ] },
+      ],
+      faqs: [
+        { q: "I leoni del Lago Manyara si arrampicano davvero sugli alberi?", a: "A volte, ma è raro. Leoni che si arrampicano vivono in alcuni parchi dell'Africa orientale, tra cui Manyara. Non costruire il viaggio intorno a questo." },
+        { q: "Quanto tempo serve al Lago Manyara?", a: "Mezza giornata basta alla maggior parte dei viaggiatori. Si inserisce bene nel tragitto da Arusha a Karatu o Ngorongoro." },
+      ],
+    },
+    karatu: {
+      name: "Karatu",
+      seoTitle: "Lodge a Karatu: dormire vicino al cratere di Ngorongoro",
+      description: "Karatu è una cittadina degli altopiani vicinissima all'ingresso dell'Area di conservazione di Ngorongoro. Perché molti ospiti dormono qui invece che sul bordo del cratere, e i lodge di Karatu con cui lavoriamo.",
+      h1: "Karatu, il campo base per Ngorongoro",
+      lede: "Colline verdi, piantagioni di caffè e serate fresche, a due passi dall'ingresso di Ngorongoro. È a Karatu che molti dei nostri ospiti dormono prima o dopo la giornata nel cratere.",
+      heroAlt: "Gibb's Farm sugli altopiani di Karatu",
+      facts: [["Dove", "Tra il Lago Manyara e l'Area di conservazione di Ngorongoro"], ["Da Arusha", "Circa 2,5-3 ore di strada"], ["Fino al cratere", "Circa 30 minuti fino all'ingresso, poi la salita al bordo"], ["Ideale per", "Una notte confortevole vicino al cratere, spendendo meno"]],
+      sections: [
+        { h: "Perché dormire a Karatu?", p: [
+          "Karatu si trova sugli altopiani, appena fuori dall'Area di conservazione di Ngorongoro. Dato che è fuori dall'area di conservazione, la notte non comporta l'ingresso, e i lodge di solito costano meno che sul bordo del cratere. Fa anche un po' più caldo, perché è un po' più in basso.",
+          "Molti lodge si trovano in piantagioni di caffè e giardini, con buona cucina e spazio per rilassarsi. Dopo una lunga giornata di safari, fa davvero piacere.",
+        ] },
+        { h: "Karatu o il bordo del cratere?", p: [
+          "Se vuoi il panorama e la partenza più mattiniera verso il <a href=\"/parks/ngorongoro-crater\">cratere di Ngorongoro</a>, dormi sul bordo. Se vuoi risparmiare, o viaggi con bambini che apprezzeranno un giardino e una piscina, Karatu è un'ottima scelta. Ti diremo con sincerità cosa è meglio per il tuo viaggio.",
+        ] },
+        { h: "Dove dormire a Karatu", p: [
+          "Questi sono i lodge di Karatu con cui lavoriamo, da indirizzi familiari e confortevoli ad alcuni dei migliori lodge del nord della Tanzania.",
+        ] },
+      ],
+      faqs: [
+        { q: "Quanto dista Karatu dal cratere di Ngorongoro?", a: "Circa 30 minuti fino all'ingresso dell'area di conservazione, poi altri 30-45 minuti per salire al bordo del cratere e scendere per la pista." },
+        { q: "Meglio dormire a Karatu o sul bordo del cratere?", a: "Il bordo del cratere è più vicino e il panorama è più bello. Karatu costa meno, è più calda e la notte non comporta l'ingresso all'area di conservazione. Funzionano bene entrambe." },
+      ],
+    },
+  },
+  es: {
+    "serengeti-national-park": {
+      name: "Parque Nacional del Serengeti",
+      seoTitle: "Safari en el Serengeti: mejor época, fauna y lodges",
+      description: "El Serengeti visto por un guía local: dónde alojarse, cuándo ir para la Gran Migración y los grandes felinos, las tarifas del parque y cuántas noches planear. Safaris privados desde Arusha.",
+      h1: "Parque Nacional del Serengeti",
+      lede: "Llanuras infinitas, la Gran Migración y más leones que casi en cualquier otro lugar de África. El Serengeti es el parque por el que vienen la mayoría de nuestros viajeros, y rara vez decepciona.",
+      heroAlt: "Elefantes en las amplias llanuras del Serengeti",
+      facts: [["Superficie", "Unos 14.750 km²"], ["Desde Arusha", "Un día de carretera pasando por el Ngorongoro, o un vuelo corto"], ["Ideal para", "La Gran Migración, leones, guepardos, leopardos"], ["Nuestro consejo", "2-3 noches, más si sigues a las manadas"], ["Entrada", "$82,60 por adulto cada 24 horas"]],
+      sections: [
+        { h: "Por qué el Serengeti es especial", p: [
+          "El Serengeti es Patrimonio Mundial de la UNESCO y forma un único ecosistema con el Maasai Mara de Kenia. Mucho más de un millón de ñus lo recorren durante todo el año, junto con cientos de miles de cebras y gacelas, siguiendo la lluvia y la hierba fresca. Los depredadores van detrás.",
+          "Lo que más sorprende a nuestros viajeros es el espacio. Conduces una hora por la sabana y llegas a un grupo de kopjes, montículos de rocas de granito, con una manada de leones durmiendo en lo alto. No se parece en nada a una reserva vallada.",
+        ] },
+        { h: "¿Qué parte del Serengeti?", p: [
+          "El centro del Serengeti (Seronera) tiene animales todo el año, y el valle del río Seronera es uno de los mejores lugares de África para ver grandes felinos. Si tienes dos noches y ningún mes fijo, normalmente nos alojamos allí.",
+          "Las llanuras del sur y la zona de Ndutu acogen a las manadas para los partos, aproximadamente de enero a marzo. Ndutu está justo dentro del Área de Conservación del Ngorongoro, en el límite del Serengeti.",
+          "El corredor occidental sigue el río Grumeti, que las manadas suelen cruzar hacia junio. En el norte del Serengeti, cerca de la frontera con Kenia, los cruces del río Mara tienen lugar aproximadamente de julio a octubre. Queda lejos de Arusha, así que allí planeamos al menos dos noches.",
+        ] },
+        { h: "¿Cuándo ir?", p: [
+          "En el Serengeti no hay meses malos, solo meses distintos. De junio a octubre es la estación seca: los animales son fáciles de encontrar, pero es la época con más gente y más cara. De enero a marzo es la temporada de partos en el sur. Abril y mayo son la estación de las lluvias largas: algunos campamentos cierran, pero el parque está verde, tranquilo y más barato.",
+          "Nuestra guía de la <a href=\"/great-migration-serengeti\">Gran Migración mes a mes</a> explica dónde suelen estar las manadas, y nuestro artículo sobre <a href=\"/post/best-time-to-visit-tanzania-for-a-safari-month-by-month-guide\">la mejor época para visitar Tanzania</a> cubre también los demás parques.",
+        ] },
+        { h: "Cómo llegar", p: [
+          "La mayoría de nuestros viajeros van por carretera. El camino desde Arusha pasa junto al lago Manyara y cruza las tierras altas del Ngorongoro: el trayecto ya forma parte del safari. Con los avistamientos por el camino, ocupa casi todo el día. También puedes volar desde Arusha a una de las pistas del Serengeti y encontrarte allí con tu guía.",
+        ] },
+        { h: "Dónde alojarse", p: [
+          "Puedes acampar en un camping público, dormir en un campamento de tiendas cómodo o elegir uno de los campamentos de lujo. Estos son los campamentos y lodges con los que trabajamos. Están incluidos en los precios de nuestro planificador, así que puedes compararlos para tus fechas.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Cuántos días hacen falta en el Serengeti?", a: "Dos días completos, es decir, tres noches, es un buen mínimo. Con una sola noche llegas por la tarde, te vas a la mañana siguiente y pasas la mayor parte del tiempo en la carretera." },
+        { q: "¿Se pueden ver los Cinco Grandes en el Serengeti?", a: "Leones, leopardos, elefantes y búfalos se ven con regularidad. Los rinocerontes son raros, por eso solemos combinarlo con el cráter del Ngorongoro, uno de los mejores lugares de Tanzania para ver el rinoceronte negro." },
+        { q: "¿Merece la pena el Serengeti en un safari corto?", a: "Con menos de cuatro días, muchas veces no. La carretera desde Arusha lleva casi un día de ida y otro de vuelta. En tres días, Tarangire y el cráter del Ngorongoro suelen darte más tiempo con los animales." },
+      ],
+    },
+    "ngorongoro-crater": {
+      name: "Cráter del Ngorongoro",
+      seoTitle: "Safari en el cráter del Ngorongoro: fauna, tarifas y alojamiento",
+      description: "Todo para planear un día en el cráter del Ngorongoro: qué puedes ver, las tarifas para bajar al cráter, dormir en el borde o en Karatu y la mejor época. Por un guía local de Arusha.",
+      h1: "Cráter del Ngorongoro",
+      lede: "Un volcán hundido con el fondo lleno de animales. Un día en el cráter del Ngorongoro es una de las mejores oportunidades de ver un rinoceronte negro en Tanzania, y encaja en casi cualquier safari.",
+      heroAlt: "Un vehículo de safari en el fondo del cráter del Ngorongoro",
+      facts: [["Fondo del cráter", "Unos 260 km², unos 600 m por debajo del borde"], ["Desde Arusha", "Unas 3-4 horas de carretera"], ["Ideal para", "Rinocerontes negros, leones, hienas, flamencos"], ["Nuestro consejo", "Medio día o un día entero en el fondo del cráter"], ["Tarifas", "$71,80 por adulto cada 24 horas, más $295 por vehículo para bajar al cráter"]],
+      sections: [
+        { h: "Qué hace especial al cráter", p: [
+          "El cráter del Ngorongoro es una de las calderas volcánicas intactas más grandes del mundo. Está dentro del Área de Conservación del Ngorongoro, Patrimonio Mundial de la UNESCO. Paredes empinadas rodean un fondo de praderas, pantanos, bosque y un lago salado, donde viven muchos animales todo el año.",
+          "Como la zona es pequeña y abierta, ves muchísimo en pocas horas: ñus, cebras, búfalos, leones, hienas manchadas, elefantes y, con un poco de paciencia, rinocerontes negros. Los flamencos suelen alimentarse en el lago Magadi, en el fondo del cráter. A diferencia de la mayoría de los parques nacionales, en el área de conservación viven familias masáis que llevan aquí a pastar su ganado.",
+        ] },
+        { h: "Un día en el cráter", p: [
+          "Bajamos temprano por la pista del cráter, pasamos el día en el fondo y subimos por la tarde. Muchos viajeros hacen el cráter el último día del safari, de camino de vuelta a Arusha.",
+          "Cada vehículo paga una tarifa para bajar al fondo del cráter, además de la entrada por persona al área de conservación. Cuando un viaje en nuestro planificador incluye una noche en el Ngorongoro, el safari en el cráter siempre está incluido.",
+        ] },
+        { h: "¿Borde del cráter o Karatu?", p: [
+          "Puedes dormir en el borde del cráter, muy por encima del fondo, o en <a href=\"/parks/karatu\">Karatu</a>, a una media hora de la entrada del área de conservación. En el borde estás más cerca del cráter, las vistas son espectaculares y bajas temprano. Karatu es más barato y más cálido, y la noche allí no implica pagar entrada al área de conservación.",
+          "El borde del cráter está a más de 2.000 m de altitud, así que las noches son frías todo el año. Lleva una chaqueta de abrigo.",
+        ] },
+        { h: "¿Cuándo ir?", p: [
+          "El cráter es bueno todo el año, porque los animales no migran fuera de él. De junio a octubre está seco y hay más gente. En los meses de lluvia está más tranquilo y muy verde. En cualquier mes, salir temprano ayuda a evitar las aglomeraciones.",
+        ] },
+        { h: "Dónde alojarse", p: [
+          "Estos son los campamentos y lodges del borde del cráter con los que trabajamos. El camping público Simba, en el borde, es la opción económica.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Se ven rinocerontes en el cráter del Ngorongoro?", a: "Sí. El cráter alberga una pequeña población de rinocerontes negros y es uno de los lugares más fiables de Tanzania para verlos, aunque a menudo están lejos y nunca se puede garantizar un avistamiento." },
+        { q: "¿Basta un día para el cráter del Ngorongoro?", a: "Sí. Medio día o un día entero en el fondo del cráter es suficiente para la mayoría de los viajeros. Duerme en el borde o en Karatu para poder bajar temprano." },
+        { q: "¿Cuánto cuesta visitar el cráter del Ngorongoro?", a: "La entrada al área de conservación cuesta $71,80 por adulto cada 24 horas, y cada vehículo paga $295 para bajar al cráter. Nuestros precios siempre incluyen las dos cosas." },
+      ],
+    },
+    "tarangire-national-park": {
+      name: "Parque Nacional de Tarangire",
+      seoTitle: "Safari en Tarangire: elefantes, mejor época y lodges",
+      description: "Tarangire está a dos horas de Arusha y es famoso por sus elefantes y baobabs. Los consejos de un guía local: cuándo ir, cuánto tiempo quedarse y dónde alojarse.",
+      h1: "Parque Nacional de Tarangire",
+      lede: "Grandes manadas de elefantes, baobabs gigantes y un río que atrae a los animales durante toda la estación seca. Tarangire está cerca de Arusha y suele ser el primer parque de nuestros safaris.",
+      heroAlt: "Cebras en la sabana del norte de Tanzania",
+      facts: [["Superficie", "Unos 2.850 km²"], ["Desde Arusha", "Unas 2 horas de carretera"], ["Ideal para", "Elefantes, baobabs, aves"], ["Nuestro consejo", "1-2 noches"], ["Entrada", "$53,10 por adulto cada 24 horas"]],
+      sections: [
+        { h: "Por qué ir a Tarangire", p: [
+          "El Parque Nacional de Tarangire debe su nombre al río Tarangire, que lo atraviesa. En la estación seca, cuando escasea el agua en otros lugares, el río se convierte en un imán: elefantes, cebras, ñus, búfalos y los leones que los cazan vienen todos a beber.",
+          "Es uno de los mejores lugares de Tanzania para ver grandes manadas de elefantes, y sus baobabs milenarios le dan un aspecto único. También es un parque precioso para las aves, con cientos de especies registradas.",
+        ] },
+        { h: "¿Cuándo ir?", p: [
+          "Tarangire está en su mejor momento aproximadamente de junio a octubre, cuando los animales se concentran a lo largo del río. En la estación de lluvias muchos se dispersan fuera del parque, pero sigue siendo precioso y verde, con muchos menos vehículos.",
+        ] },
+        { h: "¿Cuánto tiempo quedarse?", p: [
+          "Tarangire está lo bastante cerca de Arusha para una excursión de un día, pero una noche en el parque te permite estar allí a primera hora de la mañana y a última de la tarde, cuando la luz y los animales están en su mejor momento. En los viajes más largos solemos planear dos noches.",
+          "Es una primera parada perfecta: aterrizas, descansas en Arusha y al mediodía siguiente ya estás viendo elefantes.",
+        ] },
+        { h: "Dónde alojarse", p: [
+          "Hay un camping público dentro del parque, además de lodges y campamentos de tiendas dentro y en los límites del parque. Estos son con los que trabajamos.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Merece la pena visitar Tarangire?", a: "Sí, sobre todo de junio a octubre. Está a dos horas de Arusha y es uno de los mejores parques de Tanzania para ver elefantes, así que es una primera parada excelente." },
+        { q: "¿Cuántos días hacen falta en Tarangire?", a: "Una noche basta para la mayoría de los viajes. Dos noches permiten alejarse del río y descubrir las zonas más tranquilas del parque." },
+        { q: "¿Tarangire o el lago Manyara?", a: "Si solo tienes tiempo para uno, normalmente recomendamos Tarangire: es más grande, tiene más animales y sus manadas de elefantes son difíciles de superar. El lago Manyara funciona bien para medio día de camino al Ngorongoro." },
+      ],
+    },
+    "lake-manyara-national-park": {
+      name: "Parque Nacional del Lago Manyara",
+      seoTitle: "Safari en el lago Manyara: fauna, mejor época y lodges",
+      description: "Un parque pequeño y verde al pie del escarpe del Rift, de camino al Ngorongoro. Qué se ve en el lago Manyara, cuándo ir y dónde alojarse, por un guía local.",
+      h1: "Parque Nacional del Lago Manyara",
+      lede: "Una estrecha franja de bosque, sabana y lago al pie del escarpe del Gran Valle del Rift. El lago Manyara es pequeño, pero ofrece mucho en medio día.",
+      heroAlt: "&Beyond Lake Manyara Tree Lodge",
+      facts: [["Ubicación", "Entre el escarpe del Rift y el lago Manyara"], ["Desde Arusha", "Unas 2 horas de carretera"], ["Ideal para", "Bosque, babuinos, elefantes, aves, vistas del Rift"], ["Nuestro consejo", "Medio día o un día entero"], ["Entrada", "$59 por adulto cada 24 horas"]],
+      sections: [
+        { h: "¿Cómo es el lago Manyara?", p: [
+          "Se entra por un bosque alimentado por aguas subterráneas, con grandes higueras y caobas que se nutren de los manantiales del escarpe. Lo atraviesan grupos de babuinos y monos azules, y los elefantes comen a la sombra.",
+          "Más adelante, el bosque se abre a la sabana y a la orilla del lago, donde viven hipopótamos, búfalos, jirafas y muchas aves acuáticas. Algunos años, los flamencos se reúnen aquí en gran número. El parque es conocido por sus leones que trepan a los árboles, pero se ven mucho menos de lo que hacen creer las historias.",
+        ] },
+        { h: "¿Merece la pena?", p: [
+          "El lago Manyara está en la carretera de Arusha al Ngorongoro y el Serengeti, así que es fácil añadirlo para medio día. Es una buena elección si ya has visto Tarangire, si te gustan las aves o si quieres algo distinto de las grandes llanuras. En un viaje corto, Tarangire suele ofrecer más animales.",
+        ] },
+        { h: "¿Cuándo ir?", p: [
+          "La estación seca, de junio a octubre, es la mejor para los animales grandes. La estación de lluvias es ideal para las aves, y el parque está más verde que nunca.",
+        ] },
+        { h: "Dónde alojarse", p: [
+          "La mayoría de los lodges están en lo alto del escarpe sobre el parque o en el pueblo de Mto wa Mbu, con buenas vistas del lago. Muchos viajeros prefieren dormir en <a href=\"/parks/karatu\">Karatu</a> y visitar Manyara de camino.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿De verdad los leones del lago Manyara trepan a los árboles?", a: "A veces, pero es raro. Hay leones trepadores en algunos parques de África oriental, entre ellos Manyara. No organices el viaje en torno a eso." },
+        { q: "¿Cuánto tiempo hace falta en el lago Manyara?", a: "Medio día es suficiente para la mayoría de los viajeros. Encaja bien en el trayecto de Arusha a Karatu o al Ngorongoro." },
+      ],
+    },
+    karatu: {
+      name: "Karatu",
+      seoTitle: "Lodges en Karatu: dormir cerca del cráter del Ngorongoro",
+      description: "Karatu es un pequeño pueblo de las tierras altas muy cerca de la entrada del Área de Conservación del Ngorongoro. Por qué muchos viajeros duermen aquí en lugar de en el borde del cráter, y los lodges de Karatu con los que trabajamos.",
+      h1: "Karatu, el campamento base para el Ngorongoro",
+      lede: "Colinas verdes, cafetales y noches frescas, a un paso de la entrada del Ngorongoro. Es en Karatu donde muchos de nuestros viajeros duermen antes o después de su día en el cráter.",
+      heroAlt: "Gibb's Farm en las tierras altas de Karatu",
+      facts: [["Dónde", "Entre el lago Manyara y el Área de Conservación del Ngorongoro"], ["Desde Arusha", "Unas 2,5-3 horas de carretera"], ["Hasta el cráter", "Unos 30 minutos hasta la entrada, y después la subida al borde"], ["Ideal para", "Una noche cómoda cerca del cráter, gastando menos"]],
+      sections: [
+        { h: "¿Por qué dormir en Karatu?", p: [
+          "Karatu está en las tierras altas, justo a las afueras del Área de Conservación del Ngorongoro. Como queda fuera del área de conservación, la noche no implica pagar entrada, y los lodges suelen ser más baratos que en el borde del cráter. También hace algo más de calor, porque está un poco más bajo.",
+          "Muchos lodges están entre cafetales y jardines, con buena cocina y espacio para relajarse. Después de un largo día de safari, se agradece mucho.",
+        ] },
+        { h: "¿Karatu o el borde del cráter?", p: [
+          "Si quieres las vistas y la salida más temprana hacia el <a href=\"/parks/ngorongoro-crater\">cráter del Ngorongoro</a>, duerme en el borde. Si quieres ahorrar, o viajas con niños que disfrutarán de un jardín y una piscina, Karatu es una opción excelente. Te diremos con sinceridad qué encaja mejor con tu viaje.",
+        ] },
+        { h: "Dónde alojarse en Karatu", p: [
+          "Estos son los lodges de Karatu con los que trabajamos, desde casas familiares y cómodas hasta algunos de los mejores lodges del norte de Tanzania.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿A qué distancia está Karatu del cráter del Ngorongoro?", a: "Unos 30 minutos hasta la entrada del área de conservación, y después otros 30-45 minutos para subir al borde del cráter y bajar por la pista." },
+        { q: "¿Es mejor dormir en Karatu o en el borde del cráter?", a: "El borde del cráter está más cerca y las vistas son mejores. Karatu es más barato, más cálido y la noche no implica pagar entrada. Las dos opciones funcionan muy bien." },
       ],
     },
   },

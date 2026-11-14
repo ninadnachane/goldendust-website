@@ -15,7 +15,7 @@ for (const f of readdirSync("src/content/blog").filter((x) => x.endsWith(".md"))
 const home = read("dist/index.html");
 must(home.includes("<h1"), "homepage has no headline");
 must(home.includes("/planner"), "homepage doesn't link to the planner");
-for (const p of ["planner", "nl/planner", "de/planner", "fr/planner"]) must(!read(`dist/${p}.html`).includes('name="robots" content="noindex'), `/${p} must be indexable (it should rank for "Tanzania safari planner")`);
+for (const p of ["planner", "nl/planner", "de/planner", "fr/planner", "it/planner", "es/planner"]) must(!read(`dist/${p}.html`).includes('name="robots" content="noindex'), `/${p} must be indexable (it should rank for "Tanzania safari planner")`);
 must(sitemap0().includes("goldendustsafaris.com/planner<"), "sitemap must list /planner");
 
 const sitemap = readdirSync("dist").filter((f) => f.startsWith("sitemap")).map((f) => read(`dist/${f}`)).join("");
@@ -30,8 +30,8 @@ for (const p of ["admin", "admin/login"]) {
 must(existsSync("dist/_redirects"), "missing _redirects (old Wix links would break)");
 
 
-// ---- languages: every English page has a Dutch, German and French copy that is really in that language ----
-const LANGS = ["nl", "de", "fr"];
+// ---- languages: every English page has a Dutch, German, French, Italian and Spanish copy that is really in that language ----
+const LANGS = ["nl", "de", "fr", "it", "es"];
 const walkHtml = (d, out = []) => { for (const f of readdirSync(d, { withFileTypes: true })) { const p = `${d}/${f.name}`; if (f.isDirectory()) { if (!(d === "dist" && LANGS.includes(f.name))) walkHtml(p, out); } else if (f.name.endsWith(".html")) out.push(p); } return out; };
 const english = walkHtml("dist").map((f) => f.slice(5, -5)).filter((p) => !/^(admin|404|sitemap)/.test(p) && !LANGS.includes(p));
 const langOfHtml = (html) => html.match(/<html[^>]*\blang="([a-z-]+)"/)?.[1];
@@ -58,6 +58,8 @@ for (const l of LANGS) for (const t of ["Golden Dust Safaris"]) must(read(`dist/
 must(read("dist/nl.html").includes("Privésafari") || read("dist/nl.html").includes("privésafari"), "/nl home page isn't in Dutch");
 must(read("dist/de.html").includes("Privatsafari"), "/de home page isn't in German");
 must(read("dist/fr.html").includes("Safaris privés"), "/fr home page isn't in French");
+must(read("dist/it.html").includes("Safari privati"), "/it home page isn't in Italian");
+must(read("dist/es.html").includes("Safaris privados"), "/es home page isn't in Spanish");
 for (const l of LANGS) for (const page of ["itinerary"]) must(!sitemap.includes(`goldendustsafaris.com/${l}/${page}<`), `sitemap must not list /${l}/${page}`);
 must(/hreflang="nl"/.test(sitemap), "sitemap has no language links");
 

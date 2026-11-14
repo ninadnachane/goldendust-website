@@ -90,4 +90,42 @@ export const PLANNER_GUIDE: Record<Lang, Guide> = {
     moreH: "Avant de commencer",
     links: { cost: "Combien coûte un safari en Tanzanie ?", best: "La meilleure période pour la Tanzanie, mois par mois", migration: "La Grande Migration dans le Serengeti", serengeti: "Parc national du Serengeti", ngorongoro: "Cratère du Ngorongoro", tarangire: "Parc national de Tarangire" },
   },
+  it: {
+    h: "Come funziona il planner di safari in Tanzania",
+    intro: "La maggior parte dei siti di safari ti chiede di compilare un modulo e aspettare un preventivo. Il nostro planner ti mostra subito il prezzo, calcolato sulle tariffe reali dei campi e dei lodge con cui lavoriamo nel nord della Tanzania. Vedi quanto costa ogni parte del viaggio, cambi quello che vuoi e mandi il programma alla tua guida quando ti sembra giusto.",
+    steps: [
+      { h: "1. Chi viaggia", p: "Aggiungi adulti e bambini. L'età dei bambini conta, perché molti campi e parchi applicano tariffe ridotte." },
+      { h: "2. Quando arrivi", p: "Scegli la data di arrivo ad Arusha o all'aeroporto del Kilimangiaro e quante notti hai a disposizione. La prima notte, ad Arusha o a Karatu, la offriamo noi." },
+      { h: "3. Dove andare e dove dormire", p: "Scegli tra Tarangire, Lago Manyara, il bordo del cratere di Ngorongoro, Karatu, Ndutu e il Serengeti meridionale, centrale, occidentale e settentrionale. Le mettiamo noi in un ordine sensato. Poi scegli un campo o un lodge in ogni zona: vengono mostrati solo quelli con tariffe per le tue date." },
+      { h: "4. Guarda il prezzo e invialo", p: "Il prezzo a persona e per il gruppo si aggiorna man mano, diviso tra ingressi ai parchi, veicolo e guida, alloggio, pasti e il nostro margine. Invia il programma su WhatsApp o scaricalo in PDF." },
+    ],
+    faqH: "Domande sull'organizzazione del safari",
+    faqs: [
+      { q: "Cosa include il prezzo del planner?", a: "Ingressi ai parchi, veicolo privato e guida, transfer aeroportuali, alloggio e pasti durante il safari. Voli internazionali, visti, mance e bevande sono esclusi. Il prezzo è in dollari USA." },
+      { q: "Il prezzo del planner è definitivo?", a: "È calcolato sulle tariffe attuali di ogni campo, ma i campi possono riempirsi. Quando invii il programma, la tua guida verifica la disponibilità e lo rifinisce con te, di solito rispondendo su WhatsApp entro poche ore." },
+      { q: "Dove andare per vedere la Grande Migrazione?", a: "Più o meno da gennaio a marzo le mandrie si radunano per le nascite nelle pianure di Ndutu e nel Serengeti meridionale. Da luglio attraversano il fiume Mara nel Serengeti settentrionale, dove prevediamo almeno due notti. Il planner mostra solo i campi aperti nelle tue date." },
+      { q: "Posso organizzare il safari con una persona?", a: "Sì, e te lo consigliamo. La maggior parte dei nostri ospiti finisce con un programma su misura creato insieme alla propria guida. Scrivici su WhatsApp con le date, il budget e cosa ti piacerebbe vedere." },
+    ],
+    moreH: "Prima di organizzare",
+    links: { cost: "Quanto costa un safari in Tanzania?", best: "Il periodo migliore per visitare la Tanzania, mese per mese", migration: "La Grande Migrazione nel Serengeti", serengeti: "Parco nazionale del Serengeti", ngorongoro: "Cratere di Ngorongoro", tarangire: "Parco nazionale del Tarangire" },
+  },
+  es: {
+    h: "Cómo funciona el planificador de safaris en Tanzania",
+    intro: "La mayoría de las webs de safaris te piden rellenar un formulario y esperar un presupuesto. Nuestro planificador te muestra el precio al momento, calculado con las tarifas reales de los campamentos y lodges con los que trabajamos en el norte de Tanzania. Ves cuánto cuesta cada parte del viaje, cambias lo que quieras y envías el plan a tu guía cuando te parezca bien.",
+    steps: [
+      { h: "1. Quién viaja", p: "Añade adultos y niños. La edad de los niños importa, porque muchos campamentos y parques les cobran menos." },
+      { h: "2. Cuándo llegas", p: "Elige tu fecha de llegada a Arusha o al aeropuerto del Kilimanjaro y cuántas noches tienes. Tu primera noche, en Arusha o Karatu, corre de nuestra cuenta." },
+      { h: "3. Adónde ir y dónde alojarse", p: "Elige entre Tarangire, el lago Manyara, el borde del cráter del Ngorongoro, Karatu, Ndutu y el sur, centro, oeste y norte del Serengeti. Nosotros las ponemos en un orden lógico. Después elige un campamento o lodge en cada zona: solo aparecen los que tienen tarifas para tus fechas." },
+      { h: "4. Mira el precio y envíalo", p: "El precio por persona y para tu grupo se actualiza sobre la marcha, desglosado en entradas a los parques, vehículo y guía, alojamiento, comidas y nuestro margen. Envía el plan por WhatsApp o descárgalo en PDF." },
+    ],
+    faqH: "Preguntas sobre cómo planear tu safari",
+    faqs: [
+      { q: "¿Qué incluye el precio del planificador?", a: "Entradas a los parques, vehículo privado y guía, traslados al aeropuerto, alojamiento y comidas durante el safari. Los vuelos internacionales, visados, propinas y bebidas no están incluidos. El precio está en dólares estadounidenses." },
+      { q: "¿Es definitivo el precio del planificador?", a: "Se calcula con las tarifas actuales de cada campamento, pero los campamentos se pueden llenar. Cuando envías tu plan, tu guía comprueba la disponibilidad y lo ajusta contigo, normalmente respondiendo por WhatsApp en pocas horas." },
+      { q: "¿Adónde debo ir para ver la Gran Migración?", a: "Aproximadamente de enero a marzo, las manadas se reúnen para parir en las llanuras de Ndutu y el sur del Serengeti. A partir de julio cruzan el río Mara en el norte del Serengeti, donde planeamos al menos dos noches. El planificador solo muestra campamentos abiertos en tus fechas." },
+      { q: "¿Puedo planear mi safari con una persona?", a: "Sí, y te lo recomendamos. La mayoría de nuestros viajeros acaban con un plan a medida hecho junto a su guía. Escríbenos por WhatsApp con tus fechas, tu presupuesto y lo que te gustaría ver." },
+    ],
+    moreH: "Antes de planear",
+    links: { cost: "¿Cuánto cuesta un safari en Tanzania?", best: "La mejor época para visitar Tanzania, mes a mes", migration: "La Gran Migración en el Serengeti", serengeti: "Parque Nacional del Serengeti", ngorongoro: "Cráter del Ngorongoro", tarangire: "Parque Nacional de Tarangire" },
+  },
 };

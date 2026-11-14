@@ -21,7 +21,7 @@ const base = basePath(Astro.url);
 const canonical = new URL(Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/", site.url).href;
 // the same page in every language, for Google (hreflang)
 const alternates = noindex ? [] : LANGS.map((l) => ({ l, href: new URL(lp(l, base), site.url).href }));
-const skip = { en: "Skip to content", nl: "Naar de inhoud", de: "Zum Inhalt", fr: "Aller au contenu" }[lang];
+const skip = { en: "Skip to content", nl: "Naar de inhoud", de: "Zum Inhalt", fr: "Aller au contenu", it: "Vai al contenuto", es: "Ir al contenido" }[lang];
 const ogImage = image ? img(image, 1200) : img("7df076_f9426230a0e84400a48f65dcfbca9bc0~mv2.png", 1200);
 ---
 <!doctype html>

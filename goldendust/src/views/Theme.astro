@@ -24,6 +24,8 @@ const T = {
   nl: { samples: "Voorbeeldsafari's", change: "Elk voorbeeld kun je aanpassen, of", own: "plan je eigen reis", more: "Andere manieren van reizen", parks: "Parkgidsen" },
   de: { samples: "Beispielsafaris", change: "Jedes Beispiel lässt sich anpassen, oder", own: "planen Sie Ihre eigene Safari", more: "Weitere Reisearten", parks: "Park-Ratgeber" },
   fr: { samples: "Exemples de safaris", change: "Chaque exemple peut être modifié, ou", own: "créez le vôtre", more: "D'autres façons de voyager", parks: "Guides des parcs" },
+  it: { samples: "Safari di esempio", change: "Ogni esempio si può modificare, oppure", own: "organizza il tuo", more: "Altri modi di viaggiare", parks: "Guide ai parchi" },
+  es: { samples: "Safaris de ejemplo", change: "Cada ejemplo se puede cambiar, o", own: "planea el tuyo", more: "Otras formas de viajar", parks: "Guías de parques" },
 }[lang];
 const schema: object[] = [breadcrumbs([[w(lang, "home"), L("/")], [t.name, url]])];
 if (t.faqs.length) schema.push(faqSchema(t.faqs));

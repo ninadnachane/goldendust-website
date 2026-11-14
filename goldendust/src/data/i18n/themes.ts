@@ -1,8 +1,8 @@
-// Dutch, German and French text for the safari-style pages (src/data/themes.ts).
+// Dutch, German, French, Italian and Spanish text for the safari-style pages (src/data/themes.ts).
 import type { Theme } from "../themes";
 
 type ThemeText = Pick<Theme, "name" | "seoTitle" | "description" | "h1" | "lede" | "heroAlt" | "sections" | "faqs">;
-type Lang3 = "nl" | "de" | "fr";
+type Lang3 = "nl" | "de" | "fr" | "it" | "es";
 
 export const THEMES_I18N: Record<Lang3, Record<string, ThemeText>> = {
   nl: {
@@ -304,6 +304,206 @@ export const THEMES_I18N: Record<Lang3, Record<string, ThemeText>> = {
       faqs: [
         { q: "Camper au Serengeti, est-ce sûr ?", a: "Oui. Les campings publics sont utilisés chaque nuit par des groupes de safari, et votre guide connaît les règles. La nuit, vous restez dans votre tente." },
         { q: "Quelle est la façon la moins chère de faire un safari en Tanzanie ?", a: "Un safari camping dans les campings publics, pendant la saison verte, avec plus de voyageurs qui se partagent le véhicule." },
+      ],
+    },
+  },
+  it: {
+    "private-safari-tanzania": {
+      name: "Safari privati in Tanzania",
+      seoTitle: "Safari privato in Tanzania con una guida locale",
+      description: "Un safari privato in Tanzania con il tuo veicolo e la guida locale che organizza il viaggio con te. Serengeti, Ngorongoro e Tarangire da Arusha, con prezzi trasparenti.",
+      h1: "Safari privati in Tanzania con una guida locale",
+      lede: "Il tuo veicolo, il tuo ritmo e una guida con cui hai già parlato prima di atterrare. Tutti i nostri safari sono privati.",
+      heroAlt: "Vista dal posto della guida su gazzelle nelle pianure del Serengeti",
+      sections: [
+        { h: "Cosa significa «privato» per noi", p: [
+          "Non condividi mai il veicolo con sconosciuti. Decidi tu quando lasciare il campo, quanto restare a guardare un leopardo su un albero e quando è ora di pranzo.",
+          "Abbiamo due guide, non cento. La guida che organizza il viaggio con te è la stessa che ti viene a prendere in aeroporto e guida ogni giorno. Sai con chi viaggerai prima di prenotare.",
+        ] },
+        { h: "Costruito intorno a quello che vuoi", p: [
+          "Di solito iniziamo con una chiamata. Alcuni viaggiatori vogliono vedere la Grande Migrazione, altri i grandi felini, altri ancora un viaggio tranquillo con i figli. Ti spieghiamo i parchi con sincerità, compresi quelli che puoi saltare, e scegli tu.",
+          "Se preferisci organizzare da solo, il nostro <a href=\"/planner\">planner</a> ti mostra subito il prezzo del tuo itinerario, con il dettaglio completo dei costi.",
+        ] },
+        { h: "Per ogni budget", p: [
+          "Privato non vuol dire per forza di lusso. Puoi campeggiare nei campeggi pubblici, dormire in lodge confortevoli o scegliere i campi più belli del Serengeti. In ogni caso, il veicolo e la guida sono solo tuoi.",
+        ] },
+      ],
+      faqs: [
+        { q: "Quanto costa un safari privato in Tanzania?", a: "Dipende soprattutto dai lodge, dalla stagione e da quante persone viaggiano. I nostri safari di esempio mostrano prezzi reali a persona, e il planner calcola il prezzo del tuo itinerario." },
+        { q: "Vale la pena fare un safari privato?", a: "Per la maggior parte dei viaggiatori sì. La tua giornata non dipende da altri passeggeri, e la guida può organizzare tutto intorno a quello che vuoi vedere." },
+      ],
+    },
+    "family-safari-tanzania": {
+      name: "Safari per famiglie",
+      seoTitle: "Safari in famiglia in Tanzania con i bambini | Privato e locale",
+      description: "Come organizziamo un safari in famiglia in Tanzania: trasferimenti più brevi, i lodge giusti, tariffe ridotte per i bambini nei parchi e una guida che sa stare con i più piccoli. Viaggi privati da Arusha.",
+      h1: "Safari per famiglie in Tanzania",
+      lede: "Un safari con i bambini ha bisogno di un altro ritmo. Trasferimenti più brevi, pause quando servono e lodge dove i bambini sono i benvenuti.",
+      heroAlt: "Una giraffa accanto a un'acacia nel Serengeti",
+      sections: [
+        { h: "Come organizziamo un safari in famiglia", p: [
+          "Costruiamo le giornate intorno ai bambini. Spesso vuol dire meno ore in auto, un pomeriggio in piscina e parchi vicini tra loro, come Tarangire, Karatu e il cratere di Ngorongoro.",
+          "Dato che il safari è privato, vi fermate quando volete. Osservare a lungo gli elefanti a una pozza d'acqua è spesso il momento preferito dei più piccoli, e nessun altro nel veicolo aspetta di ripartire.",
+        ] },
+        { h: "I prezzi per i bambini", p: [
+          "Gli ingressi ai parchi costano meno per i bambini, e molti lodge hanno tariffe per bambini o tende familiari. Il nostro planner chiede l'età di ogni bambino, così il prezzo è giusto fin dall'inizio.",
+          "Alcuni campi hanno un'età minima. Dicci l'età dei tuoi figli e ti consiglieremo le sistemazioni adatte.",
+        ] },
+        { h: "Quanti giorni?", p: [
+          "Da cinque a sette giorni vanno bene per la maggior parte delle famiglie. Bastano per includere il Serengeti senza correre, e sono abbastanza pochi perché nessuno si stanchi dei game drive.",
+        ] },
+      ],
+      faqs: [
+        { q: "Qual è l'età migliore per un safari in Tanzania?", a: "I bambini di qualsiasi età possono fare un safari, ma dai sei anni circa la maggior parte si gode i game drive e riesce a stare qualche ora nel veicolo." },
+        { q: "Un safari in Tanzania è sicuro per i bambini?", a: "Sì, con una buona guida. Durante i game drive si resta nel veicolo, e scegliamo lodge che accolgono i bambini." },
+      ],
+    },
+    "honeymoon-safari-tanzania": {
+      name: "Safari per la luna di miele",
+      seoTitle: "Luna di miele in safari in Tanzania | Privato nel Serengeti e a Ngorongoro",
+      description: "Organizza la tua luna di miele con un safari privato in Tanzania: campi speciali nel Serengeti, sul bordo del cratere di Ngorongoro e a Tarangire, voli in mongolfiera e colazioni nella savana, con una guida locale.",
+      h1: "Luna di miele in safari in Tanzania",
+      lede: "Campi tranquilli, cieli immensi e un veicolo solo per voi due. Un safari è un modo meraviglioso per iniziare la vita insieme.",
+      heroAlt: "Tramonto dietro un'acacia nelle pianure della Tanzania",
+      sections: [
+        { h: "Scegliere i campi", p: [
+          "In luna di miele il campo conta quanto il parco. Spesso proponiamo un mix: un lodge sul bordo del cratere di Ngorongoro per il panorama, un piccolo campo tendato nel Serengeti e una notte davvero speciale da ricordare.",
+          "Le nostre <a href=\"/lodges\">pagine dei lodge</a> mostrano i campi con cui lavoriamo, con foto vere.",
+        ] },
+        { h: "I piccoli extra", p: [
+          "Un volo in mongolfiera all'alba sul Serengeti, una colazione nella savana dopo un game drive mattutino, o semplicemente una notte in più senza lunghi trasferimenti. Puoi aggiungerli nel <a href=\"/planner\">planner</a> o chiederceli.",
+        ] },
+        { h: "Quando andare?", p: [
+          "Da giugno a ottobre è la stagione secca e gli animali si vedono facilmente. Da gennaio a marzo è più tranquillo e verde, ed è la stagione delle nascite nel sud. La nostra <a href=\"/great-migration-serengeti\">guida alla Grande Migrazione</a> ti aiuta a scegliere.",
+        ] },
+      ],
+      faqs: [
+        { q: "Quanti giorni per una luna di miele in safari?", a: "Da cinque a sette giorni ti permettono di includere il Serengeti e Ngorongoro senza lunghe giornate di viaggio." },
+      ],
+    },
+    "budget-camping-safari-tanzania": {
+      name: "Safari economici in campeggio",
+      seoTitle: "Safari economico in campeggio in Tanzania | Privato, da Arusha",
+      description: "Un safari privato in campeggio nei campeggi pubblici della Tanzania: cosa è incluso, come funziona e quanto costa davvero. Serengeti, Ngorongoro e Tarangire da Arusha.",
+      h1: "Safari economici in campeggio in Tanzania",
+      lede: "Dormi in tenda dentro i parchi, senti i leoni di notte e tieni il budget sotto controllo. Il campeggio è il modo più economico per vivere un vero safari in Tanzania.",
+      heroAlt: "Bufali sotto un'acacia in Tanzania",
+      sections: [
+        { h: "Com'è un safari in campeggio?", p: [
+          "Dormi in tenda nei campeggi pubblici dei parchi, come Seronera nel Serengeti centrale, Simba sul bordo del cratere di Ngorongoro e il campeggio di Tarangire. I servizi sono in comune e semplici.",
+          "Dato che dormi dentro il parco, all'alba sei già in mezzo agli animali.",
+        ] },
+        { h: "Sempre privato", p: [
+          "Un safari economico con noi resta un safari privato: il tuo veicolo e la stessa guida ogni giorno. Risparmi sull'alloggio, non sull'esperienza.",
+        ] },
+        { h: "Quanto costa", p: [
+          "I nostri safari di esempio in campeggio mostrano prezzi reali a persona, con ingressi ai parchi, tasse di campeggio, veicolo e guida inclusi. Puoi anche calcolare il tuo itinerario in campeggio nel <a href=\"/planner\">planner</a>: scegli Economico per ogni notte.",
+          "Per tutti i dettagli, leggi <a href=\"/post/budget-safari-tanzania-chasing-the-big-five-on-a-backpacker-s-budget\">la nostra guida al safari economico</a>.",
+        ] },
+      ],
+      faqs: [
+        { q: "Campeggiare nel Serengeti è sicuro?", a: "Sì. I campeggi pubblici sono usati ogni notte da gruppi di safari, e la tua guida conosce le regole. Di notte resti nella tua tenda." },
+        { q: "Qual è il modo più economico per fare un safari in Tanzania?", a: "Un safari in campeggio nei campeggi pubblici, in stagione verde, con più viaggiatori che si dividono il veicolo." },
+      ],
+    },
+  },
+  es: {
+    "private-safari-tanzania": {
+      name: "Safaris privados en Tanzania",
+      seoTitle: "Safari privado en Tanzania con un guía local",
+      description: "Un safari privado en Tanzania con tu propio vehículo y el guía local que planea el viaje contigo. Serengeti, Ngorongoro y Tarangire desde Arusha, con precios transparentes.",
+      h1: "Safaris privados en Tanzania con un guía local",
+      lede: "Tu propio vehículo, tu propio ritmo y un guía con el que ya has hablado antes de aterrizar. Todos nuestros safaris son privados.",
+      heroAlt: "Vista desde el asiento del guía de gacelas en las llanuras del Serengeti",
+      sections: [
+        { h: "Qué significa «privado» para nosotros", p: [
+          "Nunca compartes el vehículo con desconocidos. Tú decides cuándo salir del campamento, cuánto tiempo quedarte mirando un leopardo en un árbol y cuándo es hora de comer.",
+          "Tenemos dos guías, no cien. El guía que planea el viaje contigo es el mismo que te recoge en el aeropuerto y conduce cada día. Sabes con quién vas a viajar antes de reservar.",
+        ] },
+        { h: "Pensado en torno a lo que quieres", p: [
+          "Normalmente empezamos con una llamada. Algunos viajeros quieren ver la Gran Migración, otros los grandes felinos, otros un viaje tranquilo con sus hijos. Te explicamos los parques con sinceridad, incluidos los que te puedes saltar, y tú eliges.",
+          "Si prefieres planearlo tú, nuestro <a href=\"/planner\">planificador</a> te muestra al momento el precio de tu ruta, con el desglose completo de costes.",
+        ] },
+        { h: "Para todos los presupuestos", p: [
+          "Privado no significa necesariamente de lujo. Puedes acampar en los campings públicos, alojarte en lodges cómodos o elegir los mejores campamentos del Serengeti. En todos los casos, el vehículo y el guía son solo para ti.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Cuánto cuesta un safari privado en Tanzania?", a: "Depende sobre todo de los lodges, la temporada y cuántas personas viajan. Nuestros safaris de ejemplo muestran precios reales por persona, y el planificador calcula el precio de tu propia ruta." },
+        { q: "¿Merece la pena un safari privado?", a: "Para la mayoría de los viajeros, sí. Tu día no depende de otros pasajeros, y el guía puede organizarlo todo en torno a lo que quieres ver." },
+      ],
+    },
+    "family-safari-tanzania": {
+      name: "Safaris en familia",
+      seoTitle: "Safari en familia en Tanzania con niños | Privado y local",
+      description: "Cómo organizamos un safari en familia en Tanzania: trayectos más cortos, los lodges adecuados, tarifas reducidas para niños en los parques y un guía que se lleva genial con los pequeños. Viajes privados desde Arusha.",
+      h1: "Safaris en familia en Tanzania",
+      lede: "Un safari con niños necesita otro ritmo. Trayectos más cortos, pausas cuando hacen falta y lodges donde los niños son bienvenidos.",
+      heroAlt: "Una jirafa junto a una acacia en el Serengeti",
+      sections: [
+        { h: "Cómo planeamos un safari en familia", p: [
+          "Organizamos los días en torno a los niños. Eso suele significar menos horas de coche, una tarde en la piscina y parques cercanos entre sí, como Tarangire, Karatu y el cráter del Ngorongoro.",
+          "Como el safari es privado, paráis cuando queráis. Ver elefantes un buen rato en una charca suele ser el momento favorito de los más pequeños, y no hay nadie más en el vehículo esperando para seguir.",
+        ] },
+        { h: "Precios para niños", p: [
+          "Las entradas a los parques son más baratas para los niños, y muchos lodges tienen tarifas infantiles o tiendas familiares. Nuestro planificador pide la edad de cada niño para que el precio sea correcto desde el principio.",
+          "Algunos campamentos tienen una edad mínima. Dinos la edad de tus hijos y te recomendaremos alojamientos adecuados.",
+        ] },
+        { h: "¿Cuántos días?", p: [
+          "De cinco a siete días van bien a la mayoría de las familias. Es suficiente para incluir el Serengeti sin prisas, y lo bastante corto para que nadie se canse de los safaris.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Cuál es la mejor edad para un safari en Tanzania?", a: "Los niños de cualquier edad pueden ir de safari, pero a partir de los seis años, más o menos, la mayoría disfrutan de las salidas y aguantan unas horas en el vehículo." },
+        { q: "¿Es seguro un safari en Tanzania para los niños?", a: "Sí, con un buen guía. Durante los safaris os quedáis en el vehículo, y elegimos lodges que reciben bien a los niños." },
+      ],
+    },
+    "honeymoon-safari-tanzania": {
+      name: "Safaris de luna de miel",
+      seoTitle: "Luna de miel de safari en Tanzania | Privado por el Serengeti y el Ngorongoro",
+      description: "Planea tu luna de miel con un safari privado en Tanzania: campamentos especiales en el Serengeti, en el borde del cráter del Ngorongoro y en Tarangire, vuelos en globo y desayunos en la sabana, con un guía local.",
+      h1: "Luna de miel de safari en Tanzania",
+      lede: "Campamentos tranquilos, cielos inmensos y un vehículo solo para vosotros dos. Un safari es una forma maravillosa de empezar la vida juntos.",
+      heroAlt: "Puesta de sol detrás de una acacia en las llanuras de Tanzania",
+      sections: [
+        { h: "Elegir los campamentos", p: [
+          "En una luna de miel, el campamento importa tanto como el parque. Solemos proponer una combinación: un lodge en el borde del cráter del Ngorongoro por las vistas, un pequeño campamento de tiendas en el Serengeti y una noche realmente especial que recordaréis.",
+          "Nuestras <a href=\"/lodges\">páginas de lodges</a> muestran los campamentos con los que trabajamos, con fotos reales.",
+        ] },
+        { h: "Los pequeños extras", p: [
+          "Un vuelo en globo al amanecer sobre el Serengeti, un desayuno en la sabana después de un safari temprano o simplemente una noche más sin trayectos largos. Puedes añadirlos en el <a href=\"/planner\">planificador</a> o pedírnoslos.",
+        ] },
+        { h: "¿Cuándo ir?", p: [
+          "De junio a octubre es la estación seca y los animales se ven con facilidad. De enero a marzo hay más tranquilidad y todo está verde, y es la temporada de partos en el sur. Nuestra <a href=\"/great-migration-serengeti\">guía de la Gran Migración</a> te ayuda a elegir.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Cuántos días para una luna de miel de safari?", a: "De cinco a siete días permiten incluir el Serengeti y el Ngorongoro sin largas jornadas de carretera." },
+      ],
+    },
+    "budget-camping-safari-tanzania": {
+      name: "Safaris económicos de camping",
+      seoTitle: "Safari económico de camping en Tanzania | Privado, desde Arusha",
+      description: "Un safari privado de camping en los campings públicos de Tanzania: qué incluye, cómo funciona y cuánto cuesta de verdad. Serengeti, Ngorongoro y Tarangire desde Arusha.",
+      h1: "Safaris económicos de camping en Tanzania",
+      lede: "Duerme en una tienda dentro de los parques, escucha a los leones por la noche y mantén el presupuesto bajo control. El camping es la forma más asequible de vivir un safari de verdad en Tanzania.",
+      heroAlt: "Búfalos bajo una acacia en Tanzania",
+      sections: [
+        { h: "¿Cómo es un safari de camping?", p: [
+          "Duermes en tienda en los campings públicos de los parques, como Seronera en el centro del Serengeti, Simba en el borde del cráter del Ngorongoro y el camping de Tarangire. Los baños son compartidos y sencillos.",
+          "Como duermes dentro del parque, al amanecer ya estás entre los animales.",
+        ] },
+        { h: "Siempre privado", p: [
+          "Un safari económico con nosotros sigue siendo un safari privado: tu propio vehículo y el mismo guía cada día. Ahorras en alojamiento, no en la experiencia.",
+        ] },
+        { h: "Cuánto cuesta", p: [
+          "Nuestros safaris de camping de ejemplo muestran precios reales por persona, con entradas a los parques, tasas de camping, vehículo y guía incluidos. También puedes calcular tu propia ruta de camping en el <a href=\"/planner\">planificador</a>: elige Económico para cada noche.",
+          "Para todos los detalles, lee <a href=\"/post/budget-safari-tanzania-chasing-the-big-five-on-a-backpacker-s-budget\">nuestra guía del safari económico</a>.",
+        ] },
+      ],
+      faqs: [
+        { q: "¿Es seguro acampar en el Serengeti?", a: "Sí. Los campings públicos los usan cada noche grupos de safari, y tu guía conoce las normas. Por la noche te quedas en tu tienda." },
+        { q: "¿Cuál es la forma más barata de hacer un safari en Tanzania?", a: "Un safari de camping en los campings públicos, en temporada verde, con más viajeros compartiendo el vehículo." },
       ],
     },
   },

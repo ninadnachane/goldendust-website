@@ -10,8 +10,10 @@ const T = {
   nl: { car: "Safarifoto's", of: (i: number, n: number) => `Foto ${i} van ${n}`, prev: "Vorige foto", next: "Volgende foto" },
   de: { car: "Safarifotos", of: (i: number, n: number) => `Foto ${i} von ${n}`, prev: "Vorheriges Foto", next: "Nächstes Foto" },
   fr: { car: "Photos de safari", of: (i: number, n: number) => `Photo ${i} sur ${n}`, prev: "Photo précédente", next: "Photo suivante" },
+  it: { car: "Foto di safari", of: (i: number, n: number) => `Foto ${i} di ${n}`, prev: "Foto precedente", next: "Foto successiva" },
+  es: { car: "Fotos de safari", of: (i: number, n: number) => `Foto ${i} de ${n}`, prev: "Foto anterior", next: "Foto siguiente" },
 }[lang];
-const alt = (p: (typeof gallery)[number]) => ({ en: p.alt, nl: p.altNl, de: p.altDe, fr: p.altFr }[lang] ?? p.alt);
+const alt = (p: (typeof gallery)[number]) => ({ en: p.alt, nl: p.altNl, de: p.altDe, fr: p.altFr, it: p.altIt, es: p.altEs }[lang] ?? p.alt);
 const src = (s: string) => (s.startsWith("/") ? s : img(s, 1400));
 ---
 <div class="gal" aria-roledescription="carousel" aria-label={T.car}>
