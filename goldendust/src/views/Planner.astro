@@ -401,7 +401,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
     // open the new tab now (inside the click) so pop-up blockers allow it
     const win = mode === "pdf" || window.matchMedia("(pointer: fine)").matches ? window.open("", "_blank") : null;
     const trip = tripNow();
-    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip, source: mode }) })
+    const r = await fetch("/api/planner/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: v("name"), phone, email: v("email"), website: v("website"), trip, source: mode, lang: LANG }) })
       .then(async (x) => ({ ok: x.ok, d: await x.json().catch(() => ({})) })).catch(() => ({ ok: false, d: { network: true } as any }));
     btn.disabled = false; btn.textContent = label;
     if (!r.ok && (mode === "pdf" || !r.d.network)) { win?.close(); err.textContent = (LANG === "en" && r.d.error) || t("errSave"); return; }

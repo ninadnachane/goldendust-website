@@ -2,6 +2,8 @@
 // Public:  GET /api/planner/options, POST /api/planner/quote, GET /media/<id> (lodge photos)
 // Admin:   /admin (page) and /api/admin/*
 //
+// New leads: an email to LEAD_EMAILS (or ADMIN_EMAILS) through Resend, see notifyLead().
+//
 // Admin security: password + one-time email code, see worker/auth.ts.
 // Login page: /admin/login. Local development only: DEV_ADMIN_BYPASS="1" in .dev.vars.
 import { authApi, sessionEmail, logoutEverywhere, type AuthEnv } from "./auth";
@@ -10,7 +12,11 @@ import { defaultConfig } from "../src/planner/defaults";
 
 interface Env extends AuthEnv {
   ASSETS: Fetcher;
+  LEAD_EMAILS?: string; // who gets the new-lead email (comma-separated); defaults to ADMIN_EMAILS
 }
+type Ctx = { waitUntil(p: Promise<unknown>): void };
+const LANGS = ["en", "nl", "de", "fr", "it", "es"] as const;
+const LANG_NAMES: Record<string, string> = { en: "English", nl: "Dutch", de: "German", fr: "French", it: "Italian", es: "Spanish" };
 
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra } });
@@ -61,7 +67,7 @@ function toRequest(b: any): QuoteRequest {
 }
 
 export default {
-  async fetch(req: Request, env: Env): Promise<Response> {
+  async fetch(req: Request, env: Env, ctx?: Ctx): Promise<Response> {
     const url = new URL(req.url);
     const p = url.pathname;
 
@@ -76,7 +82,7 @@ export default {
       const q = quote(config, toRequest(body));
       return json({ ok: q.ok, errors: q.errors, people: q.people, priced: q.priced, perPerson: q.totals.perPerson });
     }
-    if (p === "/api/planner/lead" && req.method === "POST") return saveLead(req, env);
+    if (p === "/api/planner/lead" && req.method === "POST") return saveLead(req, env, ctx);
     if (p === "/api/planner/itinerary" && req.method === "GET") {
       const ref = url.searchParams.get("ref") || "", k = url.searchParams.get("k") || "";
       if (!/^GD-\d+$/.test(ref) || !/^[a-f0-9]{32}$/.test(k)) return json({ error: "Not found" }, 404);
@@ -138,7 +144,7 @@ function tripSummary(cfg: Config, r: QuoteRequest) {
   return `${r.startDate} · ${r.totalNights} nights · ${r.adults} adult${r.adults === 1 ? "" : "s"}${kids} · ${cat} · ${stops.join(", ")}${chosenAddons(cfg, r).map((a) => ` · + ${a.name}`).join("")}`;
 }
 
-async function saveLead(req: Request, env: Env) {
+async function saveLead(req: Request, env: Env, ctx?: Ctx) {
   const origin = req.headers.get("origin");
   if (!origin || origin !== new URL(req.url).origin) return json({ error: "Bad origin" }, 403);
   const b = await req.json<any>().catch(() => null);
@@ -156,13 +162,51 @@ async function saveLead(req: Request, env: Env) {
   const r = toRequest(b.trip);
   const q = quote(config, r);
   const source = b.source === "pdf" ? "pdf" : "whatsapp";
+  const lang = (LANGS as readonly string[]).includes(b.lang) ? String(b.lang) : "en";
   const token = [...crypto.getRandomValues(new Uint8Array(16))].map((x) => x.toString(16).padStart(2, "0")).join("");
-  const ins = await env.DB.prepare("INSERT INTO leads (name, phone, email, summary, total, request, ip, token, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(name, phone, email || null, tripSummary(config, r), q.ok ? q.totals.total : null, JSON.stringify(r), ip, token, source).run();
+  const ins = await env.DB.prepare("INSERT INTO leads (name, phone, email, summary, total, request, ip, token, source, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(name, phone, email || null, tripSummary(config, r), q.ok ? q.totals.total : null, JSON.stringify(r), ip, token, source, lang).run();
   const id = Number(ins.meta.last_row_id);
   const ref = `GD-${1000 + id}`;
   await env.DB.prepare("UPDATE leads SET ref = ? WHERE id = ?").bind(ref, id).run();
+  // the email goes out in the background: a mail problem never stops the guest getting their PDF or WhatsApp
+  const mail = notifyLead(env, new URL(req.url).origin, { ref, token, name, phone, email, lang, source, summary: tripSummary(config, r), total: q.ok ? q.totals.total : null })
+    .catch((e) => console.log("lead email failed", String(e)));
+  if (ctx) ctx.waitUntil(mail); else await mail;
   return json({ ok: true, ref, token });
+}
+
+type LeadMail = { ref: string; token: string; name: string; phone: string; email: string; lang: string; source: string; summary: string; total: number | null };
+
+async function notifyLead(env: Env, origin: string, l: LeadMail) {
+  const to = (env.LEAD_EMAILS || env.ADMIN_EMAILS || "").split(",").map((e) => e.trim()).filter(Boolean);
+  if (!to.length) return;
+  const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
+  const how = l.source === "pdf" ? "downloaded the PDF" : "went to WhatsApp";
+  const pdf = `${origin}${l.lang === "en" ? "" : "/" + l.lang}/itinerary#ref=${l.ref}&k=${l.token}`;
+  const subject = `New lead ${l.ref}: ${l.name}${l.total != null ? ` · ${usd(l.total)}` : ""} · ${LANG_NAMES[l.lang] || l.lang} · ${l.source === "pdf" ? "PDF" : "WhatsApp"}`;
+  const text = [
+    `${l.name} built a trip in the planner and ${how}.`,
+    l.source === "pdf" ? "They haven't messaged you, so reach out to them." : "If no WhatsApp message arrives from them, reach out to them.",
+    "",
+    `Name: ${l.name}`,
+    `WhatsApp: ${l.phone}  ->  https://wa.me/${l.phone.replace("+", "")}`,
+    `Email: ${l.email || "-"}`,
+    `Language: ${LANG_NAMES[l.lang] || l.lang}`,
+    `Planner price (group): ${l.total != null ? usd(l.total) : "couldn't be priced"}`,
+    `Trip: ${l.summary}`,
+    "",
+    `Their itinerary PDF: ${pdf}`,
+    `All leads: ${origin}/admin`,
+  ].join("\n");
+  if (env.DEV_EMAIL_LOG === "1") { console.log(`[dev] lead email to ${to.join(", ")}: ${subject}\n${text}`); return; }
+  if (!env.RESEND_API_KEY) { console.log("lead email skipped: no RESEND_API_KEY"); return; }
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({ from: env.MAIL_FROM || "Golden Dust admin <onboarding@resend.dev>", to, subject, text, ...(l.email ? { reply_to: l.email } : {}) }),
+  });
+  if (!r.ok) console.log("lead email failed", r.status, await r.text());
 }
 
 // Itinerary data for the PDF page. Guests need their private link (ref + token); the admin uses the lead id.
@@ -210,7 +254,7 @@ async function adminApi(req: Request, env: Env, p: string, email: string): Promi
     return json(quote(cfg, toRequest(body?.request)));
   }
   if (p === "/api/admin/leads" && req.method === "GET") {
-    const { results } = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, summary, total, status, notes, source FROM leads ORDER BY id DESC LIMIT 1000").all();
+    const { results } = await env.DB.prepare("SELECT id, ref, created_at, name, phone, email, summary, total, status, notes, source, lang FROM leads ORDER BY id DESC LIMIT 1000").all();
     return json({ leads: results });
   }
   const lm = p.match(/^\/api\/admin\/leads\/(\d+)$/);

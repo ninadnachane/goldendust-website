@@ -509,7 +509,7 @@
       const counts = statuses.map((s) => `${leads.filter((l) => l.status === s).length} ${s}`).join(" · ");
       $("[data-leads]").innerHTML = `<p class="hint">${leads.length} total · ${counts}</p><div class="tbl"><table class="leads"><thead><tr><th>Received (UTC)</th><th>Ref</th><th>Guest</th><th>Trip</th><th class="n">Planner price</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${
         rows.map((l) => `<tr data-lead="${l.id}" class="st-${esc(l.status)}">
-          <td class="nw">${esc(l.created_at)}</td><td class="nw">${esc(l.ref)}<br><span class="src src--${esc(l.source || "whatsapp")}">${l.source === "pdf" ? "PDF download" : "WhatsApp"}</span></td>
+          <td class="nw">${esc(l.created_at)}</td><td class="nw">${esc(l.ref)}<br><span class="src src--${esc(l.source || "whatsapp")}">${l.source === "pdf" ? "PDF download" : "WhatsApp"}</span>${l.lang && l.lang !== "en" ? ` <span class="src">${esc(String(l.lang).toUpperCase())}</span>` : ""}</td>
           <td><strong>${esc(l.name)}</strong><br><a href="https://wa.me/${esc(l.phone.replace("+", ""))}" target="_blank" rel="noopener">${esc(l.phone)}</a>${l.email ? `<br><a href="mailto:${esc(l.email)}">${esc(l.email)}</a>` : ""}</td>
           <td class="sm">${esc(l.summary)}</td><td class="n">${l.total != null ? money(l.total) : "–"}</td>
           <td><select data-ls>${statuses.map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>

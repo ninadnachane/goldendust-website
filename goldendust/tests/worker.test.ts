@@ -134,6 +134,42 @@ test("requests from other websites can't change data", async () => {
   assert.equal(l.status, 403);
 });
 
+test("a new lead (PDF too) is saved with its language and emailed to the admin", async () => {
+  const logs: string[] = [];
+  const orig = console.log; console.log = (...a: unknown[]) => { logs.push(a.join(" ")); };
+  let d: any;
+  try {
+    const r = await call(req("/api/planner/lead", { method: "POST", json: { name: "Giulia Rossi", phone: "+39 312 345 6789", email: "g@example.com", trip: trip(), source: "pdf", lang: "it" } }));
+    assert.equal(r.status, 200);
+    d = await r.json();
+  } finally { console.log = orig; }
+  const mail = logs.find((l) => l.includes("lead email to hello@goldendustsafaris.com"));
+  assert.ok(mail, "lead email was sent");
+  assert.match(mail!, new RegExp(`New lead ${d.ref}: Giulia Rossi`));
+  assert.match(mail!, /Italian · PDF/);
+  assert.match(mail!, /https:\/\/wa\.me\/393123456789/);
+  assert.match(mail!, new RegExp(`/it/itinerary#ref=${d.ref}&k=${d.token}`));
+  const s = await login();
+  const lead = (await (await call(req("/api/admin/leads", { cookie: s.cookie }))).json() as any).leads[0];
+  assert.equal(lead.lang, "it");
+  assert.equal(lead.phone, "+393123456789");
+  assert.equal(lead.email, "g@example.com");
+});
+
+test("the lead is saved even when the email can't be sent", async () => {
+  const e = testEnv({ DEV_EMAIL_LOG: "0", RESEND_API_KEY: "test" });
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async () => { throw new Error("mail down"); }) as any;
+  const orig = console.log; console.log = () => {};
+  try {
+    const r = await call(req("/api/planner/lead", { method: "POST", json: { name: "Ann Guest", phone: "+31612345678", trip: trip(), source: "pdf", lang: "xx" } }), e);
+    assert.equal(r.status, 200);
+    const row = await e.DB.prepare("SELECT name, lang FROM leads").first();
+    assert.equal(row.name, "Ann Guest");
+    assert.equal(row.lang, "en", "unknown languages are stored as en");
+  } finally { globalThis.fetch = realFetch; console.log = orig; }
+});
+
 test("lead needs a name and a valid mobile number", async () => {
   const bad = await call(req("/api/planner/lead", { method: "POST", json: { name: "A", phone: "0612", trip: trip() } }));
   assert.equal(bad.status, 400);
