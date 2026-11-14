@@ -31,6 +31,7 @@ const T = {
   .pb table { width: 100%; border-collapse: collapse; font-size: 0.93rem; margin: 0 0 0.8rem; }
   .pb th { text-align: left; font-family: var(--display); font-size: 0.8rem; color: var(--ink-2); padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--line); }
   .pb td { padding: 0.45rem 0.4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .pb td:last-child, .pb th:last-child { text-align: right; white-space: nowrap; }
+  .pb td:last-child, .pb th:last-child { text-align: right; }
+  .pb td:last-child { white-space: nowrap; } /* headings may wrap, so long ones ("Desde, por persona") don't push the page wider than a phone */
   .pb__note { font-size: 0.85rem; color: var(--ink-2); margin: 0 !important; }
 </style>

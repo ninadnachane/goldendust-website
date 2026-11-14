@@ -51,7 +51,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: X, doc: lang === "e
     const tr = (k: string, v: Record<string, unknown> = {}) => { const x = I.t?.[k]; const s = Array.isArray(x) ? x[PR.select(Number(v.n ?? 0)) === "one" ? 0 : 1] : x; return fill(String(s ?? k), v); };
     const tx = (m: any, id: string, kind: "name" | "blurb", en: string) => { const e = m?.[id]?.[kind]; return e && e.en === en ? (e[LANG] ?? en) : en; };
     const dtx = (en: string) => I.doc?.[en]?.[LANG] ?? en;
-    const usd = (n: number) => Math.round(n).toLocaleString(LANG === "en" ? "en-US" : LOC);
+    const usd = (n: number) => Math.round(n).toLocaleString(LANG === "en" ? "en-US" : LOC, { useGrouping: "always" } as Intl.NumberFormatOptions);
     const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
     const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Date(iso + "T00:00:00Z").toLocaleDateString(LOC, { ...o, timeZone: "UTC" });
     const short = (iso: string) => fmt(iso, { weekday: "short", day: "numeric", month: "short" });

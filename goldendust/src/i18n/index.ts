@@ -33,7 +33,8 @@ export const langPaths = () => OTHER_LANGS.map((lang) => ({ params: { lang } }))
 export const pick = <T>(lang: Lang, v: Partial<Record<Lang, T>> & { en: T }): T => v[lang] ?? v.en;
 
 export function usdFor(lang: Lang, n: number) {
-  return "$" + Math.round(n).toLocaleString(lang === "en" ? "en-US" : LOCALE[lang]);
+  // "always": Italian and Spanish otherwise skip the separator in 4-digit numbers ($1162 instead of $1.162)
+  return "$" + Math.round(n).toLocaleString(lang === "en" ? "en-US" : LOCALE[lang], { useGrouping: "always" } as Intl.NumberFormatOptions);
 }
 
 /** Adds the language prefix to the site links inside a piece of HTML (href="/..."). */

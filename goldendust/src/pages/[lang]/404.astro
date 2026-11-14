@@ -1,0 +1,7 @@
+---
+// Cloudflare serves the nearest 404.html, so /it/whatever gets the Italian page.
+import View from "../../views/NotFound.astro";
+import { langPaths } from "../../i18n";
+export const getStaticPaths = langPaths;
+---
+<View />

@@ -221,7 +221,7 @@ const it: Record<PlannerKey, string | Pair | string[]> = {
   gvAria: "Foto di {l}", close: "Chiudi", photoOf: "{l}, foto {k} di {n}",
   soonCamp: "Le foto di questo campo arriveranno presto. Scrivici su WhatsApp e te ne manderemo alcune.", soonLodge: "Le foto di questo lodge arriveranno presto. Scrivici su WhatsApp e te ne manderemo alcune.",
   prevPhoto: "Foto precedente", nextPhoto: "Foto successiva", selected: "Scelto ✓", choose: "Scegli questo lodge",
-  arrive: "Arrivo a {a}", onUs: "Prima notte offerta da noi", back: "Ritorno ad Arusha / in aeroporto", empty: "Il tuo viaggio apparirà qui mentre lo organizzi.",
+  arrive: "Arrivo ad {a}", onUs: "Prima notte offerta da noi", back: "Ritorno ad Arusha / in aeroporto", empty: "Il tuo viaggio apparirà qui mentre lo organizzi.",
   finishFirst: "Completa prima l'itinerario: date, stile e destinazioni.",
   pdfH: "Ricevi il tuo itinerario in PDF", sendH: "Invia il tuo itinerario",
   pdfLede: "Lascia nome e numero di cellulare e il PDF si apre subito. La tua guida potrebbe ricontattarti su WhatsApp per aiutarti con il programma.",

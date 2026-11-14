@@ -135,7 +135,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
   // admin text by id, translated only while the English in admin still matches
   const tx = (m: any, id: string, kind: "name" | "blurb", en: string) => { const e = m?.[id]?.[kind]; return e && e.en === en ? (e[LANG] ?? en) : en; };
   const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-  const usd = (n: number) => "$" + Math.round(n).toLocaleString(LANG === "en" ? "en-US" : LOC);
+  const usd = (n: number) => "$" + Math.round(n).toLocaleString(LANG === "en" ? "en-US" : LOC, { useGrouping: "always" } as Intl.NumberFormatOptions);
   const usdEn = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
   const addDays = (iso: string, d: number) => { const x = new Date(iso + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
   const nice = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString(LOC, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });

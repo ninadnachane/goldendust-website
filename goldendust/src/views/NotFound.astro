@@ -1,0 +1,24 @@
+---
+import Base from "../layouts/Base.astro";
+import { langOf, lp } from "../i18n";
+
+const lang = langOf(Astro.url);
+const L = (x: string) => lp(lang, x);
+const T = {
+  en: { title: "Page not found", h1: "This page doesn't exist", lede: "It may have moved when we updated our website.", a: "See our safari packages", b: "read our planning guides", c: "go to the homepage", or: "or" },
+  nl: { title: "Pagina niet gevonden", h1: "Deze pagina bestaat niet", lede: "Misschien is ze verplaatst toen we onze website vernieuwden.", a: "Bekijk onze safaripakketten", b: "lees onze reisgidsen", c: "ga naar de homepage", or: "of" },
+  de: { title: "Seite nicht gefunden", h1: "Diese Seite gibt es nicht", lede: "Vielleicht wurde sie bei der Überarbeitung unserer Website verschoben.", a: "Unsere Safari-Pakete ansehen", b: "unsere Reiseratgeber lesen", c: "zur Startseite gehen", or: "oder" },
+  fr: { title: "Page introuvable", h1: "Cette page n'existe pas", lede: "Elle a peut-être été déplacée lors de la mise à jour de notre site.", a: "Voir nos circuits safari", b: "lire nos guides pratiques", c: "revenir à l'accueil", or: "ou" },
+  it: { title: "Pagina non trovata", h1: "Questa pagina non esiste", lede: "Potrebbe essere stata spostata quando abbiamo aggiornato il sito.", a: "Vedi i nostri pacchetti safari", b: "leggi le nostre guide", c: "torna alla home", or: "oppure" },
+  es: { title: "Página no encontrada", h1: "Esta página no existe", lede: "Puede que se haya movido al actualizar nuestra web.", a: "Ver nuestros paquetes de safari", b: "leer nuestras guías", c: "ir a la página de inicio", or: "o" },
+}[lang];
+---
+<Base title={`${T.title} | Golden Dust Safaris`} description={T.h1} noindex>
+  <section class="section">
+    <div class="wrap measure">
+      <h1>{T.h1}</h1>
+      <p class="lede">{T.lede}</p>
+      <p><a href={L("/tanzania-safari-packages")}>{T.a}</a>, <a href={L("/blog")}>{T.b}</a> {T.or} <a href={L("/")}>{T.c}</a>.</p>
+    </div>
+  </section>
+</Base>

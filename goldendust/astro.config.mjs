@@ -9,8 +9,8 @@ export default defineConfig({
   vite: { build: { assetsInlineLimit: 0 } },
   integrations: [
     sitemap({
-      // the printable itinerary and the admin pages stay out of Google (in every language)
-      filter: (p) => !/^\/(?:(?:nl|de|fr|it|es)\/)?(admin|itinerary)(\/|\.html|$)/.test(new URL(p).pathname),
+      // the printable itinerary, the 404 pages and the admin pages stay out of Google (in every language)
+      filter: (p) => !/^\/(?:(?:nl|de|fr|it|es)\/)?(admin|itinerary|404)(\/|\.html|$)/.test(new URL(p).pathname),
       // English at the root, the other languages under /nl, /de, /fr, /it and /es (adds hreflang links)
       i18n: { defaultLocale: "en", locales: { en: "en", nl: "nl", de: "de", fr: "fr", it: "it", es: "es" } },
     }),
