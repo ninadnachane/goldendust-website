@@ -110,6 +110,17 @@ test("too many wrong passwords lock the login", async () => {
   assert.equal(r.status, 429);
 });
 
+test("wrong passwords from many places can't lock out an admin who signed in before", async () => {
+  assert.equal((await login()).status, 200); // the admin signs in once from 203.0.113.7
+  for (let i = 0; i < 20; i++)
+    await call(req("/api/auth/login", { method: "POST", ip: `198.51.100.${i}`, json: { email: "hello@goldendustsafaris.com", password: "wrong-wrong-wrong" } } as any));
+  // a new address is blocked by the site-wide limit...
+  const fresh = await call(req("/api/auth/login", { method: "POST", ip: "192.0.2.50", json: { email: "hello@goldendustsafaris.com", password: "correct-horse-battery" } } as any));
+  assert.equal(fresh.status, 429);
+  // ...but the admin's own address still gets in
+  assert.equal((await login()).status, 200);
+});
+
 test("a forged session cookie doesn't work", async () => {
   const r = await call(req("/api/admin/config", { cookie: "__Host-gd_admin=" + "a".repeat(64) }));
   assert.equal(r.status, 401);

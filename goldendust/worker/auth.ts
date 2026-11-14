@@ -5,7 +5,7 @@
 //   RESEND_API_KEY  - from resend.com (account created with the admin email)
 // Plain vars (wrangler.jsonc): ADMIN_EMAILS, MAIL_FROM
 //
-// Protections: generic error messages, rate limits per IP and per account, codes expire
+// Protections: generic error messages, rate limits per IP and site-wide (IPs that signed in before are exempt from the site-wide one), codes expire
 // after 10 minutes and allow 5 tries, sessions are random 256-bit tokens stored hashed,
 // cookie is __Host-, HttpOnly, Secure, SameSite=Strict, sessions last 12 hours.
 
@@ -24,7 +24,8 @@ const SESSION_HOURS = 12;
 const CODE_MINUTES = 10;
 const CODE_TRIES = 5;
 const PW_FAILS_PER_IP = 5; // per 15 minutes
-const PW_FAILS_TOTAL = 20; // per hour, all IPs (slows down spread-out attacks)
+const PW_FAILS_TOTAL = 20; // per hour, all IPs (slows down spread-out attacks; IPs that signed in before are exempt)
+const KNOWN_IP_DAYS = 90; // an IP that completed a sign-in in this many days counts as known
 const MIN_PASSWORD = 12;
 
 const enc = new TextEncoder();
@@ -85,9 +86,16 @@ export async function sessionEmail(req: Request, env: AuthEnv): Promise<string |
 async function tooManyFailures(env: AuthEnv, ip: string) {
   const t = now();
   const r = await env.DB.prepare(
-    "SELECT SUM(CASE WHEN ip = ?1 AND at > ?2 THEN 1 ELSE 0 END) AS mine, SUM(CASE WHEN at > ?3 THEN 1 ELSE 0 END) AS total FROM login_attempts WHERE ok = 0 AND at > ?3",
-  ).bind(ip, t - 15 * 60, t - 60 * 60).first<{ mine: number | null; total: number | null }>();
-  return (r?.mine || 0) >= PW_FAILS_PER_IP || (r?.total || 0) >= PW_FAILS_TOTAL;
+    `SELECT
+       SUM(CASE WHEN ok = 0 AND ip = ?1 AND at > ?2 THEN 1 ELSE 0 END) AS mine,
+       SUM(CASE WHEN ok = 0 AND at > ?3 THEN 1 ELSE 0 END) AS total,
+       SUM(CASE WHEN ok = 1 AND kind = 'code' AND ip = ?1 AND at > ?4 THEN 1 ELSE 0 END) AS known
+     FROM login_attempts WHERE at > ?4`,
+  ).bind(ip, t - 15 * 60, t - 60 * 60, t - KNOWN_IP_DAYS * 86400).first<{ mine: number | null; total: number | null; known: number | null }>();
+  if ((r?.mine || 0) >= PW_FAILS_PER_IP) return true;
+  // The site-wide limit only applies to IP addresses that haven't signed in successfully before,
+  // so someone sending wrong passwords from many places can't lock the real admin out.
+  return (r?.total || 0) >= PW_FAILS_TOTAL && !(r?.known || 0);
 }
 
 const record = (env: AuthEnv, ip: string, kind: string, ok: boolean) =>
@@ -161,7 +169,8 @@ async function verify(req: Request, env: AuthEnv) {
   await env.DB.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(t).run();
   await env.DB.prepare("INSERT INTO sessions (token_hash, email, created_at, expires_at, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?)")
     .bind(await sha256("s:" + token), ch.email, t, t + SESSION_HOURS * 3600, ip, (req.headers.get("user-agent") || "").slice(0, 300)).run();
-  await env.DB.prepare("DELETE FROM login_attempts WHERE at < ?").bind(t - 7 * 86400).run();
+  // keep failures for a week; keep successful sign-ins longer, they mark known IPs
+  await env.DB.prepare("DELETE FROM login_attempts WHERE at < ? AND NOT (ok = 1 AND kind = 'code' AND at > ?)").bind(t - 7 * 86400, t - KNOWN_IP_DAYS * 86400).run();
   return jsonRes({ ok: true }, 200, { "set-cookie": `${COOKIE}=${token}; Path=/; Max-Age=${SESSION_HOURS * 3600}; HttpOnly; Secure; SameSite=Strict` });
 }
 
