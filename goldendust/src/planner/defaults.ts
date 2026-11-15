@@ -58,7 +58,7 @@ export const defaultConfig: Config = {
       "International flights", "Visa fees", "Travel & medical insurance", "Tips & gratuities (standard tipping is USD 10-20 per person per day)",
       "Beverages at the camps", "Personal expenses (laundry, minibar, souvenirs, phone calls)", "Optional activities (e.g. hot air balloon safari)",
     ],
-    payment: "Advance of 30%, the rest in cash on arrival. The cancellation policy of each camp and lodge applies.",
+    payment: "Advance of 40%, the rest in cash on arrival. The cancellation policy of each camp and lodge applies.",
     notes: [
       "Accommodation is subject to availability. Bookings aren't confirmed until you accept this quotation, so a listed property may become fully booked in the meantime. If that happens we'll propose suitable alternatives for your approval. If you're not happy with the alternatives and we can't secure your original choice, we'll give you a full refund.",
     ],
