@@ -1,58 +1,102 @@
 ---
-// Google Analytics 4 and Google Tag Manager (Google Ads) with a cookie banner. Nothing is loaded or stored by Google until the visitor accepts.
-// The choice is kept in localStorage ("gd_consent_v2"; v2 since the banner now covers ads too, so earlier choices are asked again);
+// Google Analytics 4 and Google Tag Manager (Google Ads) with a cookie banner: Accept / More options (Analytics and Advertising toggles, off by default, plus Reject all).
+// Nothing is loaded or stored by Google until the visitor agrees. The choice is kept in localStorage ("gd_consent_v3", JSON {a, m});
 // the footer link "Cookie settings" opens the banner again.
 // Other scripts can call window.gdTrack(eventName, params) — it does nothing without consent.
 import { site } from "../lib/site";
 import { langOf } from "../i18n";
 const T = {
-  en: { aria: "Cookie choice", p: "We use cookies from Google Analytics and Google Ads to see how visitors use our website and which of our ads work, so we can improve both. We don't sell your data.", yes: "Accept", no: "Decline" },
-  nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics en Google Ads om te zien hoe bezoekers onze website gebruiken en welke van onze advertenties werken, zodat we beide kunnen verbeteren. We verkopen je gegevens niet.", yes: "Accepteren", no: "Weigeren" },
-  de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics und Google Ads, um zu sehen, wie Besucher unsere Website nutzen und welche unserer Anzeigen funktionieren, damit wir beides verbessern können. Wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", no: "Ablehnen" },
-  fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics et Google Ads pour voir comment les visiteurs utilisent notre site et lesquelles de nos annonces fonctionnent, afin d'améliorer les deux. Nous ne vendons pas vos données.", yes: "Accepter", no: "Refuser" },
-  it: { aria: "Scelta dei cookie", p: "Usiamo i cookie di Google Analytics e Google Ads per capire come i visitatori usano il nostro sito e quali annunci funzionano, così da migliorarli entrambi. Non vendiamo i tuoi dati.", yes: "Accetta", no: "Rifiuta" },
-  es: { aria: "Elección de cookies", p: "Usamos cookies de Google Analytics y Google Ads para ver cómo usan los visitantes nuestra web y qué anuncios funcionan, y así mejorar ambos. No vendemos tus datos.", yes: "Aceptar", no: "Rechazar" },
+  en: { aria: "Cookie choice", p: "We use cookies from Google Analytics and Google Ads to see how visitors use our website and which of our ads work, so we can improve both. We don't sell your data.", yes: "Accept", more: "More options", an: "Analytics", anD: "Google Analytics: which pages people visit and how they use the trip planner.", ad: "Advertising", adD: "Google Ads: which of our ads lead to an enquiry.", save: "Save choices", no: "Reject all", all: "Accept all" },
+  nl: { aria: "Cookiekeuze", p: "We gebruiken cookies van Google Analytics en Google Ads om te zien hoe bezoekers onze website gebruiken en welke van onze advertenties werken, zodat we beide kunnen verbeteren. We verkopen je gegevens niet.", yes: "Accepteren", more: "Meer opties", an: "Analyse", anD: "Google Analytics: welke pagina's bezoekers bekijken en hoe ze de reisplanner gebruiken.", ad: "Advertenties", adD: "Google Ads: welke van onze advertenties tot een aanvraag leiden.", save: "Keuze opslaan", no: "Alles weigeren", all: "Alles accepteren" },
+  de: { aria: "Cookie-Auswahl", p: "Wir verwenden Cookies von Google Analytics und Google Ads, um zu sehen, wie Besucher unsere Website nutzen und welche unserer Anzeigen funktionieren, damit wir beides verbessern können. Wir verkaufen Ihre Daten nicht.", yes: "Akzeptieren", more: "Weitere Optionen", an: "Analyse", anD: "Google Analytics: welche Seiten besucht werden und wie der Reiseplaner genutzt wird.", ad: "Werbung", adD: "Google Ads: welche unserer Anzeigen zu einer Anfrage führen.", save: "Auswahl speichern", no: "Alle ablehnen", all: "Alle akzeptieren" },
+  fr: { aria: "Choix des cookies", p: "Nous utilisons les cookies de Google Analytics et Google Ads pour voir comment les visiteurs utilisent notre site et lesquelles de nos annonces fonctionnent, afin d'améliorer les deux. Nous ne vendons pas vos données.", yes: "Accepter", more: "Plus d'options", an: "Mesure d'audience", anD: "Google Analytics : les pages consultées et l'utilisation du planificateur de voyage.", ad: "Publicité", adD: "Google Ads : lesquelles de nos annonces mènent à une demande.", save: "Enregistrer mes choix", no: "Tout refuser", all: "Tout accepter" },
+  it: { aria: "Scelta dei cookie", p: "Usiamo i cookie di Google Analytics e Google Ads per capire come i visitatori usano il nostro sito e quali annunci funzionano, così da migliorarli entrambi. Non vendiamo i tuoi dati.", yes: "Accetta", more: "Altre opzioni", an: "Statistiche", anD: "Google Analytics: quali pagine vengono visitate e come si usa il pianificatore di viaggio.", ad: "Pubblicità", adD: "Google Ads: quali dei nostri annunci portano a una richiesta.", save: "Salva le scelte", no: "Rifiuta tutto", all: "Accetta tutto" },
+  es: { aria: "Elección de cookies", p: "Usamos cookies de Google Analytics y Google Ads para ver cómo usan los visitantes nuestra web y qué anuncios funcionan, y así mejorar ambos. No vendemos tus datos.", yes: "Aceptar", more: "Más opciones", an: "Analítica", anD: "Google Analytics: qué páginas se visitan y cómo se usa el planificador de viajes.", ad: "Publicidad", adD: "Google Ads: cuáles de nuestros anuncios llevan a una consulta.", save: "Guardar elección", no: "Rechazar todo", all: "Aceptar todo" },
 }[langOf(Astro.url)];
 ---
 <div class="ck" data-ck hidden role="region" aria-label={T.aria}>
   <p>{T.p}</p>
-  <div class="ck__b">
+  <div class="ck__b" data-ck-first>
     <button type="button" class="btn" data-ck-yes>{T.yes}</button>
-    <button type="button" class="btn btn--ghost" data-ck-no>{T.no}</button>
+    <button type="button" class="btn btn--ghost" data-ck-more>{T.more}</button>
+  </div>
+  <div class="ck__opts" data-ck-opts hidden>
+    <label class="ck__o"><input type="checkbox" data-ck-a /><span><strong>{T.an}</strong><small>{T.anD}</small></span></label>
+    <label class="ck__o"><input type="checkbox" data-ck-m /><span><strong>{T.ad}</strong><small>{T.adD}</small></span></label>
+    <div class="ck__b">
+      <button type="button" class="btn btn--ghost" data-ck-no>{T.no}</button>
+      <button type="button" class="btn btn--ghost" data-ck-save>{T.save}</button>
+      <button type="button" class="btn" data-ck-all>{T.all}</button>
+    </div>
   </div>
 </div>
 <script is:inline define:vars={{ id: site.gaId, gtmId: site.gtmId }}>
   (function () {
-    var KEY = "gd_consent_v2", loaded = false;
-    var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
-    var set = function (v) { try { localStorage.setItem(KEY, v); } catch (e) {} };
+    // choice is stored as JSON {a: analytics, m: marketing/ads}; old v2 "granted"/"denied" values are carried over
+    var KEY = "gd_consent_v3", OLD = "gd_consent_v2", gaOn = false, adsOn = false;
+    var get = function () {
+      try {
+        var v = localStorage.getItem(KEY);
+        if (v) return JSON.parse(v);
+        var o = localStorage.getItem(OLD);
+        if (o === "granted") return { a: true, m: true };
+        if (o === "denied") return { a: false, m: false };
+      } catch (e) {}
+      return null;
+    };
+    var set = function (c) { try { localStorage.setItem(KEY, JSON.stringify(c)); localStorage.removeItem(OLD); } catch (e) {} };
     window.dataLayer = window.dataLayer || [];
     function gtag() { window.dataLayer.push(arguments); }
     window.gtag = gtag;
     gtag("consent", "default", { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", analytics_storage: "denied" });
-    function load() {
-      if (loaded || !id) return; loaded = true;
-      gtag("consent", "update", { analytics_storage: "granted", ad_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" });
+    var gtagLoaded = false;
+    function loadGtag() {
+      if (gtagLoaded || !id) return; gtagLoaded = true;
       var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
       document.head.appendChild(s);
-      gtag("js", new Date()); gtag("config", id, { anonymize_ip: true });
-      if (gtmId) {
-        window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-        var g = document.createElement("script"); g.async = true; g.src = "https://www.googletagmanager.com/gtm.js?id=" + gtmId;
-        document.head.appendChild(g);
+      gtag("js", new Date());
+    }
+    function apply(c) {
+      if (!c || !id) return;
+      if (c.a && !gaOn) {
+        gaOn = true; loadGtag();
+        gtag("consent", "update", { analytics_storage: "granted" });
+        gtag("config", id, { anonymize_ip: true });
+      }
+      if (c.m && !adsOn) {
+        adsOn = true; loadGtag();
+        gtag("consent", "update", { ad_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" });
+        if (gtmId) {
+          window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+          var g = document.createElement("script"); g.async = true; g.src = "https://www.googletagmanager.com/gtm.js?id=" + gtmId;
+          document.head.appendChild(g);
+        }
       }
     }
-    window.gdTrack = function (name, params) { if (loaded) gtag("event", name, params || {}); };
-    var box, show = function () { box && (box.hidden = false); };
+    window.gdTrack = function (name, params) { if (gaOn || adsOn) gtag("event", name, params || {}); };
+    var box, first, opts, cbA, cbM;
+    function show() {
+      if (!box) return;
+      var c = get() || { a: false, m: false };
+      cbA.checked = !!c.a; cbM.checked = !!c.m;
+      first.hidden = false; opts.hidden = true; box.hidden = false;
+    }
+    function choose(c) {
+      var reload = (gaOn && !c.a) || (adsOn && !c.m); // stop tracking straight away if they withdraw consent
+      set(c); box.hidden = true;
+      if (reload) location.reload(); else apply(c);
+    }
     function init() {
       box = document.querySelector("[data-ck]");
+      first = box.querySelector("[data-ck-first]"); opts = box.querySelector("[data-ck-opts]");
+      cbA = box.querySelector("[data-ck-a]"); cbM = box.querySelector("[data-ck-m]");
       var c = get();
-      if (c === "granted") load(); else if (c !== "denied") show();
-      box.querySelector("[data-ck-yes]").addEventListener("click", function () { set("granted"); box.hidden = true; load(); });
-      box.querySelector("[data-ck-no]").addEventListener("click", function () {
-        set("denied"); box.hidden = true;
-        if (loaded) location.reload(); // stop tracking straight away if they change their mind
-      });
+      if (c) apply(c); else show();
+      box.querySelector("[data-ck-yes]").addEventListener("click", function () { choose({ a: true, m: true }); });
+      box.querySelector("[data-ck-all]").addEventListener("click", function () { choose({ a: true, m: true }); });
+      box.querySelector("[data-ck-no]").addEventListener("click", function () { choose({ a: false, m: false }); });
+      box.querySelector("[data-ck-save]").addEventListener("click", function () { choose({ a: cbA.checked, m: cbM.checked }); });
+      box.querySelector("[data-ck-more]").addEventListener("click", function () { first.hidden = true; opts.hidden = false; cbA.focus(); });
       document.querySelectorAll("[data-ck-open]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(); }); });
       // count clicks on any WhatsApp link
       document.addEventListener("click", function (e) {
@@ -71,4 +115,11 @@ const T = {
   .ck p { margin: 0; flex: 1 1 16rem; color: var(--ink-2); line-height: 1.45; }
   .ck__b { display: flex; gap: 0.5rem; }
   .ck .btn { padding: 0.55rem 1.1rem; font-size: 0.9rem; }
+  .ck [hidden] { display: none; }
+  .ck__opts { flex: 1 1 100%; display: grid; gap: 0.6rem; }
+  .ck__opts .ck__b { flex-wrap: wrap; justify-content: flex-end; margin-top: 0.2rem; }
+  .ck__o { display: flex; gap: 0.6rem; align-items: flex-start; cursor: pointer; }
+  .ck__o input { margin-top: 0.2rem; width: 1.05rem; height: 1.05rem; accent-color: var(--ink); flex: none; }
+  .ck__o span { display: grid; gap: 0.1rem; }
+  .ck__o small { color: var(--ink-2); font-size: 0.85rem; line-height: 1.4; }
 </style>
