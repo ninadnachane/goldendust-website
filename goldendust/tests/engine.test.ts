@@ -158,12 +158,20 @@ test("a lodge without a rate for a night isn't bookable for those dates", () => 
   assert.match(q.errors.join(" "), /Sample comfort lodge \(Tarangire\) has no rate for the night of 2026-11-09/);
 });
 
-test("lodges with a minimum child age are still offered to everyone", () => {
+test("a lodge's max child age: older children pay the adult rate there, and the lodge is still offered", () => {
   const c: Config = JSON.parse(JSON.stringify(cfg));
-  c.lodges.find((x) => x.id === "tarangire-comfort")!.minChildAge = 6;
+  const l = c.lodges.find((x) => x.id === "tarangire-comfort")!;
+  const night = (q: ReturnType<typeof quote>) => line(q, /Sample comfort lodge \(Tarangire\)/).find((x) => x.group === "accommodation")!;
+  l.maxChildAge = 12;
+  const q13 = quote(c, trip({ adults: 2, childAges: [13] }), TODAY);
+  assert.equal(q13.ok, true);
+  const p = periodFor(l, "2026-11-09")!;
+  assert.equal(night(q13).cost, Math.round(Math.min(3 * p.triple || Infinity, 2 * p.double + p.single, 3 * p.single) * 100) / 100, "a 13-year-old is a third adult");
+  assert.match(night(q13).calc, /1 child over 12 at the adult rate/);
+  const q12 = quote(c, trip({ adults: 2, childAges: [12] }), TODAY);
+  assert.equal(night(q12).cost, Math.round((2 * p.double + p.child) * 100) / 100, "12 still pays the child rate");
+  assert.equal(q13.people.children, 1, "park fees still count a 13-year-old as a child");
   assert.equal(quote(c, trip({ childAges: [4] }), TODAY).ok, true);
-  assert.equal(quote(c, trip({ childAges: [6] }), TODAY).ok, true);
-  assert.equal(quote(c, trip({ childAges: [] }), TODAY).ok, true);
 });
 
 test("real lodge data: valid, Arusha night at the fixed rate, Karatu has no park fees", () => {

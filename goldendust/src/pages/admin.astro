@@ -157,7 +157,7 @@
     }
 
     // ---------- generic table editor
-    type Col = { key: string; label: string; type: "text" | "number" | "bool" | "select" | "readonly" | "button"; options?: () => { v: string; t: string }[]; step?: string; group?: string; text?: (r: any) => string; onClick?: (r: any) => void };
+    type Col = { key: string; label: string; type: "text" | "number" | "bool" | "select" | "readonly" | "button"; options?: () => { v: string; t: string }[]; step?: string; blank?: boolean; group?: string; text?: (r: any) => string; onClick?: (r: any) => void };
     function table(host: HTMLElement, rows: any[], cols: Col[], opts: { add?: () => void; remove?: (r: any) => void; reorder?: boolean; filter?: (r: any) => boolean; rerender: () => void }) {
       const shown = rows.filter((r) => (opts.filter ? opts.filter(r) : true));
       const groups = cols.some((c) => c.group);
@@ -176,7 +176,7 @@
           if (c.type === "button") return `<td><button type="button" class="btn btn--ghost sm" data-btn="${i}" data-col="${c.key}">${esc(c.text!(r))}</button></td>`;
           if (c.type === "bool") return `<td class="c"><input type="checkbox" data-i="${i}" data-k="${c.key}" ${v ? "checked" : ""}></td>`;
           if (c.type === "select") return `<td><select data-i="${i}" data-k="${c.key}">${c.options!().map((o) => `<option value="${esc(o.v)}" ${o.v === v ? "selected" : ""}>${esc(o.t)}</option>`).join("")}</select></td>`;
-          if (c.type === "number") return `<td><input type="number" step="${c.step || "0.01"}" min="0" data-i="${i}" data-k="${c.key}" value="${v ?? 0}"></td>`;
+          if (c.type === "number") return `<td><input type="number" step="${c.step || "0.01"}" min="0" data-i="${i}" data-k="${c.key}" value="${v ?? (c.blank ? "" : 0)}"${c.blank ? ' placeholder="–"' : ""}></td>`;
           return `<td><input type="text" data-i="${i}" data-k="${c.key}" value="${esc(v)}"></td>`;
         }).join("");
         const move = opts.reorder ? `<td class="mv"><button type="button" data-up="${i}" aria-label="Move up">↑</button><button type="button" data-down="${i}" aria-label="Move down">↓</button></td>` : "";
@@ -187,8 +187,8 @@
         el.addEventListener("change", () => {
           const col = cols.find((c) => c.key === el.dataset.k)!;
           const row = rows[Number(el.dataset.i)];
-          const val = col.type === "bool" ? (el as HTMLInputElement).checked : col.type === "number" ? Number(el.value) || 0 : el.value;
-          set(row, col.key, val);
+          const val = col.type === "bool" ? (el as HTMLInputElement).checked : col.type === "number" ? (col.blank && el.value.trim() === "" ? undefined : Number(el.value) || 0) : el.value;
+          if (val === undefined) delete row[col.key]; else set(row, col.key, val);
           markDirty();
           if (col.type === "select" || col.type === "bool") opts.rerender();
         });
@@ -222,7 +222,7 @@
         ["addonAdminPct", "Add-on admin fee % (add-ons get no margin)", "0.1"],
         ["leadDays", "Guests can't arrive within this many days", "1"],
         ["childMinAge", "Children pay from age (younger = free)", "1"],
-        ["childMaxAge", "Children pay child rate up to age", "1"],
+        ["childMaxAge", "Children pay child rate up to age (a lodge can set a lower age)", "1"],
         ["minTotalNights", "Minimum total nights (incl. Arusha)", "1"],
         ["maxTotalNights", "Maximum total nights", "1"],
         ["maxGuests", "Maximum guests in the online planner", "1"],
@@ -323,7 +323,7 @@
         { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
         { key: "active", label: "Shown", type: "bool" },
         { key: "insidePark", label: "Inside park", type: "bool" },
-        { key: "minChildAge", label: "Min. child age", type: "number", step: "1" },
+        { key: "maxChildAge", label: "Child rate up to age", type: "number", step: "1", blank: true },
         { key: "periods", label: "Rates (per person per night)", type: "button", text: (r) => ratesSummary(r), onClick: openRates },
         { key: "photos", label: "Photos & text", type: "button", text: (r) => { const up = (r.images || []).length, n = lodgeImages(r).length; return `${up ? `${up} uploaded` : n ? `${n} from folder` : "0 photos"}${r.description ? " · text" : ""}`; }, onClick: openPhotos },
       ];
@@ -352,7 +352,7 @@
       d.innerHTML = `<div class="dlg__in"><h3>${esc(l.name)}</h3><p class="hint">From the Excel import. USD per person per night, full board. Dates are MM-DD and repeat every year.</p>
         <div class="tbl"><table><thead><tr><th>Season</th><th>From</th><th>To</th><th class="n">Single</th><th class="n">Double pp</th><th class="n">Triple pp</th><th class="n">Child</th></tr></thead><tbody>${
           ps.map((p) => `<tr><td>${esc(p.season)}</td><td>${esc(p.from)}</td><td>${esc(p.to)}</td><td class="n">${money(p.single)}</td><td class="n">${money(p.double)}</td><td class="n">${p.triple ? money(p.triple) : "–"}</td><td class="n">${money(p.child)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">No rates. Add this lodge to the Excel and import it.</td></tr>'
-        }</tbody></table></div>${l.minChildAge ? `<p class="hint">Children from ${l.minChildAge} years only.</p>` : ""}<p><button type="button" class="btn" data-x>Close</button></p></div>`;
+        }</tbody></table></div><p class="hint">${l.maxChildAge != null ? `Child rate up to age ${l.maxChildAge}; older children pay the adult rate here.` : `Child rate up to the general child age (Costs &amp; rules).`}</p><p><button type="button" class="btn" data-x>Close</button></p></div>`;
       d.querySelector("[data-x]")!.addEventListener("click", () => d.close());
       d.addEventListener("close", () => d.remove());
       document.body.append(d); d.showModal();

@@ -121,7 +121,7 @@ const i18n = JSON.stringify({ lang, locale: LOCALE[lang], t: P, areas: AREA_TEXT
     arrivalName: string;
     arrivalPriced?: boolean;
     areas: { id: string; name: string; minNights: number }[];
-    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[]; minChildAge?: number; open?: { from: string; to: string }[] }[];
+    lodges: { id: string; name: string; areaId: string; category: string; description: string; images: string[]; maxChildAge?: number; open?: { from: string; to: string }[] }[];
     addons?: { id: string; name: string; blurb: string; per: string; rate: number; rateChild: number }[];
   };
   const root = document.querySelector<HTMLElement>("[data-planner]")!;
