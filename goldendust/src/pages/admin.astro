@@ -124,7 +124,7 @@
   </dialog>
 
   <script>
-    import { quote, checkConfig, CATEGORIES, money, addDays, lodgeImages, imageUrl, type Config, type Line, type Lodge } from "../planner/engine";
+    import { quote, checkConfig, CATEGORIES, money, addDays, lodgeImages, imageUrl, parseChildBands, formatChildBands, type Config, type Line, type Lodge } from "../planner/engine";
     import { importLodges } from "../planner/lodgeImport";
 
     const $ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
@@ -323,7 +323,7 @@
         { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
         { key: "active", label: "Shown", type: "bool" },
         { key: "insidePark", label: "Inside park", type: "bool" },
-        { key: "maxChildAge", label: "Child rate up to age", type: "number", step: "1", blank: true },
+        { key: "childBands", label: "Child age bands", type: "button", text: (r) => formatChildBands(r.childBands) || "Child column", onClick: editChildBands },
         { key: "periods", label: "Rates (per person per night)", type: "button", text: (r) => ratesSummary(r), onClick: openRates },
         { key: "photos", label: "Photos & text", type: "button", text: (r) => { const up = (r.images || []).length, n = lodgeImages(r).length; return `${up ? `${up} uploaded` : n ? `${n} from folder` : "0 photos"}${r.description ? " · text" : ""}`; }, onClick: openPhotos },
       ];
@@ -339,6 +339,16 @@
       });
     }
 
+    // Child age bands from the lodge's rate sheet, e.g. "5-12: 50%, 13-15: 75%". Empty = every child pays the Child column.
+    function editChildBands(l: Lodge) {
+      const txt = prompt(`${l.name}: child age bands from the rate sheet.\nFormat: 5-12: 50%, 13-15: 75%  (% of the double rate per person; 0% = free; no % = the Child column).\nA child in no band pays the adult rate. Leave empty for no bands.`, formatChildBands(l.childBands));
+      if (txt === null) return;
+      try {
+        const bands = parseChildBands(txt);
+        if (bands.length) l.childBands = bands; else delete l.childBands;
+        markDirty(); renderLodges();
+      } catch (err) { alert((err as Error).message); }
+    }
     const ratesSummary = (l: Lodge) => {
       const ps = l.periods || [];
       if (!ps.length) return "No rates";
@@ -352,7 +362,7 @@
       d.innerHTML = `<div class="dlg__in"><h3>${esc(l.name)}</h3><p class="hint">From the Excel import. USD per person per night, full board. Dates are MM-DD and repeat every year.</p>
         <div class="tbl"><table><thead><tr><th>Season</th><th>From</th><th>To</th><th class="n">Single</th><th class="n">Double pp</th><th class="n">Triple pp</th><th class="n">Child</th></tr></thead><tbody>${
           ps.map((p) => `<tr><td>${esc(p.season)}</td><td>${esc(p.from)}</td><td>${esc(p.to)}</td><td class="n">${money(p.single)}</td><td class="n">${money(p.double)}</td><td class="n">${p.triple ? money(p.triple) : "–"}</td><td class="n">${money(p.child)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">No rates. Add this lodge to the Excel and import it.</td></tr>'
-        }</tbody></table></div><p class="hint">${l.maxChildAge != null ? `Child rate up to age ${l.maxChildAge}; older children pay the adult rate here.` : `Child rate up to the general child age (Costs &amp; rules).`}</p><p><button type="button" class="btn" data-x>Close</button></p></div>`;
+        }</tbody></table></div><p class="hint">${l.childBands?.length ? `Children: ${esc(formatChildBands(l.childBands))} (% of the double rate per person). A child in no band pays the adult rate.` : `Children (general ages, Costs &amp; rules) pay the Child column.`}</p><p><button type="button" class="btn" data-x>Close</button></p></div>`;
       d.querySelector("[data-x]")!.addEventListener("click", () => d.close());
       d.addEventListener("close", () => d.remove());
       document.body.append(d); d.showModal();

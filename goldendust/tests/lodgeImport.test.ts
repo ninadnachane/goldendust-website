@@ -1,16 +1,16 @@
-// Excel import: only verified rows, no Arusha, year ignored, max child age, keeps admin-only fields.
+// Excel import: only verified rows, no Arusha, year ignored, child age bands, keeps admin-only fields.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { importLodges, monthDay } from "../src/planner/lodgeImport";
 import { sampleConfig } from "./fixture";
 
-const head = ["Lodge", "Area", "Category", "Season", "Start Date", "End Date", "Single", "Double", "Triple", "Child", "Rate Type", "Updated", "Rates Verified", "Images in Folder", "Max. Child Age"];
+const head = ["Lodge", "Area", "Category", "Season", "Start Date", "End Date", "Single", "Double", "Triple", "Child", "Rate Type", "Updated", "Rates Verified", "Images in Folder", "Child Bands"];
 const d = (s: string) => new Date(s + "T00:00:00Z");
 const rows = [
   ["Lodge & Camp Rates"], [], head,
   ["Camp A", "Central Serengeti", "Comfort", "Green Season", d("2027-01-01"), d("2027-05-31"), 140, 110, 110, 55, "STO", null, "Yes", "No", null],
   ["Camp A", "Central Serengeti", "Comfort", "High Season", d("2027-06-01"), d("2027-12-31"), 160, 125, 125, 60, "STO", null, "Yes", "No", null],
-  ["Lodge B", "Tarangire", "Luxury", "High Season", d("2026-12-10"), d("2027-03-31"), 400, 300, 280, 150, "STO", null, "Yes", "No", "12"],
+  ["Lodge B", "Tarangire", "Luxury", "High Season", d("2026-12-10"), d("2027-03-31"), 400, 300, 280, 150, "STO", null, "Yes", "No", "5-12: 50%, 13-15: 75%"],
   ["Unverified C", "Tarangire", "Comfort", "High Season", d("2026-06-01"), d("2026-10-31"), 90, 60, 60, 40, "Unverified", null, "No", "No", null],
   ["Hotel D", "Arusha", "Comfort", "High Season", d("2026-06-01"), d("2026-10-31"), 90, 60, 60, 40, "STO", null, "Yes", "No", null],
   ["Camp E", "Mars", "Comfort", "High Season", d("2026-06-01"), d("2026-10-31"), 90, 60, 60, 40, "STO", null, "Yes", "No", null],
@@ -27,8 +27,8 @@ test("imports verified rows only, skips Arusha and unknown areas, ignores the ye
   assert.deepEqual(a.periods.map((p) => [p.from, p.to]), [["01-01", "05-31"], ["06-01", "12-31"]]);
   assert.equal(a.insidePark, true, "Serengeti lodges default to inside the park");
   const b = lodges.find((l) => l.name === "Lodge B")!;
-  assert.equal(b.maxChildAge, 12);
-  assert.equal(a.maxChildAge, undefined, "no age in the sheet: the general child age applies");
+  assert.deepEqual(b.childBands, [{ from: 5, to: 12, pct: 50 }, { from: 13, to: 15, pct: 75 }]);
+  assert.equal(a.childBands, undefined, "no bands in the sheet: the Child column applies");
   assert.deepEqual([b.periods[0].from, b.periods[0].to], ["12-10", "03-31"]);
   assert.match(report.warnings.join(" "), /Lodge B: no rate for 04-01 to 12-09/);
   // sample lodges (no photos/text) are removed, Arusha hotels kept

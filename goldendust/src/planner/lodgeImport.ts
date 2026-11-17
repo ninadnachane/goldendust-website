@@ -5,9 +5,10 @@
 //  - only rows with "Rates Verified" = Yes are used;
 //  - Arusha is left out for now (the arrival night isn't priced until its hotels are verified);
 //  - the year in Start/End Date is ignored: a period is a stretch of the year that repeats every year;
-//  - "Max. Child Age" = the oldest age that still pays the lodge's child rate (older children pay the adult rate);
-//    without the column, the age set in admin is kept. ("Min. Child Age" is no longer used: every lodge is offered to every group.)
-import { CATEGORIES, inRange, type Category, type Config, type Lodge, type RatePeriod } from "./engine";
+//  - "Child Bands" = the lodge's child age bands from its rate sheet, e.g. "5-12: 50%, 13-15: 75%" (% of the double
+//    rate per person; a child in no band pays the adult rate). Without the column or with an empty cell, the bands set
+//    in admin are kept. ("Min. Child Age" is no longer used: every lodge is offered to every group.)
+import { CATEGORIES, inRange, parseChildBands, type Category, type ChildBand, type Config, type Lodge, type RatePeriod } from "./engine";
 
 export type ImportReport = {
   lodges: number; periods: number;
@@ -47,11 +48,11 @@ export function importLodges(cfg: Config, rows: unknown[][]): { lodges: Lodge[];
   const C = {
     lodge: col("lodge"), area: col("area"), category: col("category"), season: col("season"),
     from: col("start date"), to: col("end date"), single: col("single"), double: col("double"), triple: col("triple"), child: col("child"),
-    verified: col("rates verified", "verified"), maxAge: col("max. child age", "max child age", "child max age"),
+    verified: col("rates verified", "verified"), bands: col("child bands", "child age bands"),
   };
-  for (const [k, i] of Object.entries(C)) if (i < 0 && k !== "maxAge" && k !== "season") throw new Error(`The Rates tab has no "${k}" column.`);
+  for (const [k, i] of Object.entries(C)) if (i < 0 && k !== "bands" && k !== "season") throw new Error(`The Rates tab has no "${k}" column.`);
 
-  type Draft = { name: string; areaId: string; category: Category; periods: RatePeriod[]; maxChildAge?: number };
+  type Draft = { name: string; areaId: string; category: Category; periods: RatePeriod[]; childBands?: ChildBand[] };
   const drafts = new Map<string, Draft>();
   const unknown = new Set<string>();
   for (const r of rows.slice(hi + 1)) {
@@ -74,8 +75,10 @@ export function importLodges(cfg: Config, rows: unknown[][]): { lodges: Lodge[];
     const d = drafts.get(key) ?? { name, areaId, category: cat, periods: [] };
     if (d.areaId !== areaId) report.warnings.push(`${name} is listed in two areas; using ${d.areaId}.`);
     d.periods.push({ season: String(C.season >= 0 ? r[C.season] ?? "" : "").trim() || "Rate", from, to, single: r4(single), double: r4(double), triple: r4(triple > 0 ? triple : 0), child: r4(child > 0 ? child : 0) });
-    const age = C.maxAge >= 0 ? parseInt(String(r[C.maxAge] ?? ""), 10) : NaN;
-    if (age >= 0) d.maxChildAge = Math.min(d.maxChildAge ?? 99, age);
+    const bandTxt = C.bands >= 0 ? String(r[C.bands] ?? "").trim() : "";
+    if (bandTxt && !d.childBands) {
+      try { d.childBands = parseChildBands(bandTxt); } catch (err) { report.warnings.push(`${name}: ${(err as Error).message}`); }
+    }
     drafts.set(key, d);
   }
   report.unknownAreas = [...unknown];
@@ -91,7 +94,7 @@ export function importLodges(cfg: Config, rows: unknown[][]): { lodges: Lodge[];
     if (!id) { id = slug(d.name) || "lodge"; let k = 2; const base = id; while (used.has(id)) id = `${base}-${k++}`; used.add(id); report.added.push(d.name); }
     out.push({
       id, name: d.name, areaId: d.areaId, category: d.category, active: old?.active ?? true,
-      periods: d.periods, ...((d.maxChildAge ?? old?.maxChildAge) != null ? { maxChildAge: d.maxChildAge ?? old!.maxChildAge } : {}),
+      periods: d.periods, ...((d.childBands ?? old?.childBands)?.length ? { childBands: d.childBands ?? old!.childBands } : {}),
       insidePark: old?.insidePark ?? true, // agreed: assume inside the park unless ticked off in admin
       ...(old?.description ? { description: old.description } : {}), ...(old?.images?.length ? { images: old.images } : {}),
     });

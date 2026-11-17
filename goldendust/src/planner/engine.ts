@@ -90,11 +90,25 @@ export type DocText = { included: string[]; excluded: string[]; payment: string;
 export type RoomRates = { single: number; double: number; triple: number; child: number }; // old shape: per room / per child, per night
 // A lodge's rate for a stretch of the year (from the Excel "Rates" tab). The year is ignored: "MM-DD" to "MM-DD",
 // inclusive, may wrap the year end. USD per person per night, full board; double/triple = per person sharing.
+// A child age band from a lodge's rate sheet, e.g. { from: 5, to: 12, pct: 50 } = children aged 5–12 pay 50% of the
+// per-person double rate. pct 0 = free; no pct = the period's child rate. A child in no band pays the adult rate here.
+export type ChildBand = { from: number; to: number; pct?: number };
+// "5-12: 50%, 13-15: 75%, 7-15" ↔ bands (a band without % uses the period's child rate). Used by admin and the Excel import.
+export function parseChildBands(txt: string): ChildBand[] {
+  const out: ChildBand[] = [];
+  for (const part of String(txt ?? "").split(/[,;]/).map((x) => x.trim()).filter(Boolean)) {
+    const m = part.match(/^(\d{1,2})\s*[-–]\s*(\d{1,2})\s*(?::\s*(\d+(?:\.\d+)?)\s*%?)?$/);
+    if (!m) throw new Error(`Can't read the child band "${part}". Use e.g. 5-12: 50%.`);
+    out.push({ from: +m[1], to: +m[2], ...(m[3] != null ? { pct: +m[3] } : {}) });
+  }
+  return out.sort((a, b) => a.from - b.from);
+}
+export const formatChildBands = (bands?: ChildBand[]) => (bands ?? []).map((b) => `${b.from}-${b.to}${b.pct != null ? `: ${b.pct}%` : ""}`).join(", ");
 export type RatePeriod = { season: string; from: string; to: string; single: number; double: number; triple: number; child: number };
 export type Lodge = {
   id: string; name: string; areaId: string; category: Category; active: boolean;
   periods: RatePeriod[]; // dates without a period → the lodge isn't offered for those dates
-  maxChildAge?: number; // oldest age that still pays this lodge's child rate (from its rate sheet); older children pay the adult rate here. Empty = settings.childMaxAge
+  childBands?: ChildBand[]; // from the rate sheet; none = every child (settings ages) pays the period's child rate
   rates?: Record<string, RoomRates>; // old shape (per room, keyed by season id), upgraded into periods
   insidePark?: boolean; // true → park concession fee per person per night (Comfort/Luxury)
   description?: string; // one or two lines shown to guests
@@ -181,7 +195,7 @@ export function upgradeConfig(cfg: Config): Config {
       const ranges = se.ranges.length ? se.ranges : se.id === c.defaultSeasonId ? [{ from: "01-01", to: "12-31" }] : [];
       return ranges.map((r) => ({ season: se.name, from: r.from, to: r.to, single: rt.single, double: rt.double / 2, triple: rt.triple / 3, child: rt.child }));
     });
-    const { rates: _old, minChildAge: _min, ...rest } = l as Lodge & { minChildAge?: number }; // minChildAge: replaced by maxChildAge (Nov 2026)
+    const { rates: _old, minChildAge: _min, maxChildAge: _max, ...rest } = l as Lodge & { minChildAge?: number; maxChildAge?: number }; // replaced by childBands (Nov 2026)
     return { ...rest, periods, insidePark: l.insidePark ?? l.areaId !== "arusha" };
   });
   delete c.seasons; delete c.defaultSeasonId;
@@ -214,7 +228,7 @@ export function stopNights(startDate: string, stops: { nights: number }[]): stri
 // Why a lodge can't be offered for these nights and children ("" = fine). Shared with the planner page,
 // which only knows the open date ranges (no rates).
 export function lodgeProblem(lodge: { name: string; periods?: { from: string; to: string }[]; open?: { from: string; to: string }[] }, nights: string[], childAges: number[]): string {
-  // Every lodge is offered to every group (agreed 25 Oct 2026); a lodge's maxChildAge only changes the price.
+  // Every lodge is offered to every group (agreed 25 Oct 2026); a lodge's child bands only change the price.
   const ranges = lodge.periods ?? lodge.open ?? [];
   const miss = nights.find((d) => !ranges.some((r) => inRange(d.slice(5), r)));
   return miss ? `${lodge.name} has no rate for the night of ${miss}.` : "";
@@ -311,14 +325,24 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     const date = addDays(q.startDate, nightIndex);
     const p = periodFor(lodge, date);
     if (!p) { errors.push(`${lodge.name} has no rate for the night of ${date}.`); return; }
-    // children older than this lodge's child age (its rate sheet) pay the adult rate and share the adults' rooms
-    const maxAge = lodge.maxChildAge ?? s.childMaxAge;
-    const kids = childAgesPaying.filter((a) => a <= maxAge).length, older = children - kids;
-    const plan = roomPlan(adults + older, perRoom(p));
-    const cost = plan.cost + kids * p.child;
+    // Children: the lodge's age bands (rate sheet) set the child price as a % of the double rate per person;
+    // a child in no band pays the adult rate and shares the adults' rooms. No bands → the period's child rate.
+    const kids: { label: string; rate: number }[] = [];
+    const asAdult: number[] = [];
+    for (const age of childAgesPaying) {
+      const bands = lodge.childBands ?? [];
+      if (!bands.length) { kids.push({ label: "child", rate: p.child }); continue; }
+      const b = bands.find((x) => age >= x.from && age <= x.to);
+      if (!b) { asAdult.push(age); continue; }
+      kids.push(b.pct == null ? { label: `child ${b.from}–${b.to}`, rate: p.child } : { label: `child ${b.from}–${b.to} at ${b.pct}%`, rate: r2(p.double * b.pct / 100) });
+    }
+    const plan = roomPlan(adults + asAdult.length, perRoom(p));
+    const cost = plan.cost + kids.reduce((a, k) => a + k.rate, 0);
     const parts = [describeRooms(plan.rooms, p) || "no rate set"];
-    if (older) parts[0] += ` (incl. ${older} child${older > 1 ? "ren" : ""} over ${maxAge} at the adult rate)`;
-    if (kids) parts.push(`${kids} child × ${money(p.child)}`);
+    if (asAdult.length) parts[0] += ` (incl. child aged ${asAdult.join(", ")} at the adult rate)`;
+    const byLabel = new Map<string, { n: number; rate: number }>();
+    for (const k of kids) { const key = `${k.label}|${k.rate}`; const g = byLabel.get(key) ?? { n: 0, rate: k.rate }; g.n++; byLabel.set(key, g); }
+    for (const [key, g] of byLabel) parts.push(`${g.n} ${key.split("|")[0]} × ${money(g.rate)}`);
     lines.push({ group: "accommodation", label: `${label}: ${lodge.name} (${date}, ${p.season})`, calc: parts.join(" + "), cost: r2(cost) });
     if (!(plan.cost > 0)) errors.push(`${lodge.name} has no ${p.season} rate.`);
   };
@@ -422,7 +446,7 @@ export function publicOptions(cfg: Config) {
       return { id: a.id, name: a.name, blurb: a.blurb, per: a.per, rate: Math.round(a.price * k), rateChild: Math.round(a.childPrice * k) };
     }),
     doc: cfg.doc ?? null,
-    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: lodgeImages(l).slice(0, 12), maxChildAge: l.maxChildAge ?? cfg.settings.childMaxAge, open: (l.periods || []).map((p) => ({ from: p.from, to: p.to })) })),
+    lodges: cfg.lodges.filter((l) => l.active && cfg.areas.some((a) => a.id === l.areaId)).map((l) => ({ id: l.id, name: l.name, areaId: l.areaId, category: l.category, description: l.description || "", images: lodgeImages(l).slice(0, 12), open: (l.periods || []).map((p) => ({ from: p.from, to: p.to })) })),
   };
 }
 
@@ -439,6 +463,11 @@ export function checkConfig(cfg: Config): string[] {
     if (!["east", "nca", "west"].includes(a.side)) e.push(`Area "${a.name}" needs a side (east, NCA or west).`);
   });
   if (cfg.settings.ncaZoneId && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro (NCA) fee zone in Costs & rules doesn't exist.");
+  cfg.lodges.forEach((l) => (l.childBands ?? []).forEach((b, i, all) => {
+    if (!(b.from >= 0 && b.to >= b.from)) e.push(`${l.name}: child band ${b.from}–${b.to} is not a valid age range.`);
+    if (b.pct != null && !(b.pct >= 0 && b.pct <= 100)) e.push(`${l.name}: child band ${b.from}–${b.to} needs a % between 0 and 100.`);
+    if (all.some((o, j) => j !== i && b.from <= o.to && o.from <= b.to)) e.push(`${l.name}: child bands overlap (${b.from}–${b.to}).`);
+  }));
   cfg.lodges.forEach((l) => {
     if (l.areaId !== "arusha" && !cfg.areas.some((a) => a.id === l.areaId)) e.push(`Lodge "${l.name}" points to a missing area.`);
     if (!CATEGORIES.some((c) => c.id === l.category)) e.push(`Lodge "${l.name}" has an unknown category.`);
