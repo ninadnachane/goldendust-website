@@ -225,6 +225,20 @@
   "lodges/kati-kati-camp-central/10.webp",
   "lodges/kati-kati-camp-central/11.webp"
  ],
+ "kifaru coffee estate": [
+  "lodges/kifaru-coffee-estate/01.webp",
+  "lodges/kifaru-coffee-estate/02.webp",
+  "lodges/kifaru-coffee-estate/03.webp",
+  "lodges/kifaru-coffee-estate/04.webp",
+  "lodges/kifaru-coffee-estate/05.webp",
+  "lodges/kifaru-coffee-estate/06.webp",
+  "lodges/kifaru-coffee-estate/07.webp",
+  "lodges/kifaru-coffee-estate/08.webp",
+  "lodges/kifaru-coffee-estate/09.webp",
+  "lodges/kifaru-coffee-estate/10.webp",
+  "lodges/kifaru-coffee-estate/11.webp",
+  "lodges/kifaru-coffee-estate/12.webp"
+ ],
  "kirurumu manyara lodge": [
   "lodges/kirurumu-manyara-lodge/01.webp",
   "lodges/kirurumu-manyara-lodge/02.webp"
@@ -279,6 +293,34 @@
   "lodges/lemala-mpingo-lodge/08.webp",
   "lodges/lemala-mpingo-lodge/09.webp",
   "lodges/lemala-mpingo-lodge/10.webp"
+ ],
+ "lion s paw": [
+  "lodges/lion-s-paw/01.webp",
+  "lodges/lion-s-paw/02.webp",
+  "lodges/lion-s-paw/03.webp",
+  "lodges/lion-s-paw/04.webp",
+  "lodges/lion-s-paw/05.webp",
+  "lodges/lion-s-paw/06.webp",
+  "lodges/lion-s-paw/07.webp",
+  "lodges/lion-s-paw/08.webp",
+  "lodges/lion-s-paw/09.webp",
+  "lodges/lion-s-paw/10.webp",
+  "lodges/lion-s-paw/11.webp",
+  "lodges/lion-s-paw/12.webp"
+ ],
+ "mara river camp": [
+  "lodges/mara-river-camp/01.webp",
+  "lodges/mara-river-camp/02.webp",
+  "lodges/mara-river-camp/03.webp",
+  "lodges/mara-river-camp/04.webp",
+  "lodges/mara-river-camp/05.webp",
+  "lodges/mara-river-camp/06.webp",
+  "lodges/mara-river-camp/07.webp",
+  "lodges/mara-river-camp/08.webp",
+  "lodges/mara-river-camp/09.webp",
+  "lodges/mara-river-camp/10.webp",
+  "lodges/mara-river-camp/11.webp",
+  "lodges/mara-river-camp/12.webp"
  ],
  "mawe mawe manyara lodge": [
   "lodges/mawe-mawe-manyara-lodge/01.webp",
@@ -621,6 +663,20 @@
   "lodges/whistling-thorn/05.webp",
   "lodges/whistling-thorn/06.webp"
  ],
+ "woodlands": [
+  "lodges/woodlands/01.webp",
+  "lodges/woodlands/02.webp",
+  "lodges/woodlands/03.webp",
+  "lodges/woodlands/04.webp",
+  "lodges/woodlands/05.webp",
+  "lodges/woodlands/06.webp",
+  "lodges/woodlands/07.webp",
+  "lodges/woodlands/08.webp",
+  "lodges/woodlands/09.webp",
+  "lodges/woodlands/10.webp",
+  "lodges/woodlands/11.webp",
+  "lodges/woodlands/12.webp"
+ ],
  "zuri kilima siri": [
   "lodges/zuri-kilima-siri/01.webp",
   "lodges/zuri-kilima-siri/02.webp",
@@ -632,19 +688,5 @@
   "lodges/zuri-kilima-siri/08.webp",
   "lodges/zuri-kilima-siri/09.webp",
   "lodges/zuri-kilima-siri/10.webp"
- ],
- "kifaru coffee estate": [
-  "lodges/kifaru-coffee-estate/01.webp",
-  "lodges/kifaru-coffee-estate/02.webp",
-  "lodges/kifaru-coffee-estate/03.webp",
-  "lodges/kifaru-coffee-estate/04.webp",
-  "lodges/kifaru-coffee-estate/05.webp",
-  "lodges/kifaru-coffee-estate/06.webp",
-  "lodges/kifaru-coffee-estate/07.webp",
-  "lodges/kifaru-coffee-estate/08.webp",
-  "lodges/kifaru-coffee-estate/09.webp",
-  "lodges/kifaru-coffee-estate/10.webp",
-  "lodges/kifaru-coffee-estate/11.webp",
-  "lodges/kifaru-coffee-estate/12.webp"
  ]
 }

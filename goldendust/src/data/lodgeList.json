@@ -175,6 +175,11 @@
   "tier": "Budget"
  },
  {
+  "name": "Lion's Paw",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
   "name": "Friends Camp",
   "area": "central-serengeti",
   "tier": "Comfort"
@@ -355,8 +360,18 @@
   "tier": "Premium"
  },
  {
+  "name": "Woodlands",
+  "area": "ndutu",
+  "tier": "Luxury"
+ },
+ {
   "name": "Safari Haven Migration Camp (Kogatende)",
   "area": "north-serengeti",
   "tier": "Premium"
+ },
+ {
+  "name": "Mara River Camp",
+  "area": "north-serengeti",
+  "tier": "Luxury"
  }
 ]

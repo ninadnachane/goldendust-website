@@ -71,6 +71,18 @@
     "child": 80
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   },
+   {
+    "from": 13,
+    "to": 15,
+    "pct": 75
+   }
+  ],
   "insidePark": true
  },
  {
@@ -97,6 +109,18 @@
     "double": 290,
     "triple": 290,
     "child": 145
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   },
+   {
+    "from": 13,
+    "to": 15,
+    "pct": 75
    }
   ],
   "insidePark": true
@@ -144,6 +168,18 @@
     "double": 125,
     "triple": 125,
     "child": 62.5
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   },
+   {
+    "from": 13,
+    "to": 15,
+    "pct": 75
    }
   ],
   "insidePark": true
@@ -210,6 +246,13 @@
     "child": 115
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -236,6 +279,17 @@
     "double": 672,
     "triple": 640,
     "child": 344
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 6,
+    "pct": 0
+   },
+   {
+    "from": 7,
+    "to": 15
    }
   ],
   "insidePark": true
@@ -303,6 +357,13 @@
     "child": 61.95
    }
   ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 15,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -329,6 +390,18 @@
     "double": 300,
     "triple": 300,
     "child": 150
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   },
+   {
+    "from": 13,
+    "to": 15,
+    "pct": 75
    }
   ],
   "insidePark": true
@@ -377,6 +450,13 @@
     "child": 78.75
    }
   ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 15,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -421,6 +501,13 @@
     "double": 123.9,
     "triple": 123.9,
     "child": 61.95
+   }
+  ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 15,
+    "pct": 50
    }
   ],
   "insidePark": true
@@ -470,6 +557,18 @@
     "child": 87.5
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   },
+   {
+    "from": 13,
+    "to": 15,
+    "pct": 75
+   }
+  ],
   "insidePark": true
  },
  {
@@ -498,6 +597,13 @@
     "child": 66
    }
   ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -517,6 +623,13 @@
     "child": 86.5
    }
   ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -534,6 +647,13 @@
     "double": 173,
     "triple": 163,
     "child": 86.5
+   }
+  ],
+  "childBands": [
+   {
+    "from": 3,
+    "to": 12,
+    "pct": 50
    }
   ],
   "insidePark": true
@@ -591,6 +711,13 @@
     "child": 75
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -646,6 +773,13 @@
     "child": 70
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -665,6 +799,13 @@
     "child": 95
    }
   ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
+   }
+  ],
   "insidePark": true
  },
  {
@@ -682,6 +823,13 @@
     "double": 190,
     "triple": 180,
     "child": 95
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 12,
+    "pct": 50
    }
   ],
   "insidePark": true
@@ -889,6 +1037,148 @@
    }
   ],
   "insidePark": true
+ },
+ {
+  "id": "lions-paw",
+  "name": "Lion's Paw",
+  "areaId": "ngorongoro",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "01-01",
+    "to": "03-31",
+    "single": 565,
+    "double": 450,
+    "triple": 450,
+    "child": 225
+   },
+   {
+    "season": "Green Season",
+    "from": "04-01",
+    "to": "05-31",
+    "single": 340,
+    "double": 295,
+    "triple": 295,
+    "child": 147.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 565,
+    "double": 450,
+    "triple": 450,
+    "child": 225
+   },
+   {
+    "season": "Green Season",
+    "from": "11-01",
+    "to": "12-14",
+    "single": 340,
+    "double": 295,
+    "triple": 295,
+    "child": 147.5
+   },
+   {
+    "season": "High Season",
+    "from": "12-15",
+    "to": "12-31",
+    "single": 565,
+    "double": 450,
+    "triple": 450,
+    "child": 225
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 14,
+    "pct": 50
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "mara-river-camp",
+  "name": "Mara River Camp",
+  "areaId": "north-serengeti",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "Green Season",
+    "from": "01-01",
+    "to": "05-31",
+    "single": 340,
+    "double": 295,
+    "triple": 295,
+    "child": 147.5
+   },
+   {
+    "season": "High Season",
+    "from": "06-01",
+    "to": "10-31",
+    "single": 685,
+    "double": 550,
+    "triple": 550,
+    "child": 275
+   },
+   {
+    "season": "Green Season",
+    "from": "11-01",
+    "to": "12-31",
+    "single": 340,
+    "double": 295,
+    "triple": 295,
+    "child": 147.5
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 14,
+    "pct": 50
+   }
+  ],
+  "insidePark": true
+ },
+ {
+  "id": "woodlands",
+  "name": "Woodlands",
+  "areaId": "ndutu",
+  "category": "luxury",
+  "active": true,
+  "periods": [
+   {
+    "season": "High Season",
+    "from": "12-01",
+    "to": "03-31",
+    "single": 465,
+    "double": 370,
+    "triple": 370,
+    "child": 185
+   },
+   {
+    "season": "Green Season",
+    "from": "04-01",
+    "to": "11-30",
+    "single": 325,
+    "double": 280,
+    "triple": 280,
+    "child": 140
+   }
+  ],
+  "childBands": [
+   {
+    "from": 5,
+    "to": 14,
+    "pct": 50
+   }
+  ],
+  "insidePark": true,
+  "feeZoneId": "serengeti"
  },
  {
   "id": "kifaru-coffee-estate",
