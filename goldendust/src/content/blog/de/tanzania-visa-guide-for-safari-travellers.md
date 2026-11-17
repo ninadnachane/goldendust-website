@@ -44,4 +44,4 @@ Wenn Sie aus einem Land mit Gelbfieberrisiko einreisen oder mehr als 12 Stunden 
 
 ## Brauchen Sie Hilfe?
 
-Sobald Sie bei uns gebucht haben, schicken wir Ihnen eine Checkliste für Ihre Ankunft, und Sie können Ihrem Guide jede Frage per [WhatsApp](https://wa.me/255695751445) stellen. Wir holen Sie am Flughafen ab, wenn Sie landen.
+Sobald Sie bei uns gebucht haben, schicken wir Ihnen eine Checkliste für Ihre Ankunft, und Sie können Ihrem Guide jede Frage per [WhatsApp](https://wa.me/255799185811) stellen. Wir holen Sie am Flughafen ab, wenn Sie landen.

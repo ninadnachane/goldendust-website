@@ -44,4 +44,4 @@ Se arrivi da un paese a rischio di febbre gialla, o hai trascorso più di 12 ore
 
 ## Ti serve aiuto?
 
-Dopo la prenotazione ti mandiamo una checklist per l'arrivo, e puoi scrivere alla tua guida su [WhatsApp](https://wa.me/255695751445) per qualsiasi domanda. Ti aspettiamo in aeroporto quando atterri.
+Dopo la prenotazione ti mandiamo una checklist per l'arrivo, e puoi scrivere alla tua guida su [WhatsApp](https://wa.me/255799185811) per qualsiasi domanda. Ti aspettiamo in aeroporto quando atterri.

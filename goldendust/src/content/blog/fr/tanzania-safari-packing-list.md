@@ -57,4 +57,4 @@ Prenez un **sac souple** plutôt qu'une valise rigide. Il se range mieux dans le
 
 La plupart des prises en Tanzanie sont de type britannique à trois broches (type G). Prévoyez un adaptateur.
 
-Des questions sur ce qu'il faut emporter pour votre voyage ? Demandez à votre guide sur [WhatsApp](https://wa.me/255695751445).
+Des questions sur ce qu'il faut emporter pour votre voyage ? Demandez à votre guide sur [WhatsApp](https://wa.me/255799185811).

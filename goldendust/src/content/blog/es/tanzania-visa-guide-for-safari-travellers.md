@@ -44,4 +44,4 @@ Si llegas desde un país con riesgo de fiebre amarilla, o has pasado más de 12 
 
 ## ¿Necesitas ayuda?
 
-Cuando hayas reservado con nosotros, te enviaremos una lista de comprobación para tu llegada, y puedes escribir a tu guía por [WhatsApp](https://wa.me/255695751445) con cualquier pregunta. Te recibiremos en el aeropuerto cuando aterrices.
+Cuando hayas reservado con nosotros, te enviaremos una lista de comprobación para tu llegada, y puedes escribir a tu guía por [WhatsApp](https://wa.me/255799185811) con cualquier pregunta. Te recibiremos en el aeropuerto cuando aterrices.

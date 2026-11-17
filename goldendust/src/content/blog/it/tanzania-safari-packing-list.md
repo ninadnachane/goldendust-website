@@ -57,4 +57,4 @@ Usa una **borsa morbida** invece di una valigia rigida. Sta meglio nel veicolo, 
 
 La maggior parte delle prese in Tanzania è del tipo britannico a tre poli (tipo G). Porta un adattatore.
 
-Hai domande su cosa portare per il tuo viaggio? Chiedi alla tua guida su [WhatsApp](https://wa.me/255695751445).
+Hai domande su cosa portare per il tuo viaggio? Chiedi alla tua guida su [WhatsApp](https://wa.me/255799185811).

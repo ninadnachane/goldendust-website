@@ -44,4 +44,4 @@ If you arrive from a country with a risk of yellow fever, or you spent more than
 
 ## Need help?
 
-Once you've booked with us, we'll send you a checklist for your arrival, and you can message your guide on [WhatsApp](https://wa.me/255695751445) with any question. We'll meet you at the airport when you land.
+Once you've booked with us, we'll send you a checklist for your arrival, and you can message your guide on [WhatsApp](https://wa.me/255799185811) with any question. We'll meet you at the airport when you land.

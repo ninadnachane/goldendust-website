@@ -57,4 +57,4 @@ Nehmen Sie eine **weiche Reisetasche** statt eines Hartschalenkoffers. Sie passt
 
 Die meisten Steckdosen in Tansania passen für britische Stecker mit drei Stiften (Typ G). Nehmen Sie einen Adapter mit.
 
-Fragen dazu, was Sie für Ihre Reise einpacken sollten? Fragen Sie Ihren Guide per [WhatsApp](https://wa.me/255695751445).
+Fragen dazu, was Sie für Ihre Reise einpacken sollten? Fragen Sie Ihren Guide per [WhatsApp](https://wa.me/255799185811).

@@ -44,4 +44,4 @@ Kom je uit een land met een risico op gele koorts, of heb je meer dan 12 uur ove
 
 ## Hulp nodig?
 
-Zodra je bij ons hebt geboekt, sturen we je een checklist voor je aankomst, en je kunt je gids elke vraag stellen via [WhatsApp](https://wa.me/255695751445). We halen je op van het vliegveld als je landt.
+Zodra je bij ons hebt geboekt, sturen we je een checklist voor je aankomst, en je kunt je gids elke vraag stellen via [WhatsApp](https://wa.me/255799185811). We halen je op van het vliegveld als je landt.

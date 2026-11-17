@@ -57,4 +57,4 @@ Neem een **zachte tas** in plaats van een harde koffer. Die past beter in het vo
 
 De meeste stopcontacten in Tanzania passen bij Britse stekkers met drie pinnen (type G). Neem een verloopstekker mee.
 
-Vragen over wat je voor je reis moet meenemen? Vraag het je gids via [WhatsApp](https://wa.me/255695751445).
+Vragen over wat je voor je reis moet meenemen? Vraag het je gids via [WhatsApp](https://wa.me/255799185811).

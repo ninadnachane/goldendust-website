@@ -57,4 +57,4 @@ Usa una **bolsa blanda** en lugar de una maleta rígida. Cabe mejor en el vehíc
 
 La mayoría de los enchufes de Tanzania son del tipo británico de tres clavijas (tipo G). Lleva un adaptador.
 
-¿Tienes dudas sobre qué llevar a tu viaje? Pregúntale a tu guía por [WhatsApp](https://wa.me/255695751445).
+¿Tienes dudas sobre qué llevar a tu viaje? Pregúntale a tu guía por [WhatsApp](https://wa.me/255799185811).

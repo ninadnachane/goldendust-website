@@ -44,4 +44,4 @@ Si vous arrivez d'un pays à risque de fièvre jaune, ou si vous avez fait une e
 
 ## Besoin d'aide ?
 
-Une fois votre réservation faite, nous vous envoyons une liste de contrôle pour votre arrivée, et vous pouvez poser toutes vos questions à votre guide sur [WhatsApp](https://wa.me/255695751445). Nous venons vous chercher à l'aéroport à votre atterrissage.
+Une fois votre réservation faite, nous vous envoyons une liste de contrôle pour votre arrivée, et vous pouvez poser toutes vos questions à votre guide sur [WhatsApp](https://wa.me/255799185811). Nous venons vous chercher à l'aéroport à votre atterrissage.

@@ -57,4 +57,4 @@ Use a **soft bag** rather than a hard suitcase. It fits better in the vehicle, a
 
 Most sockets in Tanzania take UK-style three-pin plugs (type G). Bring an adapter.
 
-Questions about what to bring for your trip? Ask your guide on [WhatsApp](https://wa.me/255695751445).
+Questions about what to bring for your trip? Ask your guide on [WhatsApp](https://wa.me/255799185811).
