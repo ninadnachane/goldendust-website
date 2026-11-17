@@ -130,6 +130,11 @@
   "tier": "Luxury"
  },
  {
+  "name": "Kifaru Coffee Estate",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
   "name": "Embalakai Ngorongoro",
   "area": "ngorongoro",
   "tier": "Premium"

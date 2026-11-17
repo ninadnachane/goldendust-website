@@ -906,5 +906,24 @@
    }
   ],
   "insidePark": true
+ },
+ {
+  "id": "kifaru-coffee-estate",
+  "name": "Kifaru Coffee Estate",
+  "areaId": "karatu",
+  "category": "comfort",
+  "active": true,
+  "periods": [
+   {
+    "season": "All Year",
+    "from": "01-01",
+    "to": "12-31",
+    "single": 150,
+    "double": 120,
+    "triple": 110,
+    "child": 60
+   }
+  ],
+  "insidePark": true
  }
 ]
