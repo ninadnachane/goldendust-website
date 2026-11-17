@@ -323,6 +323,7 @@
         { key: "category", label: "Category", type: "select", options: () => CATEGORIES.map((c) => ({ v: c.id, t: c.name })) },
         { key: "active", label: "Shown", type: "bool" },
         { key: "insidePark", label: "Inside park", type: "bool" },
+        { key: "feeZoneId", label: "Park fees", type: "select", options: () => [{ v: "", t: "Area's" }, ...cfg.feeZones.map((z) => ({ v: z.id, t: z.name }))] },
         { key: "childBands", label: "Child age bands", type: "button", text: (r) => formatChildBands(r.childBands) || "Child column", onClick: editChildBands },
         { key: "periods", label: "Rates (per person per night)", type: "button", text: (r) => ratesSummary(r), onClick: openRates },
         { key: "photos", label: "Photos & text", type: "button", text: (r) => { const up = (r.images || []).length, n = lodgeImages(r).length; return `${up ? `${up} uploaded` : n ? `${n} from folder` : "0 photos"}${r.description ? " · text" : ""}`; }, onClick: openPhotos },

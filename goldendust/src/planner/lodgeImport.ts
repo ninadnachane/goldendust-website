@@ -96,7 +96,7 @@ export function importLodges(cfg: Config, rows: unknown[][]): { lodges: Lodge[];
       id, name: d.name, areaId: d.areaId, category: d.category, active: old?.active ?? true,
       periods: d.periods, ...((d.childBands ?? old?.childBands)?.length ? { childBands: d.childBands ?? old!.childBands } : {}),
       insidePark: old?.insidePark ?? true, // agreed: assume inside the park unless ticked off in admin
-      ...(old?.description ? { description: old.description } : {}), ...(old?.images?.length ? { images: old.images } : {}),
+      ...(old?.description ? { description: old.description } : {}), ...(old?.feeZoneId ? { feeZoneId: old.feeZoneId } : {}), ...(old?.images?.length ? { images: old.images } : {}),
     });
     report.periods += d.periods.length;
     // overlaps and gaps (year ignored)

@@ -45,6 +45,7 @@ const PLACE: Record<string, Partial<Dict>> = {
   "Northern Serengeti": { nl: "Noordelijke Serengeti", de: "Nördliche Serengeti", fr: "Serengeti nord", it: "Serengeti settentrionale", es: "Serengeti norte" },
   "Southern Serengeti": { nl: "Zuidelijke Serengeti", de: "Südliche Serengeti", fr: "Serengeti sud", it: "Serengeti meridionale", es: "Serengeti sur" },
   "North Serengeti": { nl: "Noordelijke Serengeti", de: "Nördliche Serengeti", fr: "Serengeti nord", it: "Serengeti settentrionale", es: "Serengeti norte" },
+  "Ndutu & South Serengeti": { nl: "Ndutu & zuidelijke Serengeti", de: "Ndutu & südliche Serengeti", fr: "Ndutu et sud du Serengeti", it: "Ndutu e Serengeti meridionale", es: "Ndutu y sur del Serengeti" },
   "South Serengeti": { nl: "Zuidelijke Serengeti", de: "Südliche Serengeti", fr: "Serengeti sud", it: "Serengeti meridionale", es: "Serengeti sur" },
   "Ngorongoro Crater": { nl: "Ngorongorokrater", de: "Ngorongoro-Krater", fr: "Cratère du Ngorongoro", it: "Cratere di Ngorongoro", es: "Cráter del Ngorongoro" },
   "Ngorongoro (crater rim)": { nl: "Ngorongoro (kraterrand)", de: "Ngorongoro (Kraterrand)", fr: "Ngorongoro (bord du cratère)", it: "Ngorongoro (bordo del cratere)", es: "Ngorongoro (borde del cráter)" },

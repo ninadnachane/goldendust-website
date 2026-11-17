@@ -304,3 +304,22 @@ test("a night at Ngorongoro always includes the crater game drive", () => {
   const noRim = trip({ totalNights: 5, stops: [{ areaId: "tarangire", nights: 1, lodgeId: "tarangire-comfort" }, { areaId: "central-serengeti", nights: 3, lodgeId: "central-serengeti-comfort" }] });
   assert.ok(!quote(cfg, noRim, TODAY).lines.some((l) => /Crater game drive/.test(l.label)));
 });
+
+test("a camp's own park fee zone: Serengeti fees and the NCA crossing for a Serengeti camp in the Ndutu area", () => {
+  const c: Config = JSON.parse(JSON.stringify(cfg));
+  c.areas.find((a) => a.id === "ndutu")!.side = "nca"; // as in the live admin settings
+  const ser = c.feeZones.find((z) => /seren/i.test(z.id))!, nca = c.feeZones.find((z) => z.id === c.settings.ncaZoneId)!;
+  const t = trip({ childAges: [], totalNights: 3, stops: [{ areaId: "ndutu", nights: 2, lodgeId: "ndutu-premium" }] });
+  const before = quote(c, t, TODAY);
+  assert.equal(line(before, /transit/).length, 0, "a night in the NCA: no transit day");
+  assert.ok(line(before, new RegExp(`${nca.name} entry`)).length === 1);
+  c.lodges.find((l) => l.id === "ndutu-premium")!.feeZoneId = ser.id;
+  assert.deepEqual(checkConfig(c), []);
+  const after = quote(c, t, TODAY);
+  assert.equal(sumOf(after, new RegExp(`${ser.name} entry`)), round(2 * ser.adultDay * 2));
+  assert.equal(sumOf(after, new RegExp(`${ser.name} concession`)), round(2 * ser.concessionAdult * 2));
+  assert.equal(line(after, new RegExp(`${nca.name} entry`)).length, 0);
+  assert.equal(sumOf(after, /transit/), round(2 * nca.adultDay * 2), "east → Serengeti and back crosses the NCA twice");
+  c.lodges.find((l) => l.id === "ndutu-premium")!.feeZoneId = "nope";
+  assert.match(checkConfig(c).join(" "), /missing park fee zone/);
+});

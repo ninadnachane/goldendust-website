@@ -9,8 +9,8 @@ import lodgeData from "./lodges.data.json";
 export const areas: Area[] = [
   { id: "tarangire", side: "east", blurb: "Game drives in Tarangire, known for its elephant herds, baobab trees and river wildlife.", name: "Tarangire", feeZoneId: "tarangire", minNights: 1, active: true },
   { id: "manyara", side: "east", blurb: "Game drives around Lake Manyara: groundwater forest, flamingos and tree-climbing lions if you're lucky.", name: "Lake Manyara", feeZoneId: "manyara", minNights: 1, active: true },
-  { id: "ndutu", side: "west", blurb: "Game drives on the Ndutu plains, where the herds gather to calve from January to March.", name: "Ndutu", feeZoneId: "ncaa", minNights: 1, active: true },
-  { id: "south-serengeti", side: "west", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
+  { id: "ndutu", side: "west", blurb: "Game drives on the Ndutu plains and the southern Serengeti, where the herds gather to calve from January to March.", name: "Ndutu & South Serengeti", feeZoneId: "ncaa", minNights: 1, active: true },
+  { id: "south-serengeti", side: "west", blurb: "Game drives in the southern Serengeti plains.", name: "South Serengeti", feeZoneId: "serengeti", minNights: 1, active: false },
   { id: "central-serengeti", side: "west", blurb: "Game drives in the central Serengeti around Seronera, home to many of the park's big cats.", name: "Central Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
   { id: "west-serengeti", side: "west", blurb: "Game drives in the western Serengeti.", name: "Western Serengeti", feeZoneId: "serengeti", minNights: 1, active: true },
   { id: "north-serengeti", side: "west", blurb: "Game drives in the northern Serengeti, where the herds cross the Mara River from July.", name: "North Serengeti", feeZoneId: "serengeti", minNights: 2, active: true },

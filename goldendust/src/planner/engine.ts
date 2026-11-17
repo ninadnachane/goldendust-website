@@ -109,6 +109,7 @@ export type Lodge = {
   id: string; name: string; areaId: string; category: Category; active: boolean;
   periods: RatePeriod[]; // dates without a period → the lodge isn't offered for those dates
   childBands?: ChildBand[]; // from the rate sheet; none = every child (settings ages) pays the period's child rate
+  feeZoneId?: string; // park fees for this camp when they differ from its area's (e.g. Woodlands: Serengeti fees in the Ndutu & South Serengeti area)
   rates?: Record<string, RoomRates>; // old shape (per room, keyed by season id), upgraded into periods
   insidePark?: boolean; // true → park concession fee per person per night (Comfort/Luxury)
   description?: string; // one or two lines shown to guests
@@ -219,6 +220,15 @@ export const inRange = (md: string, r: { from: string; to: string }) => (r.from 
 export function periodFor(lodge: { periods?: RatePeriod[] }, iso: string): RatePeriod | undefined {
   const md = iso.slice(5);
   return (lodge.periods || []).find((p) => inRange(md, p));
+}
+// Which side of the Ngorongoro Conservation Area a stop is on: the area's side, unless the camp has its own park fee
+// zone (then NCA fees → "nca", other park fees in an NCA area → "west", e.g. a Serengeti camp near Ndutu).
+export function stopSide(cfg: Config, st: { areaId: string; lodgeId: string }): Side {
+  const area = cfg.areas.find((a) => a.id === st.areaId);
+  const fz = cfg.lodges.find((l) => l.id === st.lodgeId)?.feeZoneId;
+  if (!area) return "east";
+  if (!fz || fz === area.feeZoneId) return area.side;
+  return fz === cfg.settings.ncaZoneId ? "nca" : area.side === "nca" ? "west" : area.side;
 }
 // Night dates of each stop (night 1 = arrival in Arusha, so the first stop starts on the second night).
 export function stopNights(startDate: string, stops: { nights: number }[]): string[][] {
@@ -359,8 +369,8 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
   let night = 1;
   for (const st of q.stops) {
     const area = cfg.areas.find((a) => a.id === st.areaId)!;
-    const zone = cfg.feeZones.find((z) => z.id === area.feeZoneId);
     const lodge = cfg.lodges.find((l) => l.id === st.lodgeId);
+    const zone = cfg.feeZones.find((z) => z.id === (lodge?.feeZoneId || area.feeZoneId));
     for (let k = 0; k < st.nights; k++) { stayAt(st.lodgeId, night, `Night ${night + 1} ${area.name}`); night++; }
     if (!zone) { if (area.feeZoneId) errors.push(`${area.name} has no park fee zone.`); continue; } // "" = outside the parks (e.g. Karatu)
     const n = st.nights;
@@ -376,7 +386,7 @@ export function quote(cfg: Config, q: QuoteRequest, today?: string): Quote {
     if (zone.vehicleDay > 0) lines.push({ group: "park", label: `${zone.name} vehicle entry: ${area.name}, ${times(n, "day")}`, calc: `${vehicles} vehicle${vehicles > 1 ? "s" : ""} × ${money(zone.vehicleDay)} × ${times(n, "day")}`, cost: r2(vehicles * zone.vehicleDay * n) });
   }
   // Rule 3: Ngorongoro Conservation Area transit — one NCA day for each drive between east and west without a night in the NCA
-  const sides: Side[] = ["east", ...q.stops.map((st) => cfg.areas.find((a) => a.id === st.areaId)?.side ?? "east"), "east"];
+  const sides: Side[] = ["east", ...q.stops.map((st) => stopSide(cfg, st)), "east"];
   let crossings = 0;
   for (let i = 1; i < sides.length; i++) if ((sides[i - 1] === "east" && sides[i] === "west") || (sides[i - 1] === "west" && sides[i] === "east")) crossings++;
   const ncaDay = (label: string, days: number, group: Group = "park") => {
@@ -460,6 +470,9 @@ export function checkConfig(cfg: Config): string[] {
   ids(cfg.feeZones, "fee zone"); ids(cfg.areas, "area"); ids(cfg.lodges, "lodge");
   cfg.areas.forEach((a) => {
     if (a.feeZoneId && !cfg.feeZones.some((z) => z.id === a.feeZoneId)) e.push(`Area "${a.name}" points to a missing fee zone.`);
+  });
+  cfg.lodges.forEach((l) => { if (l.feeZoneId && !cfg.feeZones.some((z) => z.id === l.feeZoneId)) e.push(`${l.name} points to a missing park fee zone.`); });
+  cfg.areas.forEach((a) => {
     if (!["east", "nca", "west"].includes(a.side)) e.push(`Area "${a.name}" needs a side (east, NCA or west).`);
   });
   if (cfg.settings.ncaZoneId && !cfg.feeZones.some((z) => z.id === cfg.settings.ncaZoneId)) e.push("The Ngorongoro (NCA) fee zone in Costs & rules doesn't exist.");
