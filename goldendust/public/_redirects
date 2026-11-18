@@ -7,3 +7,7 @@
 /profile/*  /  301
 /blog/categories/*  /blog  301
 /blog/page/*  /blog  301
+/lodges/kati-kati-camp-central  /lodges/kati-kati-camp-ndutu  301
+/nl/lodges/kati-kati-camp-central  /nl/lodges/kati-kati-camp-ndutu  301
+/de/lodges/kati-kati-camp-central  /de/lodges/kati-kati-camp-ndutu  301
+/fr/lodges/kati-kati-camp-central  /fr/lodges/kati-kati-camp-ndutu  301

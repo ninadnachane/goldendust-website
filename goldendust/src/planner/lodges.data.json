@@ -1303,68 +1303,6 @@
   "insidePark": true
  },
  {
-  "id": "kati-kati-camp-central",
-  "name": "Kati Kati Camp (Central)",
-  "areaId": "central-serengeti",
-  "category": "premium",
-  "active": true,
-  "periods": [
-   {
-    "season": "High Season",
-    "from": "01-01",
-    "to": "03-31",
-    "single": 267,
-    "double": 187,
-    "triple": 162,
-    "child": 93.5
-   },
-   {
-    "season": "Low Season",
-    "from": "04-01",
-    "to": "05-31",
-    "single": 222,
-    "double": 156,
-    "triple": 136,
-    "child": 78
-   },
-   {
-    "season": "High Season",
-    "from": "06-01",
-    "to": "10-31",
-    "single": 267,
-    "double": 187,
-    "triple": 162,
-    "child": 93.5
-   },
-   {
-    "season": "Shoulder Season",
-    "from": "11-01",
-    "to": "12-15",
-    "single": 244,
-    "double": 171,
-    "triple": 149,
-    "child": 85.5
-   },
-   {
-    "season": "High Season",
-    "from": "12-16",
-    "to": "12-31",
-    "single": 267,
-    "double": 187,
-    "triple": 162,
-    "child": 93.5
-   }
-  ],
-  "childBands": [
-   {
-    "from": 3,
-    "to": 15,
-    "pct": 50
-   }
-  ],
-  "insidePark": true
- },
- {
   "id": "kati-kati-camp-ndutu",
   "name": "Kati Kati Camp (Ndutu)",
   "areaId": "ndutu",
