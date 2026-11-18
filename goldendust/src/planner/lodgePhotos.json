@@ -81,7 +81,13 @@
   "lodges/burunge-tented-lodge/03.webp",
   "lodges/burunge-tented-lodge/04.webp",
   "lodges/burunge-tented-lodge/05.webp",
-  "lodges/burunge-tented-lodge/06.webp"
+  "lodges/burunge-tented-lodge/06.webp",
+  "lodges/burunge-tented-lodge/07.webp",
+  "lodges/burunge-tented-lodge/08.webp",
+  "lodges/burunge-tented-lodge/09.webp",
+  "lodges/burunge-tented-lodge/10.webp",
+  "lodges/burunge-tented-lodge/11.webp",
+  "lodges/burunge-tented-lodge/12.webp"
  ],
  "canopy migration camp": [
   "lodges/canopy-migration-camp/01.webp",
@@ -223,7 +229,36 @@
   "lodges/kati-kati-camp-central/08.webp",
   "lodges/kati-kati-camp-central/09.webp",
   "lodges/kati-kati-camp-central/10.webp",
-  "lodges/kati-kati-camp-central/11.webp"
+  "lodges/kati-kati-camp-central/11.webp",
+  "lodges/kati-kati-camp-central/12.webp"
+ ],
+ "kati kati camp ndutu": [
+  "lodges/kati-kati-camp-central/01.webp",
+  "lodges/kati-kati-camp-central/02.webp",
+  "lodges/kati-kati-camp-central/03.webp",
+  "lodges/kati-kati-camp-central/04.webp",
+  "lodges/kati-kati-camp-central/05.webp",
+  "lodges/kati-kati-camp-central/06.webp",
+  "lodges/kati-kati-camp-central/07.webp",
+  "lodges/kati-kati-camp-central/08.webp",
+  "lodges/kati-kati-camp-central/09.webp",
+  "lodges/kati-kati-camp-central/10.webp",
+  "lodges/kati-kati-camp-central/11.webp",
+  "lodges/kati-kati-camp-central/12.webp"
+ ],
+ "kati kati camp north serengeti": [
+  "lodges/kati-kati-camp-central/01.webp",
+  "lodges/kati-kati-camp-central/02.webp",
+  "lodges/kati-kati-camp-central/03.webp",
+  "lodges/kati-kati-camp-central/04.webp",
+  "lodges/kati-kati-camp-central/05.webp",
+  "lodges/kati-kati-camp-central/06.webp",
+  "lodges/kati-kati-camp-central/07.webp",
+  "lodges/kati-kati-camp-central/08.webp",
+  "lodges/kati-kati-camp-central/09.webp",
+  "lodges/kati-kati-camp-central/10.webp",
+  "lodges/kati-kati-camp-central/11.webp",
+  "lodges/kati-kati-camp-central/12.webp"
  ],
  "kifaru coffee estate": [
   "lodges/kifaru-coffee-estate/01.webp",
@@ -243,12 +278,47 @@
   "lodges/kirurumu-manyara-lodge/01.webp",
   "lodges/kirurumu-manyara-lodge/02.webp"
  ],
+ "kitela lodge": [
+  "lodges/kitela-lodge/01.webp",
+  "lodges/kitela-lodge/02.webp",
+  "lodges/kitela-lodge/03.webp",
+  "lodges/kitela-lodge/04.webp",
+  "lodges/kitela-lodge/05.webp",
+  "lodges/kitela-lodge/06.webp",
+  "lodges/kitela-lodge/07.webp",
+  "lodges/kitela-lodge/08.webp",
+  "lodges/kitela-lodge/09.webp",
+  "lodges/kitela-lodge/10.webp",
+  "lodges/kitela-lodge/11.webp",
+  "lodges/kitela-lodge/12.webp"
+ ],
  "kubukubu tented lodge": [
   "lodges/kubukubu-tented-lodge/01.webp",
   "lodges/kubukubu-tented-lodge/02.webp",
   "lodges/kubukubu-tented-lodge/03.webp",
   "lodges/kubukubu-tented-lodge/04.webp",
-  "lodges/kubukubu-tented-lodge/05.webp"
+  "lodges/kubukubu-tented-lodge/05.webp",
+  "lodges/kubukubu-tented-lodge/06.webp",
+  "lodges/kubukubu-tented-lodge/07.webp",
+  "lodges/kubukubu-tented-lodge/08.webp",
+  "lodges/kubukubu-tented-lodge/09.webp",
+  "lodges/kubukubu-tented-lodge/10.webp",
+  "lodges/kubukubu-tented-lodge/11.webp",
+  "lodges/kubukubu-tented-lodge/12.webp"
+ ],
+ "lahia tented lodge": [
+  "lodges/lahia-tented-lodge/01.webp",
+  "lodges/lahia-tented-lodge/02.webp",
+  "lodges/lahia-tented-lodge/03.webp",
+  "lodges/lahia-tented-lodge/04.webp",
+  "lodges/lahia-tented-lodge/05.webp",
+  "lodges/lahia-tented-lodge/06.webp",
+  "lodges/lahia-tented-lodge/07.webp",
+  "lodges/lahia-tented-lodge/08.webp",
+  "lodges/lahia-tented-lodge/09.webp",
+  "lodges/lahia-tented-lodge/10.webp",
+  "lodges/lahia-tented-lodge/11.webp",
+  "lodges/lahia-tented-lodge/12.webp"
  ],
  "lake manyara serena": [
   "lodges/lake-manyara-serena/01.webp",
@@ -267,7 +337,10 @@
   "lodges/lake-masek-tented-lodge/06.webp",
   "lodges/lake-masek-tented-lodge/07.webp",
   "lodges/lake-masek-tented-lodge/08.webp",
-  "lodges/lake-masek-tented-lodge/09.webp"
+  "lodges/lake-masek-tented-lodge/09.webp",
+  "lodges/lake-masek-tented-lodge/10.webp",
+  "lodges/lake-masek-tented-lodge/11.webp",
+  "lodges/lake-masek-tented-lodge/12.webp"
  ],
  "lamai migration camp": [
   "lodges/lamai-migration-camp/01.webp",

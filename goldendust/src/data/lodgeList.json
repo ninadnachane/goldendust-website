@@ -57,7 +57,7 @@
  {
   "name": "Burunge Tented Lodge",
   "area": "tarangire",
-  "tier": "Premium"
+  "tier": "Comfort"
  },
  {
   "name": "Baobab Tented Camp Tarangire",
@@ -130,11 +130,6 @@
   "tier": "Luxury"
  },
  {
-  "name": "Kifaru Coffee Estate",
-  "area": "karatu",
-  "tier": "Comfort"
- },
- {
   "name": "Embalakai Ngorongoro",
   "area": "ngorongoro",
   "tier": "Premium"
@@ -173,11 +168,6 @@
   "name": "Simba Public Campsite (Ngorongoro)",
   "area": "ngorongoro",
   "tier": "Budget"
- },
- {
-  "name": "Lion's Paw",
-  "area": "ngorongoro",
-  "tier": "Luxury"
  },
  {
   "name": "Friends Camp",
@@ -262,7 +252,7 @@
  {
   "name": "Kati Kati Camp (Central)",
   "area": "central-serengeti",
-  "tier": "Luxury"
+  "tier": "Premium"
  },
  {
   "name": "Seronera Public Campsite (Central Serengeti)",
@@ -290,7 +280,7 @@
   "tier": "Luxury"
  },
  {
-  "name": "Katikati Camp (Ndutu)",
+  "name": "Kati Kati Camp (Ndutu)",
   "area": "ndutu",
   "tier": "Premium"
  },
@@ -360,18 +350,43 @@
   "tier": "Premium"
  },
  {
-  "name": "Woodlands",
-  "area": "ndutu",
-  "tier": "Luxury"
- },
- {
   "name": "Safari Haven Migration Camp (Kogatende)",
   "area": "north-serengeti",
   "tier": "Premium"
  },
  {
+  "name": "Kifaru Coffee Estate",
+  "area": "karatu",
+  "tier": "Comfort"
+ },
+ {
+  "name": "Lion's Paw",
+  "area": "ngorongoro",
+  "tier": "Luxury"
+ },
+ {
   "name": "Mara River Camp",
   "area": "north-serengeti",
   "tier": "Luxury"
+ },
+ {
+  "name": "Woodlands",
+  "area": "ndutu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Kitela Lodge",
+  "area": "karatu",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Lahia Tented Lodge",
+  "area": "western-serengeti",
+  "tier": "Luxury"
+ },
+ {
+  "name": "Kati Kati Camp (North Serengeti)",
+  "area": "north-serengeti",
+  "tier": "Premium"
  }
 ]
