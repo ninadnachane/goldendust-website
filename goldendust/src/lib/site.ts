@@ -9,6 +9,15 @@ export const site = {
   instagramHandle: "@goldendustsafaris",
   city: "Arusha",
   country: "TZ",
+  poBox: "3050",
+
+  // Legal details (from the certificates in Google Drive > Golden Dust Safaris > Licenses).
+  // The TALA licence is renewed every year: update talaNo and talaExpiry when the new one arrives.
+  legalName: "Golden Dust Safaris Company Limited",
+  talaNo: "035466",
+  talaExpiry: "2027-02-03",
+  companyNo: "193312020",
+  brelaSearchUrl: "https://ors.brela.go.tz/orsreg/searchbusinesspublic",
   logo: "7df076_23c9d5d8eb404c038205431f3e1857f3~mv2.png",
 
   // Instagram live feed via Behold (behold.so, free plan). Paste your feed ID here to switch it on.

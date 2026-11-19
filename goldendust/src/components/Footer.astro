@@ -20,6 +20,16 @@ const T = {
   es: { tag: "Operador de safaris registrado en TALA con sede en Arusha, Tanzania.", all: "Todos los safaris de ejemplo", day: (n: number) => `${n} días:`, explore: "Descubre Tanzania", migration: "La Gran Migración mes a mes", lodges: "Lodges y campamentos", plan: "Prepara tu viaje", cost: "Cuánto cuesta un safari en Tanzania", best: "La mejor época", vs: "Serengeti o Ngorongoro", visa: "Visado para Tanzania", yf: "Fiebre amarilla y vacunas", pack: "Qué llevar a un safari", tip: "Las propinas en un safari", weather: "El tiempo mes a mes", itins: "Itinerarios de ejemplo", cookies: "Configuración de cookies" },
 }[lang];
 const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
+// Legal line: licence and company registration, so guests can check we're real.
+const G = {
+  en: { lic: "Tanzania tourism licence (TALA) no.", op: "Tour Operator, valid until", reg: "Company reg. no.", check: "check on BRELA", box: "P.O. Box" },
+  nl: { lic: "Toerismevergunning Tanzania (TALA) nr.", op: "touroperator, geldig tot", reg: "Bedrijfsregistratienr.", check: "controleer bij BRELA", box: "Postbus" },
+  de: { lic: "Tourismuslizenz Tansania (TALA) Nr.", op: "Reiseveranstalter, gültig bis", reg: "Handelsregister-Nr.", check: "bei BRELA prüfen", box: "Postfach" },
+  fr: { lic: "Licence de tourisme de Tanzanie (TALA) n°", op: "voyagiste, valable jusqu'au", reg: "N° d'immatriculation", check: "vérifier auprès de BRELA", box: "B.P." },
+  it: { lic: "Licenza turistica della Tanzania (TALA) n.", op: "tour operator, valida fino al", reg: "N. registro imprese", check: "verifica su BRELA", box: "Casella postale" },
+  es: { lic: "Licencia de turismo de Tanzania (TALA) n.º", op: "operador turístico, válida hasta el", reg: "N.º de registro mercantil", check: "comprobar en BRELA", box: "Apartado postal" },
+}[lang];
+const expiry = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : lang, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(site.talaExpiry + "T00:00:00Z"));
 ---
 <footer class="ftr">
   <!-- All links stay in the page for Google; on phones each group folds away so the footer stays short. -->
@@ -62,6 +72,10 @@ const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
       </ul>
     </details>
   </div>
+  <div class="wrap ftr__legal">
+    <p>{site.legalName} · {G.box} {site.poBox}, {site.city}, Tanzania</p>
+    <p>{G.lic} {site.talaNo} ({G.op} {expiry}) · {G.reg} {site.companyNo} (<a href={site.brelaSearchUrl} target="_blank" rel="noopener">{G.check}</a>)</p>
+  </div>
   <div class="wrap ftr__base">© {year} {site.name}, Arusha, Tanzania · <a href="#" data-ck-open>{T.cookies}</a></div>
 </footer>
 
@@ -90,6 +104,9 @@ const tours = toursFor(lang), parks = parksFor(lang), themes = themesFor(lang);
   .ftr__quiet { opacity: 0.6; }
   ul { list-style: none; padding: 0; margin: 0; }
   li { margin-bottom: 0.3rem; break-inside: avoid; }
+  .ftr__legal { margin-top: 1.4rem; font-size: 0.8rem; color: #a8997f; }
+  .ftr__legal p { margin: 0 0 0.25rem; }
+  .ftr__legal a { color: #d8cdbd; text-decoration: underline; }
   .ftr__base { border-top: 1px solid #4a3c2e; margin-top: 1.4rem; padding-top: 1rem; font-size: 0.8rem; color: #a8997f; }
   @media (max-width: 1100px) {
     .ftr__grid { grid-template-columns: 1fr 1fr; }
